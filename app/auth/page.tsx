@@ -1,44 +1,43 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
-  const [name, setName] = useState("");
   const router = useRouter();
 
-  const handleContinue = () => {
-    if (!name.trim()) return;
-    // fake auth success
-    router.push("/app");
-  };
-
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-black text-white">
-      <div className="bg-white/10 backdrop-blur p-8 rounded-xl w-[320px]">
-        <h2 className="text-2xl font-bold mb-2 text-center">
-          Welcome to Preroll
-        </h2>
-        <p className="text-sm opacity-70 mb-6 text-center">
-          Enter your name to continue
+    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+      <div className="w-full max-w-md rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 shadow-xl">
+        <h1 className="text-2xl font-light mb-2">Welcome to Preroll</h1>
+        <p className="text-sm text-white/60 mb-8">
+          Sign in to continue (demo only)
         </p>
 
-        <input
-          type="text"
-          placeholder="Your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 rounded bg-black/60 border border-white/20 focus:outline-none mb-4"
-        />
+        <div className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full rounded-md bg-black/40 border border-white/10 px-4 py-3 text-sm outline-none focus:border-[#E6A23C]"
+          />
 
-        <button
-          onClick={handleContinue}
-          disabled={!name.trim()}
-          className="w-full py-2 rounded bg-purple-600 hover:bg-purple-700 transition disabled:opacity-40"
-        >
-          Continue
-        </button>
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full rounded-md bg-black/40 border border-white/10 px-4 py-3 text-sm outline-none focus:border-[#E6A23C]"
+          />
+
+          <button
+            onClick={() => router.push("/app")}
+            className="w-full mt-4 bg-[#E6A23C] text-black py-3 rounded-md font-medium hover:bg-[#f0b44d] transition"
+          >
+            Continue
+          </button>
+        </div>
+
+        <p className="mt-6 text-xs text-white/40">
+          This is a demo. No real authentication is performed.
+        </p>
       </div>
-    </div>
+    </main>
   );
 }
