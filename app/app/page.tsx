@@ -21,9 +21,13 @@ export default function AppDashboard() {
           <p className="text-sm text-white/60 mb-4">
             Scripts, films, or ideas you’re developing.
           </p>
-          <button className="text-sm text-[#E6A23C] hover:underline">
-            + Create new project
-          </button>
+          <a
+  href="/app/projects"
+  className="text-sm text-[#E6A23C] hover:underline"
+>
+  View projects →
+</a>
+
         </div>
 
         {/* Scripts */}
