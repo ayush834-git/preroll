@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-const AnimatedShaderBackground = () => {
+export default function AnimatedShaderBackground() {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -14,7 +14,7 @@ const AnimatedShaderBackground = () => {
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
@@ -59,6 +59,7 @@ const AnimatedShaderBackground = () => {
           float a = 0.3;
           vec2 shift = vec2(100.0);
           mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+
           for (int i = 0; i < NUM_OCTAVES; ++i) {
             v += a * noise(x);
             x = rot * x * 2.0 + shift;
@@ -68,57 +69,17 @@ const AnimatedShaderBackground = () => {
         }
 
         void main() {
-          vec2 shake = vec2(
-            sin(iTime * 1.2) * 0.005,
-            cos(iTime * 2.1) * 0.005
-          );
-
-          vec2 p =
-            ((gl_FragCoord.xy + shake * iResolution.xy) -
-              iResolution.xy * 0.5) /
-            iResolution.y *
-            mat2(6.0, -4.0, 4.0, 6.0);
-
-          vec4 o = vec4(0.0);
-          float f = 2.0 + fbm(p + vec2(iTime * 5.0, 0.0)) * 0.5;
+          vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
+          vec4 col = vec4(0.0);
 
           for (float i = 0.0; i < 35.0; i++) {
-            vec2 v =
-              p +
-              cos(
-                i * i +
-                  (iTime + p.x * 0.08) * 0.025 +
-                  i * vec2(13.0, 11.0)
-              ) *
-                3.5 +
-              vec2(
-                sin(iTime * 3.0 + i) * 0.003,
-                cos(iTime * 3.5 - i) * 0.003
-              );
-
-            float tailNoise =
-              fbm(v + vec2(iTime * 0.5, i)) *
-              0.3 *
-              (1.0 - i / 35.0);
-
-            vec4 aurora = vec4(
-              0.1 + 0.3 * sin(i * 0.2 + iTime * 0.4),
-              0.3 + 0.5 * cos(i * 0.3 + iTime * 0.5),
-              0.7 + 0.3 * sin(i * 0.4 + iTime * 0.3),
-              1.0
-            );
-
-            vec4 contrib =
-              aurora *
-              exp(sin(i * i + iTime * 0.8)) /
-              length(max(v, vec2(v.x * f * 0.015, v.y * 1.5)));
-
-            float thin = smoothstep(0.0, 1.0, i / 35.0) * 0.6;
-            o += contrib * (1.0 + tailNoise * 0.8) * thin;
+            vec2 p = uv + cos(i * i + iTime * 0.4) * 0.4;
+            float n = fbm(p + iTime * 0.1);
+            col += vec4(0.2, 0.5, 1.0, 1.0) * exp(-length(p) * 8.0) * n;
           }
 
-          o = tanh(pow(o / 100.0, vec4(1.6)));
-          gl_FragColor = o * 1.5;
+          col = tanh(col);
+          gl_FragColor = col;
         }
       `,
     });
@@ -135,19 +96,18 @@ const AnimatedShaderBackground = () => {
     };
     animate();
 
-    const handleResize = () => {
+    const onResize = () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
       material.uniforms.iResolution.value.set(
         window.innerWidth,
         window.innerHeight
       );
     };
-
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", onResize);
 
     return () => {
       cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", onResize);
       container.removeChild(renderer.domElement);
       geometry.dispose();
       material.dispose();
@@ -155,7 +115,10 @@ const AnimatedShaderBackground = () => {
     };
   }, []);
 
-  return <div ref={containerRef} className="fixed inset-0 -z-10" />;
-};
-
-export default AnimatedShaderBackground;
+  return (
+    <div
+      ref={containerRef}
+      className="fixed inset-0 -z-10 pointer-events-none"
+    />
+  );
+}
