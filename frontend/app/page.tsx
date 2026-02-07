@@ -219,16 +219,18 @@ export default function LandingPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {features.map((item) => (
-              <div
+              <GlowCard
                 key={item.title}
-                className="glass-panel rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-colors"
+                customSize
+                glowColor="blue"
+                className="w-full p-6"
               >
                 <div className="h-12 w-12 rounded-xl glass-outline flex items-center justify-center mb-4">
                   {item.icon}
                 </div>
                 <h3 className="text-xl font-medium">{item.title}</h3>
                 <p className="text-white/60 mt-3">{item.body}</p>
-              </div>
+              </GlowCard>
             ))}
           </div>
           </section>
@@ -257,26 +259,30 @@ export default function LandingPage() {
 
           <div className="grid gap-6">
             {workflow.map((item) => (
-              <div
+              <GlowCard
                 key={item.step}
-                className="glass-panel rounded-2xl p-6 flex flex-col md:flex-row md:items-center gap-6"
+                customSize
+                glowColor="blue"
+                className="w-full p-6"
               >
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full glass-outline flex items-center justify-center text-primary font-semibold">
-                    {item.step}
+                <div className="flex flex-col md:flex-row md:items-center gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-full glass-outline flex items-center justify-center text-primary font-semibold">
+                      {item.step}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-medium">{item.title}</h3>
+                      <p className="text-white/60 mt-2">{item.body}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-medium">{item.title}</h3>
-                    <p className="text-white/60 mt-2">{item.body}</p>
+                  <div className="md:ml-auto hidden md:flex items-center gap-3 text-white/50">
+                    <Shield className="h-4 w-4" />
+                    <span className="text-xs uppercase tracking-[0.2em]">
+                      Secure
+                    </span>
                   </div>
                 </div>
-                <div className="ml-auto hidden md:flex items-center gap-3 text-white/50">
-                  <Shield className="h-4 w-4" />
-                  <span className="text-xs uppercase tracking-[0.2em]">
-                    Secure
-                  </span>
-                </div>
-              </div>
+              </GlowCard>
             ))}
           </div>
           </section>
