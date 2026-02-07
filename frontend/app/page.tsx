@@ -11,7 +11,6 @@ import {
   Star,
   Timer,
 } from "lucide-react";
-import { BeamsBackground } from "@/components/ui/beams-background";
 import { GlowCard } from "@/components/ui/spotlight-card";
 
 const features = [
@@ -68,8 +67,7 @@ const spotlightStats = [
 
 export default function LandingPage() {
   return (
-    <BeamsBackground className="text-white">
-      <main className="relative min-h-screen text-white overflow-hidden">
+    <main className="relative min-h-screen text-white overflow-hidden">
         <div className="absolute inset-0 z-0 grain-overlay" />
         <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-[#E6A23C]/15 blur-[120px]" />
 
@@ -307,7 +305,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-      </main>
-    </BeamsBackground>
+    </main>
   );
 }

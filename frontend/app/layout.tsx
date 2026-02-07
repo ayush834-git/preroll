@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, Manrope } from "next/font/google";
-import { ShaderAnimation } from "@/components/ui/shader-animation";
+import { BeamsBackground } from "@/components/ui/beams-background";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -31,10 +31,9 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${dmSerif.variable} antialiased`}
       >
-        <div className="pointer-events-none fixed inset-0 -z-10">
-          <ShaderAnimation />
-        </div>
-        {children}
+        <BeamsBackground className="text-white">
+          {children}
+        </BeamsBackground>
       </body>
     </html>
   );

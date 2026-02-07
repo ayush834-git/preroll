@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BeamsBackground } from "@/components/ui/beams-background";
 import { GlowCard } from "@/components/ui/spotlight-card";
 
 const genres = [
@@ -88,28 +87,27 @@ export default function DashboardPage() {
   };
 
   return (
-    <BeamsBackground className="text-white">
-      <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
-        <div className="relative z-10 max-w-6xl mx-auto">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/80 mb-8 transition-colors"
-          >
-            {"<- Back"}
-          </Link>
+    <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
+      <div className="relative z-10 max-w-6xl mx-auto">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/80 mb-8 transition-colors"
+        >
+          {"<- Back"}
+        </Link>
 
-          <header className="mb-10">
-            <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
-              PROJECT SETUP
-            </p>
-            <h1 className="text-3xl md:text-4xl font-light text-white">
-              Define the project and your team
-            </h1>
-            <p className="text-white/60 mt-3 max-w-2xl">
-              Keep it simple: name the project, choose the genre, then assign
-              roles to your crew.
-            </p>
-          </header>
+        <header className="mb-10">
+          <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
+            PROJECT SETUP
+          </p>
+          <h1 className="text-3xl md:text-4xl font-light text-white">
+            Define the project and your team
+          </h1>
+          <p className="text-white/60 mt-3 max-w-2xl">
+            Keep it simple: name the project, choose the genre, then assign
+            roles to your crew.
+          </p>
+        </header>
 
           <section className="glass-panel rounded-2xl p-6 md:p-8 mb-10">
             <div className="grid gap-6 md:grid-cols-2">
@@ -253,8 +251,7 @@ export default function DashboardPage() {
             </button>
             </div>
           </section>
-        </div>
-      </main>
-    </BeamsBackground>
+      </div>
+    </main>
   );
 }

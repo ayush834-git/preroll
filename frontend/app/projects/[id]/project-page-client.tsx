@@ -11,7 +11,6 @@ import {
   Users,
 } from "lucide-react";
 import { generateScript } from "@/lib/api";
-import { BeamsBackground } from "@/components/ui/beams-background";
 import { GlowCard } from "@/components/ui/spotlight-card";
 
 export default function ProjectPageClient({ id }: { id: string }) {
@@ -36,10 +35,10 @@ export default function ProjectPageClient({ id }: { id: string }) {
   ];
   const navSections = [
     { key: "screenplay", label: "Screenplay", match: "SCREENPLAY" },
-    { key: "characters", label: "Characters", match: "CHARACTER PROFILES" },
-    { key: "sound", label: "Sound Design", match: "SOUND DESIGN PLAN" },
-    { key: "casting", label: "Casting", match: "CASTING RECOMMENDATIONS" },
-    { key: "budget", label: "Budget", match: "ESTIMATED BUDGET" },
+    { key: "characters", label: "Characters", match: "CHARACTER" },
+    { key: "sound", label: "Sound Design", match: "SOUND" },
+    { key: "casting", label: "Casting", match: "CASTING" },
+    { key: "budget", label: "Budget", match: "BUDGET" },
   ];
   const navColors = [
     "glass-amber",
@@ -90,9 +89,17 @@ export default function ProjectPageClient({ id }: { id: string }) {
   const headingIdForLine = (line: string) => {
     const normalized = normalizeHeading(line);
     const match = navSections.find((section) =>
-      normalized.startsWith(section.match)
+      normalized.includes(section.match)
     );
     return match ? `section-${match.key}` : undefined;
+  };
+
+  const matchSectionKey = (title: string) => {
+    const normalized = normalizeHeading(title);
+    const match = navSections.find((section) =>
+      normalized.includes(section.match)
+    );
+    return match?.key;
   };
 
   const getSectionMeta = (title: string) => {
@@ -304,6 +311,21 @@ export default function ProjectPageClient({ id }: { id: string }) {
     () => (mainText ? splitOutputSections(mainText) : []),
     [mainText]
   );
+  const sectionKeyMap = useMemo(() => {
+    const used = new Set<string>();
+    return sections.map((section) => {
+      const key = matchSectionKey(section.title);
+      if (key && !used.has(key)) {
+        used.add(key);
+        return key;
+      }
+      return null;
+    });
+  }, [sections]);
+  const matchedKeys = useMemo(
+    () => new Set(sectionKeyMap.filter(Boolean) as string[]),
+    [sectionKeyMap]
+  );
   const visibleSections = sections;
   const sectionHasBudget = useMemo(
     () => sections.some((section) => /budget/i.test(section.title)),
@@ -393,9 +415,8 @@ export default function ProjectPageClient({ id }: { id: string }) {
   };
 
   return (
-    <BeamsBackground className="text-white">
-      <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
-        <div className="relative z-10 max-w-6xl mx-auto">
+    <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
+      <div className="relative z-10 max-w-6xl mx-auto">
           <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
             <aside className="glass-panel rounded-2xl p-5 h-fit lg:sticky lg:top-8">
               <div className="flex items-center justify-between mb-6">
@@ -431,9 +452,9 @@ export default function ProjectPageClient({ id }: { id: string }) {
                       <button
                         key={section.key}
                         onClick={() => {
-                          const target = document.getElementById(
-                            `section-${section.key}`
-                          );
+                          const target =
+                            document.getElementById(`section-${section.key}`) ??
+                            document.getElementById("sections-top");
                           if (target) {
                             target.scrollIntoView({
                               behavior: "smooth",
@@ -494,6 +515,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
 
               {output && (
                 <div className="rounded-2xl p-6 glass-panel">
+                  <div id="sections-top" className="scroll-mt-24" />
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                     <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-[#E6A23C]" />
@@ -518,6 +540,14 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         Download Response
                       </button>
                     </div>
+                  </div>
+
+                  <div className="sr-only" aria-hidden="true">
+                    {navSections
+                      .filter((section) => !matchedKeys.has(section.key))
+                      .map((section) => (
+                        <span key={section.key} id={`section-${section.key}`} />
+                      ))}
                   </div>
 
                   {budgetCards.length > 0 && (
@@ -575,9 +605,10 @@ export default function ProjectPageClient({ id }: { id: string }) {
                   <div className="grid gap-4">
                     {visibleSections.map((section, index) => {
                       const meta = getSectionMeta(section.title);
-                      const sectionId =
-                        headingIdForLine(section.title) ??
-                        `section-${index}`;
+                      const matchedKey = sectionKeyMap[index];
+                      const sectionId = matchedKey
+                        ? `section-${matchedKey}`
+                        : `section-${index}`;
                       return (
                         <div
                           key={`${section.title}-${index}`}
@@ -621,8 +652,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
               )}
             </div>
           </div>
-        </div>
-      </main>
-    </BeamsBackground>
+      </div>
+    </main>
   );
 }

@@ -149,6 +149,8 @@ input:focus, textarea:focus, button:focus-visible {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  box-shadow: 0 0 0 1px var(--btn-accent), 0 0 12px var(--btn-accent-glow);
+  transition: box-shadow 250ms ease;
 }
 
 .btn-animated::before {
@@ -180,9 +182,19 @@ input:focus, textarea:focus, button:focus-visible {
   inset: 0;
   border-radius: inherit;
   box-shadow: 0 0 18px var(--btn-accent-glow);
-  opacity: 0.25;
+  opacity: 0.35;
   pointer-events: none;
   mix-blend-mode: screen;
+}
+
+.btn-animated:hover {
+  box-shadow: 0 0 0 1px var(--btn-accent),
+    0 0 22px var(--btn-accent-glow);
+}
+
+.btn-animated:active {
+  box-shadow: 0 0 0 1px var(--btn-accent),
+    0 0 10px var(--btn-accent-glow);
 }
 
 .btn-animated:disabled::before {
