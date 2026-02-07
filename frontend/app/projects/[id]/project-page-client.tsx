@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import {
+  DollarSign,
+  Film,
+  FileText,
+  Mic,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { generateScript } from "@/lib/api";
 import { BeamsBackground } from "@/components/ui/beams-background";
 
@@ -12,6 +20,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState("");
 
   const sectionHeadings = [
@@ -39,6 +48,11 @@ export default function ProjectPageClient({ id }: { id: string }) {
     "glass-rose",
     "glass-violet",
   ];
+
+  type OutputSection = {
+    title: string;
+    body: string;
+  };
 
   const isHeadingLine = (line: string) => {
     const trimmed = line.trim();
@@ -71,6 +85,62 @@ export default function ProjectPageClient({ id }: { id: string }) {
       normalized.startsWith(section.match)
     );
     return match ? `section-${match.key}` : undefined;
+  };
+
+  const getSectionMeta = (title: string) => {
+    const normalized = title.toUpperCase();
+    if (normalized.includes("SCREENPLAY")) {
+      return { label: "Screenplay", icon: <Film className="h-4 w-4" /> };
+    }
+    if (normalized.includes("CHARACTER")) {
+      return { label: "Characters", icon: <Users className="h-4 w-4" /> };
+    }
+    if (normalized.includes("SOUND")) {
+      return { label: "Sound Design", icon: <Mic className="h-4 w-4" /> };
+    }
+    if (normalized.includes("CASTING")) {
+      return { label: "Casting", icon: <Users className="h-4 w-4" /> };
+    }
+    if (normalized.includes("BUDGET")) {
+      return { label: "Budget", icon: <DollarSign className="h-4 w-4" /> };
+    }
+    if (normalized.includes("OUTLINE") || normalized.includes("SUMMARY")) {
+      return { label: "Overview", icon: <Sparkles className="h-4 w-4" /> };
+    }
+    return { label: "Section", icon: <FileText className="h-4 w-4" /> };
+  };
+
+  const splitOutputSections = (text: string): OutputSection[] => {
+    const lines = text.split(/\r?\n/);
+    const sections: OutputSection[] = [];
+    let currentTitle = "Overview";
+    let buffer: string[] = [];
+
+    const pushSection = () => {
+      const body = buffer.join("\n").trim();
+      if (body) {
+        sections.push({ title: currentTitle, body });
+      }
+      buffer = [];
+    };
+
+    lines.forEach((line) => {
+      if (isHeadingLine(line)) {
+        const normalized = line.trim().replace(/\*+/g, "");
+        pushSection();
+        currentTitle = normalized || "Overview";
+      } else {
+        buffer.push(line);
+      }
+    });
+
+    pushSection();
+
+    if (sections.length === 0 && text.trim()) {
+      return [{ title: "Overview", body: text.trim() }];
+    }
+
+    return sections;
   };
 
   const splitBudgetSections = (text: string) => {
@@ -155,6 +225,103 @@ export default function ProjectPageClient({ id }: { id: string }) {
       setDownloadError("Download failed. Please try again.");
     }
   };
+
+  const previewText = (text: string, maxLines = 8) => {
+    const lines = text.split(/\r?\n/).filter((line) => line.trim());
+    if (lines.length <= maxLines) return text.trim();
+    return `${lines.slice(0, maxLines).join("\n")}\n...`;
+  };
+
+  const renderSectionBody = (text: string) => {
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const listLines = lines.filter(
+      (line) => /^[-•]\s+/.test(line) || /^\d+[\).]\s+/.test(line)
+    );
+
+    if (listLines.length >= Math.min(3, lines.length)) {
+      return (
+        <ul className="space-y-2 text-sm text-white/75 list-disc list-inside">
+          {lines.map((line, index) => (
+            <li key={`${line.slice(0, 12)}-${index}`}>
+              {line.replace(/^[-•]\s+/, "").replace(/^\d+[\).]\s+/, "")}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    const paragraphs = text
+      .split(/\n\s*\n/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+
+    return paragraphs.map((paragraph, index) => (
+      <p
+        key={`${paragraph.slice(0, 12)}-${index}`}
+        className="text-sm text-white/75 leading-relaxed whitespace-pre-line"
+      >
+        {paragraph}
+      </p>
+    ));
+  };
+
+  const handleCopy = async (text: string, scope?: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (scope) {
+        setCopiedSection(scope);
+        setTimeout(() => setCopiedSection(null), 1500);
+      } else {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }
+    } catch {
+      if (scope) {
+        setCopiedSection(null);
+      } else {
+        setCopied(false);
+      }
+    }
+  };
+
+  const budgetSlices = useMemo(
+    () => splitBudgetSections(output),
+    [output]
+  );
+  const mainText = budgetSlices.rest || output;
+  const sections = useMemo(
+    () => (mainText ? splitOutputSections(mainText) : []),
+    [mainText]
+  );
+  const visibleSections = expanded ? sections : sections.slice(0, 4);
+  const showSectionToggle = sections.length > 4;
+  const budgetCards = useMemo(
+    () =>
+      [
+        {
+          id: "low",
+          label: "Low Budget",
+          text: budgetSlices.low,
+          filename: "preroll-low-budget.txt",
+        },
+        {
+          id: "medium",
+          label: "Medium Budget",
+          text: budgetSlices.medium,
+          filename: "preroll-medium-budget.txt",
+        },
+        {
+          id: "high",
+          label: "High Budget",
+          text: budgetSlices.high,
+          filename: "preroll-high-budget.txt",
+        },
+      ].filter((item) => item.text && item.text.trim()),
+    [budgetSlices.low, budgetSlices.medium, budgetSlices.high]
+  );
 
   const generate = async () => {
     if (!prompt.trim()) return;
@@ -280,117 +447,125 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 </div>
               )}
 
-              {output &&
-                (() => {
-                  const { budget, rest, low, medium, high } =
-                    splitBudgetSections(output);
-                  return (
-                    <div className="rounded-2xl p-6 glass-panel">
-                      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-                        <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-[#E6A23C]" />
-                          AI Output
-                        </h2>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button
-                            onClick={async () => {
-                              try {
-                                await navigator.clipboard.writeText(output);
-                                setCopied(true);
-                                setTimeout(() => setCopied(false), 1500);
-                              } catch {
-                                setCopied(false);
-                              }
-                            }}
-                            className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
-                          >
-                            {copied ? "Copied" : "Copy"}
-                          </button>
-                          <button
-                            onClick={() =>
-                              downloadText(
-                                "preroll-low-budget.txt",
-                                low || budget || ""
-                              )
-                            }
-                            className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
-                          >
-                            Download Low Budget
-                          </button>
-                          <button
-                            onClick={() =>
-                              downloadText(
-                                "preroll-medium-budget.txt",
-                                medium || budget || ""
-                              )
-                            }
-                            className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
-                          >
-                            Download Medium Budget
-                          </button>
-                          <button
-                            onClick={() =>
-                              downloadText(
-                                "preroll-high-budget.txt",
-                                high || budget || ""
-                              )
-                            }
-                            className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
-                          >
-                            Download High Budget
-                          </button>
-                          <button
-                            onClick={() =>
-                              downloadText(
-                                "preroll-response.txt",
-                                rest || output
-                              )
-                            }
-                            className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
-                          >
-                            Download Response
-                          </button>
-                          <button
-                            onClick={() => setExpanded((prev) => !prev)}
-                            className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
-                          >
-                            {expanded ? "Collapse" : "Show more"}
-                          </button>
-                        </div>
-                      </div>
-                      <div
-                        className={`relative transition-all ${
-                          expanded ? "max-h-none" : "max-h-[360px]"
-                        } overflow-hidden`}
+              {output && (
+                <div className="rounded-2xl p-6 glass-panel">
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+                    <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#E6A23C]" />
+                      AI Output
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => handleCopy(output)}
+                        className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
                       >
-                        <div className="whitespace-pre-wrap text-sm text-white/85 font-sans leading-relaxed">
-                          {output.split(/\r?\n/).map((line, index) => (
-                            <p
-                              key={`${index}-${line.slice(0, 12)}`}
-                              id={headingIdForLine(line)}
-                              className={
-                                headingIdForLine(line)
-                                  ? "scroll-mt-24"
-                                  : undefined
-                              }
-                            >
-                              {isHeadingLine(line) ? (
-                                <span className="text-[#E6A23C] font-semibold tracking-wide">
-                                  {line}
-                                </span>
-                              ) : (
-                                line || "\u00A0"
-                              )}
-                            </p>
-                          ))}
-                        </div>
-                        {!expanded && (
-                          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
-                        )}
-                      </div>
+                        {copied ? "Copied" : "Copy all"}
+                      </button>
+                      <button
+                        onClick={() =>
+                          downloadText(
+                            "preroll-response.txt",
+                            mainText || output
+                          )
+                        }
+                        className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
+                      >
+                        Download Response
+                      </button>
                     </div>
-                  );
-                })()}
+                  </div>
+
+                  {budgetCards.length > 0 && (
+                    <div className="mb-6 grid gap-4 md:grid-cols-3">
+                      {budgetCards.map((budget) => (
+                        <div
+                          key={budget.id}
+                          className="glass-outline rounded-2xl p-4"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs text-white/60 uppercase tracking-[0.2em]">
+                              <DollarSign className="h-3.5 w-3.5 text-[#E6A23C]" />
+                              {budget.label}
+                            </div>
+                            <button
+                              onClick={() =>
+                                downloadText(
+                                  budget.filename,
+                                  budget.text || ""
+                                )
+                              }
+                              className="text-[11px] text-white/60 hover:text-white px-2.5 py-1 rounded-md glass-outline transition-colors"
+                            >
+                              Download
+                            </button>
+                          </div>
+                          <div className="mt-3 space-y-2">
+                            {renderSectionBody(
+                              previewText(budget.text || "")
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="grid gap-4">
+                    {visibleSections.map((section, index) => {
+                      const meta = getSectionMeta(section.title);
+                      const sectionId =
+                        headingIdForLine(section.title) ??
+                        `section-${index}`;
+                      return (
+                        <div
+                          key={`${section.title}-${index}`}
+                          id={sectionId}
+                          className="glass-outline rounded-2xl p-5 scroll-mt-24"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-[#E6A23C]">
+                                {meta.icon}
+                              </div>
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">
+                                  {meta.label}
+                                </p>
+                                <h3 className="text-lg font-medium text-white">
+                                  {section.title}
+                                </h3>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleCopy(section.body, section.title)
+                              }
+                              className="text-xs text-white/60 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
+                            >
+                              {copiedSection === section.title
+                                ? "Copied"
+                                : "Copy section"}
+                            </button>
+                          </div>
+                          <div className="mt-4 space-y-3">
+                            {renderSectionBody(section.body)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {showSectionToggle && (
+                    <div className="mt-5 flex justify-center">
+                      <button
+                        onClick={() => setExpanded((prev) => !prev)}
+                        className="text-xs text-white/70 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors"
+                      >
+                        {expanded ? "Show fewer sections" : "Show all sections"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
