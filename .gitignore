@@ -1,10 +1,12 @@
 # Backend secrets
 backend/.env
 backend/__pycache__/
+backend/*.log
 
 # Frontend build & deps
 frontend/node_modules/
 frontend/.next/
+frontend/*.log
 
 # General
 .env
