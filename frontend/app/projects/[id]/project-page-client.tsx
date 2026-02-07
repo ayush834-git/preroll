@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   DollarSign,
   Film,
@@ -49,6 +49,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
     "glass-rose",
     "glass-violet",
   ];
+  const sectionRefs = useRef(new Map<string, HTMLDivElement>());
 
   type OutputSection = {
     title: string;
@@ -328,6 +329,22 @@ export default function ProjectPageClient({ id }: { id: string }) {
     () => new Set(sectionKeyMap.filter(Boolean) as string[]),
     [sectionKeyMap]
   );
+
+  const scrollToSection = (key: string) => {
+    const target = sectionRefs.current.get(key);
+    if (target) {
+      const top = target.getBoundingClientRect().top + window.scrollY - 96;
+      window.scrollTo({ top, behavior: "smooth" });
+      return;
+    }
+    const fallback =
+      document.getElementById(`section-${key}`) ??
+      document.getElementById("sections-top");
+    if (fallback) {
+      const top = fallback.getBoundingClientRect().top + window.scrollY - 96;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
   const visibleSections = sections;
   const sectionHasBudget = useMemo(
     () => sections.some((section) => /budget/i.test(section.title)),
@@ -454,15 +471,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                       <button
                         key={section.key}
                         onClick={() => {
-                          const target =
-                            document.getElementById(`section-${section.key}`) ??
-                            document.getElementById("sections-top");
-                          if (target) {
-                            target.scrollIntoView({
-                              behavior: "smooth",
-                              block: "start",
-                            });
-                          }
+                          scrollToSection(section.key);
                         }}
                         className={`glass-pill ${navColors[index % navColors.length]} text-[11px] text-white/90 px-3 py-1.5 rounded-full transition-colors hover:text-white`}
                       >
@@ -653,6 +662,14 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         <div
                           key={`${section.title}-${index}`}
                           id={sectionId}
+                          ref={(node) => {
+                            if (!matchedKey) return;
+                            if (node) {
+                              sectionRefs.current.set(matchedKey, node);
+                            } else {
+                              sectionRefs.current.delete(matchedKey);
+                            }
+                          }}
                           className="glass-outline rounded-2xl p-5 scroll-mt-24"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-3">
