@@ -215,15 +215,6 @@ export default function ProjectPageClient({ id }: { id: string }) {
               </p>
             </div>
 
-            <div className="space-y-3 text-sm text-white/70">
-              <div className="glass-outline rounded-xl px-3 py-2">
-                {output ? "Output Ready" : "Awaiting Output"}
-              </div>
-              <div className="glass-outline rounded-xl px-3 py-2">
-                {loading ? "Generating..." : "Idle"}
-              </div>
-            </div>
-
             {output && (
               <div className="mt-6">
                 <p className="text-xs text-white/50 uppercase tracking-widest mb-2">
