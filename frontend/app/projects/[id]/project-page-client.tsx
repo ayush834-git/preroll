@@ -516,7 +516,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 <button
                   onClick={generate}
                   disabled={loading || !prompt.trim()}
-                  className="mt-4 bg-primary text-bg px-6 py-3.5 rounded-xl font-medium hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-all shadow-glow btn-animated btn-amber"
+                  className="mt-4 bg-primary text-bg px-6 py-3.5 rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-all shadow-glow btn-animated btn-amber btn-cta"
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-2">

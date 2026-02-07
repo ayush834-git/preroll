@@ -97,13 +97,13 @@ export default function LandingPage() {
           <div className="flex gap-3">
             <Link
               href="/auth"
-              className="text-sm text-white/80 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors btn-animated btn-sky"
+              className="text-white/80 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors btn-animated btn-sky btn-ghost"
             >
               Log In
             </Link>
             <Link
               href="/dashboard"
-              className="bg-primary text-bg px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-glow glow-amber btn-animated btn-amber"
+              className="bg-primary text-bg px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
             >
               Get Started
             </Link>
@@ -134,13 +134,13 @@ export default function LandingPage() {
               <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/dashboard"
-                className="bg-primary text-bg px-6 py-3.5 rounded-xl font-medium hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber"
+                className="bg-primary text-bg px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber btn-cta"
               >
                 Get Started
               </Link>
               <Link
                 href="/auth"
-                className="glass-outline text-white/90 px-6 py-3.5 rounded-xl font-medium hover:bg-white/10 hover:border-white/20 transition-all btn-animated btn-sky"
+                className="glass-outline text-white/90 px-6 py-3.5 rounded-xl hover:bg-white/10 hover:border-white/20 transition-all btn-animated btn-sky btn-ghost"
               >
                 Request Demo
               </Link>
@@ -307,13 +307,13 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="bg-primary text-bg px-7 py-3.5 rounded-xl font-medium hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber"
+              className="bg-primary text-bg px-7 py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber btn-cta"
             >
               Get Started
             </Link>
             <Link
               href="/auth"
-              className="glass-outline text-white/90 px-7 py-3.5 rounded-xl font-medium hover:bg-white/10 transition-all btn-animated btn-sky"
+              className="glass-outline text-white/90 px-7 py-3.5 rounded-xl hover:bg-white/10 transition-all btn-animated btn-sky btn-ghost"
             >
               Request Demo
             </Link>

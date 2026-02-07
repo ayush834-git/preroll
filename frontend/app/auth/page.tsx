@@ -37,7 +37,7 @@ export default function AuthPage() {
 
             <button
               onClick={() => router.push("/dashboard")}
-              className="w-full mt-4 bg-primary text-bg py-3.5 rounded-xl font-medium hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber"
+              className="w-full mt-4 bg-primary text-bg py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber btn-cta"
             >
               Continue
             </button>
