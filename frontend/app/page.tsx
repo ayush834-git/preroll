@@ -12,6 +12,7 @@ import {
   Timer,
 } from "lucide-react";
 import { BeamsBackground } from "@/components/ui/beams-background";
+import { GlowCard } from "@/components/ui/spotlight-card";
 
 const features = [
   {
@@ -58,6 +59,12 @@ const workflow = [
     body: "Share with your team, gather feedback, and iterate until ready.",
   },
 ];
+
+const spotlightStats = [
+  { label: "Projects launched", value: "120+", glow: "orange" },
+  { label: "Prep hours saved", value: "2,300+", glow: "blue" },
+  { label: "Departments aligned", value: "8 teams", glow: "green" },
+] as const;
 
 export default function LandingPage() {
   return (
@@ -168,20 +175,20 @@ export default function LandingPage() {
           </div>
 
           <div className="mx-auto mt-14 max-w-6xl grid gap-6 md:grid-cols-3">
-            {[
-              { label: "Projects launched", value: "120+" },
-              { label: "Prep hours saved", value: "2,300+" },
-              { label: "Departments aligned", value: "8 teams" },
-            ].map((item) => (
-              <div
+            {spotlightStats.map((item) => (
+              <GlowCard
                 key={item.label}
-                className="glass-panel rounded-2xl p-6 flex items-center justify-between"
+                customSize
+                glowColor={item.glow}
+                className="w-full min-h-[160px] p-6"
               >
-                <p className="text-white/60 text-sm">{item.label}</p>
-                <p className="font-display text-3xl text-[#E6A23C]">
-                  {item.value}
-                </p>
-              </div>
+                <div className="flex h-full flex-col justify-between">
+                  <p className="text-white/60 text-sm">{item.label}</p>
+                  <p className="font-display text-3xl text-[#E6A23C]">
+                    {item.value}
+                  </p>
+                </div>
+              </GlowCard>
             ))}
           </div>
 

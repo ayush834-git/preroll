@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BeamsBackground } from "@/components/ui/beams-background";
+import { GlowCard } from "@/components/ui/spotlight-card";
 
 const genres = [
   "Drama",
@@ -213,11 +214,14 @@ export default function DashboardPage() {
                   Add team members and assign roles to keep everyone aligned.
                 </div>
               ) : (
-                teamMembers.map((member) => (
-                  <div
-                    key={member.id}
-                    className="glass-outline rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
-                  >
+              teamMembers.map((member, index) => (
+                <GlowCard
+                  key={member.id}
+                  customSize
+                  glowColor={index % 2 === 0 ? "purple" : "blue"}
+                  className="w-full p-4"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
                       <p className="text-sm text-white/80">{member.name}</p>
                       <p className="text-xs text-white/50">{member.email}</p>
@@ -234,9 +238,10 @@ export default function DashboardPage() {
                       </button>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                </GlowCard>
+              ))
+            )}
+          </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-end gap-4">
               <button

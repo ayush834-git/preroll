@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { generateScript } from "@/lib/api";
 import { BeamsBackground } from "@/components/ui/beams-background";
+import { GlowCard } from "@/components/ui/spotlight-card";
 
 export default function ProjectPageClient({ id }: { id: string }) {
   const [prompt, setPrompt] = useState("");
@@ -478,9 +479,17 @@ export default function ProjectPageClient({ id }: { id: string }) {
                   {budgetCards.length > 0 && (
                     <div className="mb-6 grid gap-4 md:grid-cols-3">
                       {budgetCards.map((budget) => (
-                        <div
+                        <GlowCard
                           key={budget.id}
-                          className="glass-outline rounded-2xl p-4"
+                          customSize
+                          glowColor={
+                            budget.id === "low"
+                              ? "green"
+                              : budget.id === "medium"
+                                ? "blue"
+                                : "orange"
+                          }
+                          className="w-full p-4"
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-xs text-white/60 uppercase tracking-[0.2em]">
@@ -504,7 +513,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                               previewText(budget.text || "")
                             )}
                           </div>
-                        </div>
+                        </GlowCard>
                       ))}
                     </div>
                   )}

@@ -28,11 +28,11 @@ function createBeam(width: number, height: number): Beam {
   return {
     x: Math.random() * width * 1.5 - width * 0.25,
     y: Math.random() * height * 1.5 - height * 0.25,
-    width: 30 + Math.random() * 60,
+    width: 60 + Math.random() * 100,
     length: height * 2.5,
     angle: angle,
     speed: 0.6 + Math.random() * 1.2,
-    opacity: 0.12 + Math.random() * 0.16,
+    opacity: 0.18 + Math.random() * 0.18,
     hue: 190 + Math.random() * 70,
     pulse: Math.random() * Math.PI * 2,
     pulseSpeed: 0.02 + Math.random() * 0.03,
@@ -50,9 +50,9 @@ export function BeamsBackground({
   const MINIMUM_BEAMS = 20;
 
   const opacityMap = {
-    subtle: 0.7,
-    medium: 0.85,
-    strong: 1,
+    subtle: 0.85,
+    medium: 1,
+    strong: 1.35,
   };
 
   useEffect(() => {
@@ -62,17 +62,22 @@ export function BeamsBackground({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let viewportWidth = window.innerWidth;
+    let viewportHeight = window.innerHeight;
+
     const updateCanvasSize = () => {
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-      ctx.scale(dpr, dpr);
+      viewportWidth = window.innerWidth;
+      viewportHeight = window.innerHeight;
+      canvas.width = viewportWidth * dpr;
+      canvas.height = viewportHeight * dpr;
+      canvas.style.width = `${viewportWidth}px`;
+      canvas.style.height = `${viewportHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       const totalBeams = MINIMUM_BEAMS * 1.5;
       beamsRef.current = Array.from({ length: totalBeams }, () =>
-        createBeam(canvas.width, canvas.height)
+        createBeam(viewportWidth, viewportHeight)
       );
     };
 
@@ -83,17 +88,17 @@ export function BeamsBackground({
       if (!canvas) return beam;
 
       const column = index % 3;
-      const spacing = canvas.width / 3;
+      const spacing = viewportWidth / 3;
 
-      beam.y = canvas.height + 100;
+      beam.y = viewportHeight + 100;
       beam.x =
         column * spacing +
         spacing / 2 +
         (Math.random() - 0.5) * spacing * 0.5;
-      beam.width = 100 + Math.random() * 100;
+      beam.width = 120 + Math.random() * 120;
       beam.speed = 0.5 + Math.random() * 0.4;
       beam.hue = 190 + (index * 70) / totalBeams;
-      beam.opacity = 0.2 + Math.random() * 0.1;
+      beam.opacity = 0.24 + Math.random() * 0.12;
       return beam;
     }
 
@@ -136,8 +141,8 @@ export function BeamsBackground({
     function animate() {
       if (!canvas || !ctx) return;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.filter = "blur(35px)";
+      ctx.clearRect(0, 0, viewportWidth, viewportHeight);
+      ctx.filter = "blur(26px)";
 
       const totalBeams = beamsRef.current.length;
       beamsRef.current.forEach((beam, index) => {
@@ -165,32 +170,29 @@ export function BeamsBackground({
   }, [intensity]);
 
   return (
-    <div
-      className={cn(
-        "relative min-h-screen w-full overflow-hidden bg-neutral-950",
-        className
-      )}
-    >
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0"
-        style={{ filter: "blur(15px)" }}
-      />
+    <div className={cn("relative min-h-screen w-full", className)}>
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-neutral-950">
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full"
+          style={{ filter: "blur(10px)" }}
+        />
 
-      <motion.div
-        className="absolute inset-0 bg-neutral-950/5"
-        animate={{
-          opacity: [0.05, 0.15, 0.05],
-        }}
-        transition={{
-          duration: 10,
-          ease: "easeInOut",
-          repeat: Number.POSITIVE_INFINITY,
-        }}
-        style={{
-          backdropFilter: "blur(50px)",
-        }}
-      />
+        <motion.div
+          className="absolute inset-0 bg-neutral-950/5"
+          animate={{
+            opacity: [0.02, 0.08, 0.02],
+          }}
+          transition={{
+            duration: 10,
+            ease: "easeInOut",
+            repeat: Number.POSITIVE_INFINITY,
+          }}
+          style={{
+            backdropFilter: "blur(30px)",
+          }}
+        />
+      </div>
 
       {children ? (
         <div className="relative z-10 min-h-screen w-full">{children}</div>
