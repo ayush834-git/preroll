@@ -13,11 +13,11 @@ interface GlowCardProps {
 }
 
 const glowColorMap = {
-  blue: { base: 220, spread: 200 },
-  purple: { base: 280, spread: 300 },
-  green: { base: 120, spread: 200 },
-  red: { base: 0, spread: 200 },
-  orange: { base: 30, spread: 200 },
+  blue: { base: 238, spread: 40 },
+  purple: { base: 238, spread: 40 },
+  green: { base: 238, spread: 40 },
+  red: { base: 238, spread: 40 },
+  orange: { base: 238, spread: 40 },
 };
 
 const sizeMap = {
@@ -75,7 +75,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
       "--spread": spread,
       "--radius": "14",
       "--border": "3",
-      "--backdrop": "hsl(0 0% 60% / 0.12)",
+      "--backdrop": "hsl(240 12% 16% / 0.6)",
       "--backup-border": "var(--backdrop)",
       "--size": "200",
       "--outer": "1",

@@ -19,22 +19,22 @@ const features = [
   {
     title: "Script Breakdown",
     body: "Analyze scripts, tag elements, and organize production requirements automatically.",
-    icon: <Brain className="h-5 w-5 text-[#E6A23C]" />,
+    icon: <Brain className="h-5 w-5 text-primary" />,
   },
   {
     title: "Storyboarding",
     body: "Visualize every scene with intuitive storyboards and shot planning.",
-    icon: <Play className="h-5 w-5 text-[#E6A23C]" />,
+    icon: <Play className="h-5 w-5 text-primary" />,
   },
   {
     title: "Team Collaboration",
     body: "Real-time collaboration for directors, DPs, and production designers.",
-    icon: <Infinity className="h-5 w-5 text-[#E6A23C]" />,
+    icon: <Infinity className="h-5 w-5 text-primary" />,
   },
   {
     title: "Mood Boards",
     body: "Collect references, define visual tone, and share creative vision.",
-    icon: <Rocket className="h-5 w-5 text-[#E6A23C]" />,
+    icon: <Rocket className="h-5 w-5 text-primary" />,
   },
 ];
 
@@ -71,11 +71,11 @@ export default function LandingPage() {
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
         <div className="absolute inset-0 z-0 grain-overlay" />
-        <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-[#E6A23C]/15 blur-[120px]" />
+        <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-primary/15 blur-[120px]" />
 
         <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 glass-panel">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-[#E6A23C] flex items-center justify-center text-black font-bold shadow-lg shadow-[#E6A23C]/20">
+            <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-bg font-bold shadow-glow">
               P
             </div>
             <span className="font-semibold tracking-wide text-white">
@@ -107,7 +107,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/dashboard"
-              className="bg-[#E6A23C] text-black px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#f0b44d] transition-colors shadow-lg shadow-[#E6A23C]/20 glow-amber btn-animated btn-amber"
+              className="bg-primary text-bg px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-glow glow-amber btn-animated btn-amber"
             >
               Get Started
             </Link>
@@ -118,13 +118,13 @@ export default function LandingPage() {
           <section className="relative z-10 px-6 md:px-10 pt-24 pb-16">
           <div className="mx-auto max-w-5xl">
             <div>
-              <p className="text-xs tracking-[0.35em] text-[#E6A23C] mb-5">
+              <p className="text-xs tracking-[0.35em] text-primary mb-5">
                 PRE-PRODUCTION PLATFORM
               </p>
 
               <h1 className="font-display text-5xl md:text-6xl leading-tight">
                 Where Films Begin <br />
-                <span className="text-[#E6A23C]">
+                <span className="text-primary">
                   Before the Camera Rolls
                 </span>
               </h1>
@@ -138,7 +138,7 @@ export default function LandingPage() {
               <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/dashboard"
-                className="bg-[#E6A23C] text-black px-6 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] transition-all shadow-lg shadow-[#E6A23C]/25 btn-animated btn-amber"
+                className="bg-primary text-bg px-6 py-3.5 rounded-xl font-medium hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber"
               >
                 Get Started
               </Link>
@@ -167,11 +167,11 @@ export default function LandingPage() {
 
               <div className="mt-12 flex items-center gap-5 text-sm text-white/50">
                 <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-[#E6A23C]" />
+                  <Star className="h-4 w-4 text-primary" />
                   <span>Trusted by indie studios</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Timer className="h-4 w-4 text-[#E6A23C]" />
+                  <Timer className="h-4 w-4 text-primary" />
                   <span>Cut prep time by 40%</span>
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default function LandingPage() {
               >
                 <div className="flex h-full flex-col justify-between">
                   <p className="text-white/60 text-sm">{item.label}</p>
-                  <p className="font-display text-3xl text-[#E6A23C]">
+                  <p className="font-display text-3xl text-primary">
                     {item.value}
                   </p>
                 </div>
@@ -209,7 +209,7 @@ export default function LandingPage() {
             className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
           >
           <div className="text-center mb-12">
-            <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
+            <p className="text-xs tracking-[0.3em] text-primary mb-3">
               FEATURES
             </p>
             <h2 className="font-display text-4xl md:text-5xl">
@@ -245,9 +245,9 @@ export default function LandingPage() {
           >
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] items-center">
             <div>
-              <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
-                INTERACTIVE PREVIEW
-              </p>
+            <p className="text-xs tracking-[0.3em] text-primary mb-3">
+              INTERACTIVE PREVIEW
+            </p>
               <h2 className="font-display text-4xl md:text-5xl">
                 Hover To Reveal the Signal
               </h2>
@@ -296,9 +296,9 @@ export default function LandingPage() {
           >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
             <div>
-              <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
-                WORKFLOW
-              </p>
+            <p className="text-xs tracking-[0.3em] text-primary mb-3">
+              WORKFLOW
+            </p>
               <h2 className="font-display text-4xl md:text-5xl">
                 Plan Every Shot
               </h2>
@@ -316,7 +316,7 @@ export default function LandingPage() {
                 className="glass-panel rounded-2xl p-6 flex flex-col md:flex-row md:items-center gap-6"
               >
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full glass-outline flex items-center justify-center text-[#E6A23C] font-semibold">
+                  <div className="h-12 w-12 rounded-full glass-outline flex items-center justify-center text-primary font-semibold">
                     {item.step}
                   </div>
                   <div>
@@ -342,7 +342,7 @@ export default function LandingPage() {
             className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
           >
           <div className="glass-panel rounded-3xl p-10 md:p-12 text-center">
-            <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
+            <p className="text-xs tracking-[0.3em] text-primary mb-3">
               START CREATING
             </p>
             <h2 className="font-display text-4xl md:text-5xl">
@@ -355,7 +355,7 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="bg-[#E6A23C] text-black px-7 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] transition-all shadow-lg shadow-[#E6A23C]/25 btn-animated btn-amber"
+              className="bg-primary text-bg px-7 py-3.5 rounded-xl font-medium hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber"
             >
               Get Started
             </Link>

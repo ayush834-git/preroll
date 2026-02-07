@@ -495,7 +495,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
             <div>
               <header className="mb-8">
                 <h1 className="text-3xl font-light text-white">
-                  Project <span className="text-[#E6A23C]">{id}</span>
+                  Project <span className="text-primary">{id}</span>
                 </h1>
                 <p className="text-white/60 mt-2">
                   Describe your scene, script, or idea and generate with AI.
@@ -510,13 +510,13 @@ export default function ProjectPageClient({ id }: { id: string }) {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="e.g. A noir detective walks into a rainy diner at 2am. The jukebox plays something slow. He orders coffee."
-                  className="w-full min-h-[160px] rounded-xl glass-input px-4 py-3.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-[#E6A23C] focus:ring-1 focus:ring-[#E6A23C]/30 transition-colors resize-y disabled:opacity-60"
+                  className="w-full min-h-[160px] rounded-xl glass-input px-4 py-3.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors resize-y disabled:opacity-60"
                   disabled={loading}
                 />
                 <button
                   onClick={generate}
                   disabled={loading || !prompt.trim()}
-                  className="mt-4 bg-[#E6A23C] text-black px-6 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] disabled:opacity-50 disabled:pointer-events-none transition-all shadow-lg shadow-[#E6A23C]/20 btn-animated btn-amber"
+                  className="mt-4 bg-primary text-bg px-6 py-3.5 rounded-xl font-medium hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-all shadow-glow btn-animated btn-amber"
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
@@ -547,7 +547,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         tiers. Hover the card to watch the cipher react.
                       </p>
                       <div className="mt-4 flex items-center gap-2 text-sm text-white/70">
-                        <Loader2 className="h-4 w-4 animate-spin text-[#E6A23C]" />
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
                         <span>Drafting sections</span>
                       </div>
                       <div className="mt-3 loading-dots" aria-hidden="true">
@@ -576,7 +576,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                   <div id="sections-top" className="scroll-mt-24" />
                   <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                     <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#E6A23C]" />
+                      <span className="w-2 h-2 rounded-full bg-primary" />
                       AI Output
                     </h2>
                     <div className="flex flex-wrap items-center gap-2">
@@ -628,7 +628,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-xs text-white/60 uppercase tracking-[0.2em]">
-                              <DollarSign className="h-3.5 w-3.5 text-[#E6A23C]" />
+                              <DollarSign className="h-3.5 w-3.5 text-primary" />
                               {budget.label}
                             </div>
                             {hasDownload ? (
@@ -683,7 +683,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         >
                           <div className="flex flex-wrap items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
-                              <div className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-[#E6A23C]">
+                              <div className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-primary">
                                 {meta.icon}
                               </div>
                               <div>

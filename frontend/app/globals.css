@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
-  --foreground: #fafafa;
-  --accent: #E6A23C;
-  --accent-hover: #f0b44d;
-  --glass: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-strong: rgba(255, 255, 255, 0.08);
-  --glass-border-strong: rgba(255, 255, 255, 0.16);
-  --glass-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
-  --ink: #0b0a07;
-  --amber-glow: 0 0 60px rgba(230, 162, 60, 0.35);
+  --background: #0A0A0B;
+  --foreground: #F5F5F7;
+  --accent: #7C7CFF;
+  --accent-hover: #9A9AFF;
+  --accent-secondary: #FF4D8D;
+  --glass: rgba(19, 19, 22, 0.72);
+  --glass-border: rgba(36, 36, 40, 0.65);
+  --glass-strong: rgba(19, 19, 22, 0.85);
+  --glass-border-strong: rgba(36, 36, 40, 0.85);
+  --glass-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  --ink: #0A0A0B;
+  --amber-glow: 0 0 60px rgba(124, 124, 255, 0.35);
 }
 
 body {
@@ -98,28 +99,28 @@ html {
 
 /* Glass pill color accents */
 .glass-amber {
-  background: rgba(230, 162, 60, 0.16);
-  border-color: rgba(230, 162, 60, 0.45);
+  background: rgba(124, 124, 255, 0.18);
+  border-color: rgba(124, 124, 255, 0.55);
 }
 
 .glass-emerald {
-  background: rgba(52, 211, 153, 0.16);
-  border-color: rgba(52, 211, 153, 0.45);
+  background: rgba(124, 124, 255, 0.14);
+  border-color: rgba(124, 124, 255, 0.45);
 }
 
 .glass-sky {
-  background: rgba(56, 189, 248, 0.16);
-  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(124, 124, 255, 0.2);
+  border-color: rgba(124, 124, 255, 0.55);
 }
 
 .glass-rose {
-  background: rgba(244, 114, 182, 0.16);
-  border-color: rgba(244, 114, 182, 0.45);
+  background: rgba(124, 124, 255, 0.16);
+  border-color: rgba(124, 124, 255, 0.5);
 }
 
 .glass-violet {
-  background: rgba(167, 139, 250, 0.16);
-  border-color: rgba(167, 139, 250, 0.45);
+  background: rgba(124, 124, 255, 0.22);
+  border-color: rgba(124, 124, 255, 0.6);
 }
 
 /* Smooth focus for inputs */
@@ -174,7 +175,7 @@ input:focus, textarea:focus, button:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #E6A23C;
+  background: var(--accent);
   animation: dotPulse 1.2s ease-in-out infinite;
 }
 
@@ -246,31 +247,31 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 .btn-amber {
-  --btn-accent: #E6A23C;
-  --btn-accent-2: #f0b44d;
-  --btn-accent-glow: rgba(230, 162, 60, 0.45);
+  --btn-accent: #7C7CFF;
+  --btn-accent-2: #9A9AFF;
+  --btn-accent-glow: rgba(124, 124, 255, 0.45);
 }
 
 .btn-sky {
-  --btn-accent: #38bdf8;
-  --btn-accent-2: #7dd3fc;
-  --btn-accent-glow: rgba(56, 189, 248, 0.45);
+  --btn-accent: #7C7CFF;
+  --btn-accent-2: #9A9AFF;
+  --btn-accent-glow: rgba(124, 124, 255, 0.35);
 }
 
 .btn-emerald {
-  --btn-accent: #34d399;
-  --btn-accent-2: #6ee7b7;
-  --btn-accent-glow: rgba(52, 211, 153, 0.45);
+  --btn-accent: #7C7CFF;
+  --btn-accent-2: #9A9AFF;
+  --btn-accent-glow: rgba(124, 124, 255, 0.35);
 }
 
 .btn-rose {
-  --btn-accent: #fb7185;
-  --btn-accent-2: #fda4af;
-  --btn-accent-glow: rgba(251, 113, 133, 0.45);
+  --btn-accent: #FF4D8D;
+  --btn-accent-2: #FF7AAE;
+  --btn-accent-glow: rgba(255, 77, 141, 0.4);
 }
 
 .btn-violet {
-  --btn-accent: #a78bfa;
-  --btn-accent-2: #c4b5fd;
-  --btn-accent-glow: rgba(167, 139, 250, 0.45);
+  --btn-accent: #7C7CFF;
+  --btn-accent-2: #9A9AFF;
+  --btn-accent-glow: rgba(124, 124, 255, 0.4);
 }

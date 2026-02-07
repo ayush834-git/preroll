@@ -99,7 +99,7 @@ export default function DashboardPage() {
 
         <Reveal>
           <header className="mb-10">
-          <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
+          <p className="text-xs tracking-[0.3em] text-primary mb-3">
             PROJECT SETUP
           </p>
           <h1 className="text-3xl md:text-4xl font-light text-white">
@@ -206,7 +206,7 @@ export default function DashboardPage() {
             <button
               onClick={addMember}
               disabled={!canAddMember}
-              className="bg-[#E6A23C] text-black px-5 py-3 rounded-xl font-medium hover:bg-[#f0b44d] transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-animated btn-amber"
+              className="bg-primary text-bg px-5 py-3 rounded-xl font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-glow btn-animated btn-amber"
             >
               Add
             </button>
@@ -251,7 +251,7 @@ export default function DashboardPage() {
             <button
               onClick={proceedToGenerate}
               disabled={!name.trim()}
-              className="bg-[#E6A23C] text-black px-6 py-3 rounded-xl font-medium hover:bg-[#f0b44d] transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-animated btn-amber"
+              className="bg-primary text-bg px-6 py-3 rounded-xl font-medium hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-glow btn-animated btn-amber"
             >
               Continue to Generate
             </button>
