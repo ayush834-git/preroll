@@ -8,7 +8,6 @@ import {
   Play,
   Rocket,
   Shield,
-  Sparkles,
   Star,
   Timer,
 } from "lucide-react";
@@ -110,7 +109,7 @@ export default function LandingPage() {
       </nav>
 
       <section className="relative z-10 px-6 md:px-10 pt-24 pb-16">
-        <div className="mx-auto max-w-6xl grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
+        <div className="mx-auto max-w-5xl">
           <div>
             <p className="text-xs tracking-[0.35em] text-[#E6A23C] mb-5">
               PRE-PRODUCTION PLATFORM
@@ -167,67 +166,6 @@ export default function LandingPage() {
               <div className="flex items-center gap-2">
                 <Timer className="h-4 w-4 text-[#E6A23C]" />
                 <span>Cut prep time by 40%</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel-strong rounded-3xl p-6 md:p-8 border border-white/15">
-            <div className="flex items-center justify-between text-xs text-white/50 mb-5">
-              <span className="tracking-[0.3em]">STUDIO CONSOLE</span>
-              <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Live
-              </span>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-black/60 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-white/50">Project</p>
-                  <p className="font-medium text-lg">Neon Harbor</p>
-                </div>
-                <span className="glass-pill px-3 py-1 text-xs text-white/70">
-                  Scene 12
-                </span>
-              </div>
-              <div className="mt-6 grid gap-3 text-sm text-white/70">
-                <div className="flex items-center justify-between">
-                  <span>Script breakdown</span>
-                  <span className="text-white/90">89% complete</span>
-                </div>
-                <div className="h-2 rounded-full bg-white/10">
-                  <div className="h-2 w-4/5 rounded-full bg-[#E6A23C]" />
-                </div>
-                <div className="flex items-center justify-between mt-3">
-                  <span>Shot list</span>
-                  <span className="text-white/90">24 shots</span>
-                </div>
-              </div>
-              <div className="mt-6 grid gap-3">
-                {[
-                  "Wide establishing, 24mm",
-                  "Tracking close-up, 35mm",
-                  "Top light reference",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70"
-                  >
-                    <span className="h-2 w-2 rounded-full bg-[#E6A23C]" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-3 md:grid-cols-2 text-xs text-white/60">
-              <div className="glass-outline rounded-2xl p-4">
-                <Sparkles className="h-4 w-4 text-[#E6A23C]" />
-                <p className="mt-3">AI prompts crafted for directors.</p>
-              </div>
-              <div className="glass-outline rounded-2xl p-4">
-                <Shield className="h-4 w-4 text-[#E6A23C]" />
-                <p className="mt-3">Version history with secure access.</p>
               </div>
             </div>
           </div>
