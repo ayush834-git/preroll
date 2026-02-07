@@ -83,9 +83,6 @@ export default function LandingPage() {
             <a href="#workflow" className="hover:text-white transition-colors">
               Workflow
             </a>
-            <a href="#studio" className="hover:text-white transition-colors">
-              Studio
-            </a>
             <a href="#pricing" className="hover:text-white transition-colors">
               Pricing
             </a>
@@ -224,69 +221,6 @@ export default function LandingPage() {
                 <p className="text-white/60 mt-3">{item.body}</p>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section
-          id="studio"
-          className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-        >
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] items-center">
-            <div>
-              <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
-                STUDIO READY
-              </p>
-              <h2 className="font-display text-4xl md:text-5xl">
-                A Workspace That Feels Like Production
-              </h2>
-              <p className="mt-4 text-white/60">
-                Move from concept to a production-ready plan with the same
-                focus as a film set. Keep every decision in one place with
-                visual context and clear ownership.
-              </p>
-              <div className="mt-8 grid gap-4">
-                {[
-                  "Cinematic boards with lighting notes",
-                  "Auto-generated call sheets and schedules",
-                  "Scene-by-scene visual references",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-3 text-white/70"
-                  >
-                    <span className="h-2 w-2 rounded-full bg-[#E6A23C]" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="glass-panel-strong rounded-3xl p-6 md:p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-white/50 tracking-[0.2em]">
-                    VISUAL BOARD
-                  </p>
-                  <p className="font-display text-2xl mt-2">Night Market</p>
-                </div>
-                <span className="glass-pill px-3 py-1 text-xs text-white/70">
-                  Mood 04
-                </span>
-              </div>
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {["#1B1A1F", "#2E2A2A", "#7A4E2A", "#E6A23C"].map((color) => (
-                  <div
-                    key={color}
-                    className="h-20 rounded-2xl border border-white/10"
-                    style={{ background: color }}
-                  />
-                ))}
-              </div>
-              <div className="mt-6 glass-outline rounded-2xl p-4 text-sm text-white/70">
-                Notes: Keep street lights warm, neon reflections on wet
-                concrete, add handheld movement in crowd shots.
-              </div>
-            </div>
           </div>
         </section>
 
