@@ -12,7 +12,6 @@ import {
   Timer,
 } from "lucide-react";
 import { GlowCard } from "@/components/ui/spotlight-card";
-import { EvervaultCard } from "@/components/ui/evervault-card";
 import { Reveal } from "@/components/ui/reveal";
 
 const features = [
@@ -86,9 +85,6 @@ export default function LandingPage() {
           <div className="hidden md:flex gap-8 text-sm text-white/70">
             <a href="#features" className="hover:text-white transition-colors">
               Features
-            </a>
-            <a href="#preview" className="hover:text-white transition-colors">
-              Preview
             </a>
             <a href="#workflow" className="hover:text-white transition-colors">
               Workflow
@@ -238,56 +234,6 @@ export default function LandingPage() {
           </section>
         </Reveal>
 
-        <Reveal>
-          <section
-            id="preview"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] items-center">
-            <div>
-            <p className="text-xs tracking-[0.3em] text-primary mb-3">
-              INTERACTIVE PREVIEW
-            </p>
-              <h2 className="font-display text-4xl md:text-5xl">
-                Hover To Reveal the Signal
-              </h2>
-              <p className="mt-4 text-white/60">
-                Every decision is stored, layered, and revealable when your
-                team needs it. Hover to feel the cinematic data flow.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                {["Secure layers", "Real-time updates", "Encrypted previews"].map(
-                  (item) => (
-                    <span
-                      key={item}
-                      className="glass-pill px-3 py-1 rounded-full text-xs text-white/70"
-                    >
-                      {item}
-                    </span>
-                  )
-                )}
-              </div>
-            </div>
-            <div className="glass-panel-strong rounded-3xl p-6 md:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <p className="text-xs text-white/50 tracking-[0.3em]">
-                  LIVE CIPHER
-                </p>
-                <span className="glass-pill px-3 py-1 text-xs text-white/70">
-                  Hover Me
-                </span>
-              </div>
-              <div className="w-full h-[320px]">
-                <EvervaultCard text="HOVER" className="w-full h-full" />
-              </div>
-              <p className="text-xs text-white/50 mt-4">
-                This hover animation will appear throughout the workspace for
-                interactive surfaces.
-              </p>
-            </div>
-          </div>
-          </section>
-        </Reveal>
 
         <Reveal>
           <section
