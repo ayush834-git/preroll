@@ -17,9 +17,16 @@ export default function AnimatedShaderBackground({
     const container = containerRef.current;
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    let renderer: THREE.WebGLRenderer | null = null;
+
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch {
+      return;
+    }
 
     const resizeToContainer = () => {
+      if (!renderer) return;
       const rect = container.getBoundingClientRect();
       const width = rect.width || window.innerWidth;
       const height = rect.height || window.innerHeight;
@@ -114,6 +121,7 @@ export default function AnimatedShaderBackground({
 
     let frameId: number;
     const animate = () => {
+      if (!renderer) return;
       material.uniforms.iTime.value += 0.016;
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(animate);
@@ -125,10 +133,12 @@ export default function AnimatedShaderBackground({
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resizeToContainer);
-      container.removeChild(renderer.domElement);
+      if (renderer) {
+        container.removeChild(renderer.domElement);
+      }
       geometry.dispose();
       material.dispose();
-      renderer.dispose();
+      renderer?.dispose();
     };
   }, []);
 

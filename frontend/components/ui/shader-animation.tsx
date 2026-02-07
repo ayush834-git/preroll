@@ -68,14 +68,19 @@ export function ShaderAnimation() {
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    let renderer: THREE.WebGLRenderer | null = null
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true })
+    } catch {
+      return
+    }
     renderer.setPixelRatio(window.devicePixelRatio)
-
     container.appendChild(renderer.domElement)
 
     const onWindowResize = () => {
       const width = container.clientWidth
       const height = container.clientHeight
+      if (!renderer) return
       renderer.setSize(width, height)
       uniforms.resolution.value.x = renderer.domElement.width
       uniforms.resolution.value.y = renderer.domElement.height
@@ -86,6 +91,7 @@ export function ShaderAnimation() {
 
     const animate = () => {
       const animationId = requestAnimationFrame(animate)
+      if (!renderer) return
       uniforms.time.value += 0.05
       renderer.render(scene, camera)
 
@@ -110,11 +116,11 @@ export function ShaderAnimation() {
       if (sceneRef.current) {
         cancelAnimationFrame(sceneRef.current.animationId)
 
-        if (container && sceneRef.current.renderer.domElement) {
-          container.removeChild(sceneRef.current.renderer.domElement)
+        if (renderer && container && renderer.domElement) {
+          container.removeChild(renderer.domElement)
         }
 
-        sceneRef.current.renderer.dispose()
+        renderer?.dispose()
         geometry.dispose()
         material.dispose()
       }
