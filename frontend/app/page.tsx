@@ -61,9 +61,9 @@ const workflow = [
 ];
 
 const spotlightStats = [
-  { label: "Projects launched", value: "120+", glow: "orange" },
-  { label: "Prep hours saved", value: "2,300+", glow: "blue" },
-  { label: "Departments aligned", value: "8 teams", glow: "green" },
+  { label: "Screenplay Studio", value: "Beat sheets + scenes", glow: "orange" },
+  { label: "Sound Design", value: "Scene-wise cues", glow: "blue" },
+  { label: "Budgeting", value: "Low / Mid / High tiers", glow: "green" },
 ] as const;
 
 export default function LandingPage() {
