@@ -19,7 +19,6 @@ export default function ProjectPageClient({ id }: { id: string }) {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState("");
@@ -53,6 +52,14 @@ export default function ProjectPageClient({ id }: { id: string }) {
   type OutputSection = {
     title: string;
     body: string;
+  };
+
+  type BudgetCard = {
+    id: string;
+    label: string;
+    text: string;
+    filename?: string;
+    placeholder?: boolean;
   };
 
   const isHeadingLine = (line: string) => {
@@ -297,32 +304,70 @@ export default function ProjectPageClient({ id }: { id: string }) {
     () => (mainText ? splitOutputSections(mainText) : []),
     [mainText]
   );
-  const visibleSections = expanded ? sections : sections.slice(0, 4);
-  const showSectionToggle = sections.length > 4;
-  const budgetCards = useMemo(
-    () =>
-      [
-        {
-          id: "low",
-          label: "Low Budget",
-          text: budgetSlices.low,
-          filename: "preroll-low-budget.txt",
-        },
-        {
-          id: "medium",
-          label: "Medium Budget",
-          text: budgetSlices.medium,
-          filename: "preroll-medium-budget.txt",
-        },
-        {
-          id: "high",
-          label: "High Budget",
-          text: budgetSlices.high,
-          filename: "preroll-high-budget.txt",
-        },
-      ].filter((item) => item.text && item.text.trim()),
-    [budgetSlices.low, budgetSlices.medium, budgetSlices.high]
+  const visibleSections = sections;
+  const sectionHasBudget = useMemo(
+    () => sections.some((section) => /budget/i.test(section.title)),
+    [sections]
   );
+  const budgetFallbackText = useMemo(() => {
+    if (budgetSlices.budget?.trim()) return budgetSlices.budget;
+    if (!output.trim()) return "";
+    const lines = output.split(/\r?\n/).filter(Boolean);
+    const budgetLines = lines.filter((line) =>
+      /budget|cost|\$|usd|inr|gbp|eur/i.test(line)
+    );
+    return budgetLines.join("\n");
+  }, [budgetSlices.budget, output]);
+  const budgetCards = useMemo<BudgetCard[]>(() => {
+    const cards = [
+      {
+        id: "low",
+        label: "Low Budget",
+        text: budgetSlices.low,
+        filename: "preroll-low-budget.txt",
+      },
+      {
+        id: "medium",
+        label: "Medium Budget",
+        text: budgetSlices.medium,
+        filename: "preroll-medium-budget.txt",
+      },
+      {
+        id: "high",
+        label: "High Budget",
+        text: budgetSlices.high,
+        filename: "preroll-high-budget.txt",
+      },
+    ].filter((item) => item.text && item.text.trim());
+
+    if (cards.length) return cards;
+    if (sectionHasBudget) return [];
+    if (budgetFallbackText.trim()) {
+      return [
+        {
+          id: "budget",
+          label: "Budget Overview",
+          text: budgetFallbackText,
+          filename: "preroll-budget.txt",
+        },
+      ];
+    }
+
+    return [
+      {
+        id: "budget",
+        label: "Budget",
+        text: "Budget details were not included in this response. Try regenerating with “include a budget breakdown.”",
+        placeholder: true,
+      },
+    ];
+  }, [
+    budgetSlices.low,
+    budgetSlices.medium,
+    budgetSlices.high,
+    budgetFallbackText,
+    sectionHasBudget,
+  ]);
 
   const generate = async () => {
     if (!prompt.trim()) return;
@@ -335,7 +380,6 @@ export default function ProjectPageClient({ id }: { id: string }) {
     try {
       const data = await generateScript(prompt);
       setOutput(data.output);
-      setExpanded(false);
       setCopied(false);
     } catch (err) {
       const message =
@@ -478,7 +522,10 @@ export default function ProjectPageClient({ id }: { id: string }) {
 
                   {budgetCards.length > 0 && (
                     <div className="mb-6 grid gap-4 md:grid-cols-3">
-                      {budgetCards.map((budget) => (
+                    {budgetCards.map((budget) => {
+                      const hasDownload =
+                        Boolean(budget.filename) && budget.text.trim();
+                      return (
                         <GlowCard
                           key={budget.id}
                           customSize
@@ -496,17 +543,23 @@ export default function ProjectPageClient({ id }: { id: string }) {
                               <DollarSign className="h-3.5 w-3.5 text-[#E6A23C]" />
                               {budget.label}
                             </div>
-                            <button
-                              onClick={() =>
-                                downloadText(
-                                  budget.filename,
-                                  budget.text || ""
-                                )
-                              }
-                              className="text-[11px] text-white/60 hover:text-white px-2.5 py-1 rounded-md glass-outline transition-colors"
-                            >
-                              Download
-                            </button>
+                            {hasDownload ? (
+                              <button
+                                onClick={() =>
+                                  downloadText(
+                                    budget.filename ?? "preroll-budget.txt",
+                                    budget.text || ""
+                                  )
+                                }
+                                className="text-[11px] text-white/60 hover:text-white px-2.5 py-1 rounded-md glass-outline transition-colors"
+                              >
+                                Download
+                              </button>
+                            ) : (
+                              <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+                                No data
+                              </span>
+                            )}
                           </div>
                           <div className="mt-3 space-y-2">
                             {renderSectionBody(
@@ -514,9 +567,10 @@ export default function ProjectPageClient({ id }: { id: string }) {
                             )}
                           </div>
                         </GlowCard>
-                      ))}
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
+                )}
 
                   <div className="grid gap-4">
                     {visibleSections.map((section, index) => {
@@ -563,16 +617,6 @@ export default function ProjectPageClient({ id }: { id: string }) {
                     })}
                   </div>
 
-                  {showSectionToggle && (
-                    <div className="mt-5 flex justify-center">
-                      <button
-                        onClick={() => setExpanded((prev) => !prev)}
-                        className="text-xs text-white/70 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors"
-                      >
-                        {expanded ? "Show fewer sections" : "Show all sections"}
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
