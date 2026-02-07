@@ -10,11 +10,10 @@ export default function AnimatedShaderBackground() {
     if (!containerRef.current) return;
 
     const container = containerRef.current;
-
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
@@ -59,7 +58,6 @@ export default function AnimatedShaderBackground() {
           float a = 0.3;
           vec2 shift = vec2(100.0);
           mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
-
           for (int i = 0; i < NUM_OCTAVES; ++i) {
             v += a * noise(x);
             x = rot * x * 2.0 + shift;
@@ -69,19 +67,34 @@ export default function AnimatedShaderBackground() {
         }
 
         void main() {
-          vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / iResolution.y;
-          vec4 col = vec4(0.0);
+          vec2 shake = vec2(sin(iTime * 1.2) * 0.005, cos(iTime * 2.1) * 0.005);
+          vec2 p = ((gl_FragCoord.xy + shake * iResolution.xy) - iResolution.xy * 0.5) / iResolution.y * mat2(6.0, -4.0, 4.0, 6.0);
+          vec2 v;
+          vec4 o = vec4(0.0);
+
+          float f = 2.0 + fbm(p + vec2(iTime * 5.0, 0.0)) * 0.5;
 
           for (float i = 0.0; i < 35.0; i++) {
-            vec2 p = uv + cos(i * i + iTime * 0.4) * 0.4;
-            float n = fbm(p + iTime * 0.1);
-            col += vec4(0.2, 0.5, 1.0, 1.0) * exp(-length(p) * 8.0) * n;
+            v = p + cos(i * i + (iTime + p.x * 0.08) * 0.025 + i * vec2(13.0, 11.0)) * 3.5
+              + vec2(sin(iTime * 3.0 + i) * 0.003, cos(iTime * 3.5 - i) * 0.003);
+            float tailNoise = fbm(v + vec2(iTime * 0.5, i)) * 0.3 * (1.0 - (i / 35.0));
+            vec4 auroraColors = vec4(
+              0.1 + 0.3 * sin(i * 0.2 + iTime * 0.4),
+              0.3 + 0.5 * cos(i * 0.3 + iTime * 0.5),
+              0.7 + 0.3 * sin(i * 0.4 + iTime * 0.3),
+              1.0
+            );
+            vec4 currentContribution = auroraColors * exp(sin(i * i + iTime * 0.8))
+              / length(max(v, vec2(v.x * f * 0.015, v.y * 1.5)));
+            float thinnessFactor = smoothstep(0.0, 1.0, i / 35.0) * 0.6;
+            o += currentContribution * (1.0 + tailNoise * 0.8) * thinnessFactor;
           }
 
-          col = tanh(col);
-          gl_FragColor = col;
+          o = tanh(pow(o / 100.0, vec4(1.6)));
+          gl_FragColor = o * 1.5;
         }
       `,
+      transparent: true,
     });
 
     const geometry = new THREE.PlaneGeometry(2, 2);
@@ -118,7 +131,7 @@ export default function AnimatedShaderBackground() {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 -z-10 pointer-events-none"
+      className="fixed inset-0 -z-10 pointer-events-none opacity-70"
     />
   );
 }

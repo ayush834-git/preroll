@@ -1,15 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import {
+  Brain,
+  ChevronDown,
+  Infinity,
+  Play,
+  Rocket,
+  Shield,
+} from "lucide-react";
 import AnimatedShaderBackground from "@/components/ui/animated-shader-background";
 
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen bg-black text-white overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 z-0 opacity-40">
+      <div className="absolute inset-0 z-0 opacity-70">
         <AnimatedShaderBackground />
       </div>
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/80 via-black/70 to-[#0a0600]" />
 
       {/* Navbar - glass */}
       <nav className="relative z-10 flex items-center justify-between px-8 md:px-10 py-5 glass-panel">
@@ -20,10 +29,16 @@ export default function LandingPage() {
           <span className="font-semibold tracking-wide text-white">PREROLL</span>
         </div>
 
-        <div className="hidden md:flex gap-8 text-sm text-white/60">
-          <span>Features</span>
-          <span>Workflow</span>
-          <span>Pricing</span>
+        <div className="hidden md:flex gap-8 text-sm text-white/70">
+          <a href="#features" className="hover:text-white transition-colors">
+            Features
+          </a>
+          <a href="#workflow" className="hover:text-white transition-colors">
+            Workflow
+          </a>
+          <a href="#pricing" className="hover:text-white transition-colors">
+            Pricing
+          </a>
         </div>
 
         <div className="flex gap-3">
@@ -43,7 +58,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative z-10 px-10 pt-28 max-w-4xl">
+      <section className="relative z-10 px-8 md:px-10 pt-28 pb-24 max-w-5xl">
         <p className="text-xs tracking-widest text-[#E6A23C] mb-4">
           PRE-PRODUCTION PLATFORM
         </p>
@@ -53,10 +68,10 @@ export default function LandingPage() {
           <span className="text-[#E6A23C]">Before the Camera Rolls</span>
         </h1>
 
-        <p className="mt-6 text-gray-300 max-w-xl">
-          A digital workspace for directors, writers, and production teams to
-          plan, visualize, and collaborate -- before the first frame is ever
-          shot.
+        <p className="mt-6 text-gray-300 max-w-2xl">
+          A cinematic workspace for directors, writers, and production teams to
+          shape scripts, plan shots, and align vision before the first frame is
+          captured.
         </p>
 
         <div className="mt-10 flex gap-4">
@@ -72,6 +87,166 @@ export default function LandingPage() {
           >
             Log In
           </Link>
+        </div>
+
+        <div className="mt-14 flex items-center gap-3 text-sm text-white/60">
+          <span className="glass-pill px-3 py-1 rounded-full">Live previews</span>
+          <span className="glass-pill px-3 py-1 rounded-full">AI workflows</span>
+          <span className="glass-pill px-3 py-1 rounded-full">Team ready</span>
+        </div>
+
+        <div className="mt-16 flex items-center gap-2 text-white/50">
+          <ChevronDown className="h-4 w-4" />
+          <span className="text-xs uppercase tracking-[0.25em]">Scroll</span>
+        </div>
+      </section>
+
+      <section
+        id="features"
+        className="relative z-10 px-8 md:px-10 py-16 max-w-6xl mx-auto"
+      >
+        <div className="text-center mb-12">
+          <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
+            FEATURES
+          </p>
+          <h2 className="text-4xl md:text-5xl font-light">
+            Everything Before Action
+          </h2>
+          <p className="mt-4 text-white/60 max-w-2xl mx-auto">
+            Professional tools designed for the crucial planning phase that
+            defines every great film.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {[
+            {
+              title: "Script Breakdown",
+              body: "Analyze scripts, tag elements, and organize production requirements automatically.",
+              icon: <Brain className="h-5 w-5 text-[#E6A23C]" />,
+            },
+            {
+              title: "Storyboarding",
+              body: "Visualize every scene with intuitive storyboards and shot planning.",
+              icon: <Play className="h-5 w-5 text-[#E6A23C]" />,
+            },
+            {
+              title: "Team Collaboration",
+              body: "Real-time collaboration for directors, DPs, and production designers.",
+              icon: <Infinity className="h-5 w-5 text-[#E6A23C]" />,
+            },
+            {
+              title: "Mood Boards",
+              body: "Collect references, define visual tone, and share creative vision.",
+              icon: <Rocket className="h-5 w-5 text-[#E6A23C]" />,
+            },
+          ].map((item) => (
+            <div key={item.title} className="glass-panel rounded-2xl p-6">
+              <div className="h-12 w-12 rounded-xl glass-outline flex items-center justify-center mb-4">
+                {item.icon}
+              </div>
+              <h3 className="text-xl font-medium">{item.title}</h3>
+              <p className="text-white/60 mt-3">{item.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        id="workflow"
+        className="relative z-10 px-8 md:px-10 py-16 max-w-6xl mx-auto"
+      >
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
+          <div>
+            <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
+              WORKFLOW
+            </p>
+            <h2 className="text-4xl md:text-5xl font-light">
+              Plan Every Shot
+            </h2>
+          </div>
+          <p className="text-white/60 max-w-xl">
+            From concept to shot list, Preroll keeps every department aligned
+            with a single cinematic source of truth.
+          </p>
+        </div>
+
+        <div className="grid gap-6">
+          {[
+            {
+              step: "01",
+              title: "Ideate & Outline",
+              body: "Capture concepts, themes, and structure with AI-assisted prompts.",
+            },
+            {
+              step: "02",
+              title: "Breakdown & Schedule",
+              body: "Tag props, cast, and locations; generate production-ready documents.",
+            },
+            {
+              step: "03",
+              title: "Visualize",
+              body: "Create boards, lighting diagrams, and camera setups for every scene.",
+            },
+            {
+              step: "04",
+              title: "Collaborate & Refine",
+              body: "Share with your team, gather feedback, and iterate until ready.",
+            },
+          ].map((item) => (
+            <div
+              key={item.step}
+              className="glass-panel rounded-2xl p-6 flex flex-col md:flex-row md:items-center gap-6"
+            >
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full glass-outline flex items-center justify-center text-[#E6A23C] font-semibold">
+                  {item.step}
+                </div>
+                <div>
+                  <h3 className="text-xl font-medium">{item.title}</h3>
+                  <p className="text-white/60 mt-2">{item.body}</p>
+                </div>
+              </div>
+              <div className="ml-auto hidden md:flex items-center gap-3 text-white/50">
+                <Shield className="h-4 w-4" />
+                <span className="text-xs uppercase tracking-[0.2em]">
+                  Secure
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        id="pricing"
+        className="relative z-10 px-8 md:px-10 py-16 max-w-6xl mx-auto"
+      >
+        <div className="glass-panel rounded-3xl p-10 md:p-12 text-center">
+          <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
+            START CREATING
+          </p>
+          <h2 className="text-4xl md:text-5xl font-light">
+            Ready to Begin Your Pre-Production Journey?
+          </h2>
+          <p className="text-white/60 mt-4 max-w-2xl mx-auto">
+            Join filmmakers who plan their vision with precision before the
+            cameras roll.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/dashboard"
+              className="bg-[#E6A23C] text-black px-7 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] transition-all shadow-lg shadow-[#E6A23C]/25"
+            >
+              Get Started
+            </Link>
+            <Link
+              href="/auth"
+              className="glass-outline text-white/90 px-7 py-3.5 rounded-xl font-medium hover:bg-white/10 transition-all"
+            >
+              Request Demo
+            </Link>
+          </div>
         </div>
       </section>
     </main>
