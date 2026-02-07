@@ -118,7 +118,7 @@ export default function LandingPage() {
                 PRE-PRODUCTION PLATFORM
               </p>
 
-              <h1 className="font-display text-5xl md:text-6xl leading-tight">
+              <h1 className="font-hero-italic text-5xl md:text-6xl leading-tight">
                 Where Films Begin <br />
                 <span className="text-primary">
                   Before the Camera Rolls
@@ -208,7 +208,7 @@ export default function LandingPage() {
             <p className="text-xs tracking-[0.3em] text-primary mb-3">
               FEATURES
             </p>
-            <h2 className="font-display text-4xl md:text-5xl">
+            <h2 className="font-hero-italic text-4xl md:text-5xl">
               Everything Before Action
             </h2>
             <p className="mt-4 text-white/60 max-w-2xl mx-auto">
@@ -247,7 +247,7 @@ export default function LandingPage() {
             <p className="text-xs tracking-[0.3em] text-primary mb-3">
               WORKFLOW
             </p>
-              <h2 className="font-display text-4xl md:text-5xl">
+              <h2 className="font-hero-italic text-4xl md:text-5xl">
                 Plan Every Shot
               </h2>
             </div>
@@ -297,7 +297,7 @@ export default function LandingPage() {
             <p className="text-xs tracking-[0.3em] text-primary mb-3">
               START CREATING
             </p>
-            <h2 className="font-display text-4xl md:text-5xl">
+            <h2 className="font-hero-italic text-4xl md:text-5xl">
               Ready to Begin Your Pre-Production Journey?
             </h2>
             <p className="text-white/60 mt-4 max-w-2xl mx-auto">

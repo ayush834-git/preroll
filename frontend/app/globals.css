@@ -30,6 +30,12 @@ html {
   font-family: var(--font-display), "Times New Roman", serif;
 }
 
+.font-hero-italic {
+  font-family: var(--font-hero), "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 600;
+}
+
 .text-ink {
   color: var(--ink);
 }
