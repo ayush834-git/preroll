@@ -199,13 +199,13 @@ export default function DashboardPage() {
                   ))}
                 </select>
               </div>
-              <button
-                onClick={addMember}
-                disabled={!canAddMember}
-                className="bg-[#E6A23C] text-black px-5 py-3 rounded-xl font-medium hover:bg-[#f0b44d] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add
-              </button>
+            <button
+              onClick={addMember}
+              disabled={!canAddMember}
+              className="bg-[#E6A23C] text-black px-5 py-3 rounded-xl font-medium hover:bg-[#f0b44d] transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-animated btn-amber"
+            >
+              Add
+            </button>
             </div>
 
             <div className="mt-8 space-y-3">
@@ -232,7 +232,7 @@ export default function DashboardPage() {
                       </span>
                       <button
                         onClick={() => removeMember(member.id)}
-                        className="text-xs text-white/50 hover:text-white/80 transition-colors"
+                        className="text-xs text-white/70 hover:text-white transition-colors rounded-lg px-2.5 py-1 glass-outline btn-animated btn-rose"
                       >
                         Remove
                       </button>
@@ -244,13 +244,13 @@ export default function DashboardPage() {
           </div>
 
             <div className="mt-8 flex flex-wrap items-center justify-end gap-4">
-              <button
-                onClick={proceedToGenerate}
-                disabled={!name.trim()}
-                className="bg-[#E6A23C] text-black px-6 py-3 rounded-xl font-medium hover:bg-[#f0b44d] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Continue to Generate
-              </button>
+            <button
+              onClick={proceedToGenerate}
+              disabled={!name.trim()}
+              className="bg-[#E6A23C] text-black px-6 py-3 rounded-xl font-medium hover:bg-[#f0b44d] transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-animated btn-amber"
+            >
+              Continue to Generate
+            </button>
             </div>
           </section>
         </div>

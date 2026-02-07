@@ -138,3 +138,84 @@ input:focus, textarea:focus, button:focus-visible {
     box-shadow: 0 0 70px rgba(230, 162, 60, 0.45);
   }
 }
+
+@keyframes borderSpin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.btn-animated {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.btn-animated::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    var(--btn-accent),
+    transparent 30%,
+    var(--btn-accent-2),
+    transparent 65%,
+    var(--btn-accent)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.7;
+  animation: borderSpin 6s linear infinite;
+  pointer-events: none;
+}
+
+.btn-animated::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 18px var(--btn-accent-glow);
+  opacity: 0.25;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.btn-animated:disabled::before {
+  opacity: 0.25;
+  animation: none;
+}
+
+.btn-amber {
+  --btn-accent: #E6A23C;
+  --btn-accent-2: #f0b44d;
+  --btn-accent-glow: rgba(230, 162, 60, 0.45);
+}
+
+.btn-sky {
+  --btn-accent: #38bdf8;
+  --btn-accent-2: #7dd3fc;
+  --btn-accent-glow: rgba(56, 189, 248, 0.45);
+}
+
+.btn-emerald {
+  --btn-accent: #34d399;
+  --btn-accent-2: #6ee7b7;
+  --btn-accent-glow: rgba(52, 211, 153, 0.45);
+}
+
+.btn-rose {
+  --btn-accent: #fb7185;
+  --btn-accent-2: #fda4af;
+  --btn-accent-glow: rgba(251, 113, 133, 0.45);
+}
+
+.btn-violet {
+  --btn-accent: #a78bfa;
+  --btn-accent-2: #c4b5fd;
+  --btn-accent-glow: rgba(167, 139, 250, 0.45);
+}

@@ -475,7 +475,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 <button
                   onClick={generate}
                   disabled={loading || !prompt.trim()}
-                  className="mt-4 bg-[#E6A23C] text-black px-6 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] disabled:opacity-50 disabled:pointer-events-none transition-all shadow-lg shadow-[#E6A23C]/20"
+                  className="mt-4 bg-[#E6A23C] text-black px-6 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] disabled:opacity-50 disabled:pointer-events-none transition-all shadow-lg shadow-[#E6A23C]/20 btn-animated btn-amber"
                 >
                   {loading ? "Generating..." : "Generate with AI"}
                 </button>
@@ -502,7 +502,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => handleCopy(output)}
-                        className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
+                        className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-sky"
                       >
                         {copied ? "Copied" : "Copy all"}
                       </button>
@@ -513,7 +513,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                             mainText || output
                           )
                         }
-                        className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
+                        className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-violet"
                       >
                         Download Response
                       </button>
@@ -551,7 +551,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                                     budget.text || ""
                                   )
                                 }
-                                className="text-[11px] text-white/60 hover:text-white px-2.5 py-1 rounded-md glass-outline transition-colors"
+                                className="text-[11px] text-white/60 hover:text-white px-2.5 py-1 rounded-md glass-outline transition-colors btn-animated btn-emerald"
                               >
                                 Download
                               </button>
@@ -602,7 +602,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                               onClick={() =>
                                 handleCopy(section.body, section.title)
                               }
-                              className="text-xs text-white/60 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors"
+                              className="text-xs text-white/60 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-sky"
                             >
                               {copiedSection === section.title
                                 ? "Copied"

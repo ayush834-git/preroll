@@ -98,13 +98,13 @@ export default function LandingPage() {
           <div className="flex gap-3">
             <Link
               href="/auth"
-              className="text-sm text-white/80 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors"
+              className="text-sm text-white/80 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors btn-animated btn-sky"
             >
               Log In
             </Link>
             <Link
               href="/dashboard"
-              className="bg-[#E6A23C] text-black px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#f0b44d] transition-colors shadow-lg shadow-[#E6A23C]/20 glow-amber"
+              className="bg-[#E6A23C] text-black px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#f0b44d] transition-colors shadow-lg shadow-[#E6A23C]/20 glow-amber btn-animated btn-amber"
             >
               Get Started
             </Link>
@@ -132,18 +132,18 @@ export default function LandingPage() {
               </p>
 
               <div className="mt-10 flex flex-wrap gap-4">
-                <Link
-                  href="/dashboard"
-                  className="bg-[#E6A23C] text-black px-6 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] transition-all shadow-lg shadow-[#E6A23C]/25"
-                >
-                  Get Started
-                </Link>
-                <Link
-                  href="/auth"
-                  className="glass-outline text-white/90 px-6 py-3.5 rounded-xl font-medium hover:bg-white/10 hover:border-white/20 transition-all"
-                >
-                  Request Demo
-                </Link>
+              <Link
+                href="/dashboard"
+                className="bg-[#E6A23C] text-black px-6 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] transition-all shadow-lg shadow-[#E6A23C]/25 btn-animated btn-amber"
+              >
+                Get Started
+              </Link>
+              <Link
+                href="/auth"
+                className="glass-outline text-white/90 px-6 py-3.5 rounded-xl font-medium hover:bg-white/10 hover:border-white/20 transition-all btn-animated btn-sky"
+              >
+                Request Demo
+              </Link>
               </div>
 
               <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-white/60">
@@ -292,18 +292,18 @@ export default function LandingPage() {
               cameras roll.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/dashboard"
-                className="bg-[#E6A23C] text-black px-7 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] transition-all shadow-lg shadow-[#E6A23C]/25"
-              >
-                Get Started
-              </Link>
-              <Link
-                href="/auth"
-                className="glass-outline text-white/90 px-7 py-3.5 rounded-xl font-medium hover:bg-white/10 transition-all"
-              >
-                Request Demo
-              </Link>
+            <Link
+              href="/dashboard"
+              className="bg-[#E6A23C] text-black px-7 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] transition-all shadow-lg shadow-[#E6A23C]/25 btn-animated btn-amber"
+            >
+              Get Started
+            </Link>
+            <Link
+              href="/auth"
+              className="glass-outline text-white/90 px-7 py-3.5 rounded-xl font-medium hover:bg-white/10 transition-all btn-animated btn-sky"
+            >
+              Request Demo
+            </Link>
             </div>
           </div>
         </section>
