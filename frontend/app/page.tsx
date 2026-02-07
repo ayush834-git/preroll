@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import { EvervaultCard } from "@/components/ui/evervault-card";
+import { Reveal } from "@/components/ui/reveal";
 
 const features = [
   {
@@ -113,7 +114,8 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        <section className="relative z-10 px-6 md:px-10 pt-24 pb-16">
+        <Reveal>
+          <section className="relative z-10 px-6 md:px-10 pt-24 pb-16">
           <div className="mx-auto max-w-5xl">
             <div>
               <p className="text-xs tracking-[0.35em] text-[#E6A23C] mb-5">
@@ -198,12 +200,14 @@ export default function LandingPage() {
             <ChevronDown className="h-4 w-4" />
             <span className="text-xs uppercase tracking-[0.25em]">Scroll</span>
           </div>
-        </section>
+          </section>
+        </Reveal>
 
-        <section
-          id="features"
-          className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-        >
+        <Reveal>
+          <section
+            id="features"
+            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
+          >
           <div className="text-center mb-12">
             <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
               FEATURES
@@ -231,12 +235,14 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </section>
+          </section>
+        </Reveal>
 
-        <section
-          id="preview"
-          className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-        >
+        <Reveal>
+          <section
+            id="preview"
+            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
+          >
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] items-center">
             <div>
               <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
@@ -280,12 +286,14 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
-        </section>
+          </section>
+        </Reveal>
 
-        <section
-          id="workflow"
-          className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-        >
+        <Reveal>
+          <section
+            id="workflow"
+            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
+          >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
             <div>
               <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
@@ -325,12 +333,14 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </section>
+          </section>
+        </Reveal>
 
-        <section
-          id="pricing"
-          className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-        >
+        <Reveal>
+          <section
+            id="pricing"
+            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
+          >
           <div className="glass-panel rounded-3xl p-10 md:p-12 text-center">
             <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
               START CREATING
@@ -357,7 +367,8 @@ export default function LandingPage() {
             </Link>
             </div>
           </div>
-        </section>
+          </section>
+        </Reveal>
     </main>
   );
 }

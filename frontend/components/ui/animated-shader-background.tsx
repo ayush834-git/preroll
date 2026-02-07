@@ -2,8 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { cn } from "@/lib/utils";
 
-export default function AnimatedShaderBackground() {
+export default function AnimatedShaderBackground({
+  className,
+}: {
+  className?: string;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -14,16 +19,22 @@ export default function AnimatedShaderBackground() {
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const resizeToContainer = () => {
+      const rect = container.getBoundingClientRect();
+      const width = rect.width || window.innerWidth;
+      const height = rect.height || window.innerHeight;
+      renderer.setSize(width, height);
+      material.uniforms.iResolution.value.set(width, height);
+    };
+
+    resizeToContainer();
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
         iTime: { value: 0 },
-        iResolution: {
-          value: new THREE.Vector2(window.innerWidth, window.innerHeight),
-        },
+        iResolution: { value: new THREE.Vector2(1, 1) },
       },
       vertexShader: `
         void main() {
@@ -109,18 +120,11 @@ export default function AnimatedShaderBackground() {
     };
     animate();
 
-    const onResize = () => {
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      material.uniforms.iResolution.value.set(
-        window.innerWidth,
-        window.innerHeight
-      );
-    };
-    window.addEventListener("resize", onResize);
+    window.addEventListener("resize", resizeToContainer);
 
     return () => {
       cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", resizeToContainer);
       container.removeChild(renderer.domElement);
       geometry.dispose();
       material.dispose();
@@ -131,7 +135,10 @@ export default function AnimatedShaderBackground() {
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 -z-10 pointer-events-none opacity-70"
+      className={cn(
+        "absolute inset-0 pointer-events-none opacity-70",
+        className
+      )}
     />
   );
 }

@@ -14,6 +14,7 @@ import {
 import { generateScript } from "@/lib/api";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import { EvervaultCard } from "@/components/ui/evervault-card";
+import { Reveal } from "@/components/ui/reveal";
 
 export default function ProjectPageClient({ id }: { id: string }) {
   const [prompt, setPrompt] = useState("");
@@ -48,6 +49,13 @@ export default function ProjectPageClient({ id }: { id: string }) {
     "glass-sky",
     "glass-rose",
     "glass-violet",
+  ];
+  const navGlowClasses = [
+    "btn-amber",
+    "btn-emerald",
+    "btn-sky",
+    "btn-rose",
+    "btn-violet",
   ];
   const sectionRefs = useRef(new Map<string, HTMLDivElement>());
 
@@ -436,7 +444,8 @@ export default function ProjectPageClient({ id }: { id: string }) {
   return (
     <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
       <div className="relative z-10 max-w-6xl mx-auto">
-          <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <Reveal>
+            <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
             <aside className="glass-panel rounded-2xl p-5 h-fit lg:sticky lg:top-8">
               <div className="flex items-center justify-between mb-6">
                 <span className="text-xs tracking-[0.2em] text-white/60">
@@ -473,7 +482,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         onClick={() => {
                           scrollToSection(section.key);
                         }}
-                        className={`glass-pill ${navColors[index % navColors.length]} text-[11px] text-white/90 px-3 py-1.5 rounded-full transition-colors hover:text-white`}
+                        className={`glass-pill ${navColors[index % navColors.length]} ${navGlowClasses[index % navGlowClasses.length]} text-[11px] text-white/90 px-3 py-1.5 rounded-full transition-colors hover:text-white btn-animated`}
                       >
                         {section.label}
                       </button>
@@ -708,7 +717,8 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 </div>
               )}
             </div>
-          </div>
+            </div>
+          </Reveal>
       </div>
     </main>
   );

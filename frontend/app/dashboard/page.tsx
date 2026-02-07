@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GlowCard } from "@/components/ui/spotlight-card";
+import { Reveal } from "@/components/ui/reveal";
 
 const genres = [
   "Drama",
@@ -96,7 +97,8 @@ export default function DashboardPage() {
           {"<- Back"}
         </Link>
 
-        <header className="mb-10">
+        <Reveal>
+          <header className="mb-10">
           <p className="text-xs tracking-[0.3em] text-[#E6A23C] mb-3">
             PROJECT SETUP
           </p>
@@ -107,9 +109,11 @@ export default function DashboardPage() {
             Keep it simple: name the project, choose the genre, then assign
             roles to your crew.
           </p>
-        </header>
+          </header>
+        </Reveal>
 
-          <section className="glass-panel rounded-2xl p-6 md:p-8 mb-10">
+          <Reveal>
+            <section className="glass-panel rounded-2xl p-6 md:p-8 mb-10">
             <div className="grid gap-6 md:grid-cols-2">
               <div>
                 <label className="block text-sm text-white/80 mb-2">
@@ -131,10 +135,10 @@ export default function DashboardPage() {
                     <button
                       key={item}
                       onClick={() => setGenre(item)}
-                      className={`glass-pill px-3 py-1.5 text-xs rounded-full transition-colors ${
+                      className={`glass-pill px-3 py-1.5 text-xs rounded-full transition-colors btn-animated ${
                         genre === item
-                          ? "glass-amber text-white"
-                          : "text-white/70"
+                          ? "glass-amber text-white btn-amber"
+                          : "text-white/70 btn-sky"
                       }`}
                     >
                       {item}
@@ -143,9 +147,11 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </section>
+            </section>
+          </Reveal>
 
-          <section className="glass-panel rounded-2xl p-6 md:p-8">
+          <Reveal>
+            <section className="glass-panel rounded-2xl p-6 md:p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <p className="text-xs text-white/50 uppercase tracking-[0.3em]">
@@ -250,7 +256,8 @@ export default function DashboardPage() {
               Continue to Generate
             </button>
             </div>
-          </section>
+            </section>
+          </Reveal>
       </div>
     </main>
   );

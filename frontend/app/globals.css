@@ -61,6 +61,7 @@ html {
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(24px) saturate(140%);
+  transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
 }
 
 .glass-panel-strong {
@@ -68,6 +69,13 @@ html {
   border: 1px solid var(--glass-border-strong);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(28px) saturate(150%);
+  transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease;
+}
+
+.glass-panel:hover,
+.glass-panel-strong:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .glass-input {
@@ -183,7 +191,7 @@ input:focus, textarea:focus, button:focus-visible {
   isolation: isolate;
   overflow: hidden;
   box-shadow: 0 0 0 1px var(--btn-accent), 0 0 12px var(--btn-accent-glow);
-  transition: box-shadow 250ms ease;
+  transition: box-shadow 250ms ease, transform 200ms ease;
 }
 
 .btn-animated::before {
@@ -223,11 +231,13 @@ input:focus, textarea:focus, button:focus-visible {
 .btn-animated:hover {
   box-shadow: 0 0 0 1px var(--btn-accent),
     0 0 22px var(--btn-accent-glow);
+  transform: translateY(-1px) scale(1.01);
 }
 
 .btn-animated:active {
   box-shadow: 0 0 0 1px var(--btn-accent),
     0 0 10px var(--btn-accent-glow);
+  transform: scale(0.98);
 }
 
 .btn-animated:disabled::before {

@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import AnimatedShaderBackground from "@/components/ui/animated-shader-background";
 
 interface AnimatedGradientBackgroundProps {
   className?: string;
@@ -172,14 +173,16 @@ export function BeamsBackground({
   return (
     <div className={cn("relative min-h-screen w-full isolate", className)}>
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black">
+        <AnimatedShaderBackground className="absolute inset-0 z-0 opacity-70" />
+
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 h-full w-full"
-          style={{ filter: "blur(4px)", opacity: 0.9 }}
+          className="absolute inset-0 h-full w-full z-10"
+          style={{ filter: "blur(4px)", opacity: 0.95 }}
         />
 
         <motion.div
-          className="absolute inset-0 bg-black/5"
+          className="absolute inset-0 z-20 bg-black/5"
           animate={{
             opacity: [0.05, 0.14, 0.05],
           }}
