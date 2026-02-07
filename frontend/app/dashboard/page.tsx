@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const genres = [
   "Drama",
@@ -33,12 +34,22 @@ type TeamMember = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [genre, setGenre] = useState("Drama");
   const [memberName, setMemberName] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [memberRole, setMemberRole] = useState("Director");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+
+  const slug = useMemo(() => {
+    const cleaned = name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+    return cleaned || "new";
+  }, [name]);
 
   const canAddMember = useMemo(() => {
     return (
@@ -67,6 +78,11 @@ export default function DashboardPage() {
 
   const removeMember = (id: string) => {
     setTeamMembers((prev) => prev.filter((member) => member.id !== id));
+  };
+
+  const proceedToGenerate = () => {
+    if (!name.trim()) return;
+    router.push(`/projects/${slug}`);
   };
 
   return (
@@ -217,6 +233,16 @@ export default function DashboardPage() {
                 </div>
               ))
             )}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-end gap-4">
+            <button
+              onClick={proceedToGenerate}
+              disabled={!name.trim()}
+              className="bg-[#E6A23C] text-black px-6 py-3 rounded-xl font-medium hover:bg-[#f0b44d] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Continue to Generate
+            </button>
           </div>
         </section>
       </div>
