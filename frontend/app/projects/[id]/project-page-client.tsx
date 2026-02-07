@@ -6,12 +6,14 @@ import {
   DollarSign,
   Film,
   FileText,
+  Loader2,
   Mic,
   Sparkles,
   Users,
 } from "lucide-react";
 import { generateScript } from "@/lib/api";
 import { GlowCard } from "@/components/ui/spotlight-card";
+import { EvervaultCard } from "@/components/ui/evervault-card";
 
 export default function ProjectPageClient({ id }: { id: string }) {
   const [prompt, setPrompt] = useState("");
@@ -498,9 +500,47 @@ export default function ProjectPageClient({ id }: { id: string }) {
                   disabled={loading || !prompt.trim()}
                   className="mt-4 bg-[#E6A23C] text-black px-6 py-3.5 rounded-xl font-medium hover:bg-[#f0b44d] disabled:opacity-50 disabled:pointer-events-none transition-all shadow-lg shadow-[#E6A23C]/20 btn-animated btn-amber"
                 >
-                  {loading ? "Generating..." : "Generate with AI"}
+                  {loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </span>
+                  ) : (
+                    "Generate with AI"
+                  )}
                 </button>
               </div>
+
+              {loading && (
+                <div className="rounded-2xl p-6 mb-6 glass-panel">
+                  <div className="grid gap-6 md:grid-cols-[220px_minmax(0,1fr)] items-center">
+                    <div className="w-full h-56">
+                      <EvervaultCard text="AI" className="w-full h-full" />
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+                        Generating
+                      </p>
+                      <h3 className="text-xl font-medium text-white mt-2">
+                        Building your production pack
+                      </h3>
+                      <p className="text-sm text-white/60 mt-2">
+                        We’re structuring scenes, character beats, and budget
+                        tiers. Hover the card to watch the cipher react.
+                      </p>
+                      <div className="mt-4 flex items-center gap-2 text-sm text-white/70">
+                        <Loader2 className="h-4 w-4 animate-spin text-[#E6A23C]" />
+                        <span>Drafting sections</span>
+                      </div>
+                      <div className="mt-3 loading-dots" aria-hidden="true">
+                        <span />
+                        <span />
+                        <span />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {error && (
                 <div className="mb-6 rounded-xl bg-red-500/10 border border-red-500/20 p-4 backdrop-blur-sm text-red-400/90 text-sm">
