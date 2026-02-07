@@ -10,17 +10,43 @@
   --glass-strong: rgba(255, 255, 255, 0.08);
   --glass-border-strong: rgba(255, 255, 255, 0.16);
   --glass-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  --ink: #0b0a07;
+  --amber-glow: 0 0 60px rgba(230, 162, 60, 0.35);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   min-height: 100vh;
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+.font-display {
+  font-family: var(--font-display), "Times New Roman", serif;
+}
+
+.text-ink {
+  color: var(--ink);
+}
+
+.glow-amber {
+  box-shadow: var(--amber-glow);
+}
+
+.grain-overlay {
+  background-image: radial-gradient(
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 0
+    ),
+    radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+  background-size: 120px 120px, 90px 90px;
+  background-position: 0 0, 40px 60px;
+  mix-blend-mode: soft-light;
+  opacity: 0.4;
 }
 
 /* Glass panel - use with Tailwind backdrop-blur */
@@ -100,5 +126,15 @@ input:focus, textarea:focus, button:focus-visible {
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(230, 162, 60, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 70px rgba(230, 162, 60, 0.45);
   }
 }
