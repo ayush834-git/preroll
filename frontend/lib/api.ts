@@ -1,5 +1,4 @@
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE?.trim() || "http://127.0.0.1:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.trim() || "";
 
 const SYSTEM_PROMPT = `You are a professional screenwriter, character designer, and sound designer.
 
@@ -55,7 +54,7 @@ export async function generateScript(
 
   const wrappedPrompt = `${SYSTEM_PROMPT}\n\nUser idea:\n${trimmed}`;
 
-  const response = await fetch(`${API_BASE}/generate`, {
+  const response = await fetch(`${API_BASE}/api/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt: wrappedPrompt }),
