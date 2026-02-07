@@ -171,8 +171,8 @@ export function BeamsBackground({
   }, [intensity]);
 
   return (
-    <div className={cn("relative min-h-screen w-full isolate", className)}>
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black">
+    <div className={cn("relative min-h-screen w-full", className)}>
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black">
         <AnimatedShaderBackground className="absolute inset-0 z-0 opacity-70" />
 
         <canvas
