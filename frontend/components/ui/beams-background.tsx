@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import AnimatedShaderBackground from "@/components/ui/animated-shader-background";
 
@@ -181,20 +180,7 @@ export function BeamsBackground({
           style={{ filter: "blur(4px)", opacity: 0.95 }}
         />
 
-        <motion.div
-          className="absolute inset-0 z-20 bg-bg/5"
-          animate={{
-            opacity: [0.05, 0.14, 0.05],
-          }}
-          transition={{
-            duration: 10,
-            ease: "easeInOut",
-            repeat: Number.POSITIVE_INFINITY,
-          }}
-          style={{
-            backdropFilter: "blur(18px)",
-          }}
-        />
+        <div className="absolute inset-0 z-20 beams-overlay" />
       </div>
 
       {children ? (
