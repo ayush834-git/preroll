@@ -25,19 +25,6 @@ export default function AnimatedShaderBackground({
       return;
     }
 
-    const resizeToContainer = () => {
-      if (!renderer) return;
-      const rect = container.getBoundingClientRect();
-      const width = rect.width || window.innerWidth;
-      const height = rect.height || window.innerHeight;
-      renderer.setSize(width, height);
-      material.uniforms.iResolution.value.set(width, height);
-    };
-
-    resizeToContainer();
-    renderer.setPixelRatio(window.devicePixelRatio);
-    container.appendChild(renderer.domElement);
-
     const material = new THREE.ShaderMaterial({
       uniforms: {
         iTime: { value: 0 },
@@ -114,6 +101,19 @@ export default function AnimatedShaderBackground({
       `,
       transparent: true,
     });
+
+    const resizeToContainer = () => {
+      if (!renderer) return;
+      const rect = container.getBoundingClientRect();
+      const width = rect.width || window.innerWidth;
+      const height = rect.height || window.innerHeight;
+      renderer.setSize(width, height);
+      material.uniforms.iResolution.value.set(width, height);
+    };
+
+    resizeToContainer();
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
 
     const geometry = new THREE.PlaneGeometry(2, 2);
     const mesh = new THREE.Mesh(geometry, material);
