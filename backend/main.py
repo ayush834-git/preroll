@@ -52,6 +52,11 @@ Rules:
 - Visual style, sound design, budget, director notes: 3-6 bullets each.
 - Assumptions made: 2-4 bullets.
 - Keep each bullet under 20 words.
+- Use the Generation type parameter to emphasize the relevant section.
+- If Generation type contains "Budget", budget_considerations MUST include line items for:
+  Sound, CGI/VFX, Casting, Marketing/Distribution, Locations/Permits, Production Design,
+  Wardrobe/Makeup, Equipment/Camera, Crew/Labor, Post-Production, Contingency.
+- Budget line items format: "Category - cost impact (Low/Medium/High) + short rationale".
 """
 
 # FastAPI app
