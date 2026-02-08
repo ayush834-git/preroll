@@ -26,11 +26,13 @@ function detectPerformanceMode(
     nav.userAgentData?.mobile ??
     /Mobi|Android|iPhone|iPad|iPod/i.test(userAgent);
 
-  if (
-    isMobile ||
-    (deviceMemory > 0 && deviceMemory <= 4) ||
-    (hardwareConcurrency > 0 && hardwareConcurrency <= 4)
-  ) {
+  if (deviceMemory > 0) {
+    if (deviceMemory >= 24) return "cinematic";
+    if (deviceMemory >= 12) return "reduced";
+    return "performance";
+  }
+
+  if (isMobile || (hardwareConcurrency > 0 && hardwareConcurrency <= 4)) {
     return "reduced";
   }
 
