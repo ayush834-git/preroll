@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
-import { usePerformanceMode } from "@/lib/usePerformanceMode"
+import { useAnimationBudget } from "@/lib/usePerformanceMode"
 
 export function ShaderAnimation() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -13,9 +13,10 @@ export function ShaderAnimation() {
     uniforms: any
     animationId: number
   } | null>(null)
-  const mode = usePerformanceMode()
+  const { mode, canAnimateContinuously } = useAnimationBudget()
   const isPerformance = mode === "performance"
   const isReduced = mode === "reduced"
+  const shouldAnimate = mode === "cinematic" && canAnimateContinuously
 
   useEffect(() => {
     if (isPerformance) return
@@ -120,7 +121,7 @@ export function ShaderAnimation() {
       animationId: 0,
     }
 
-    if (isReduced) {
+    if (isReduced || !shouldAnimate) {
       renderFrame(1.2)
     } else {
       animate()
@@ -141,7 +142,7 @@ export function ShaderAnimation() {
         material.dispose()
       }
     }
-  }, [isPerformance, isReduced])
+  }, [isPerformance, isReduced, shouldAnimate])
 
   return (
     <div

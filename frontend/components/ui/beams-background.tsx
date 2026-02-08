@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import AnimatedShaderBackground from "@/components/ui/animated-shader-background";
-import { usePerformanceMode } from "@/lib/usePerformanceMode";
+import { useAnimationBudget } from "@/lib/usePerformanceMode";
 
 interface AnimatedGradientBackgroundProps {
   className?: string;
@@ -58,7 +58,7 @@ export function BeamsBackground({
   const beamsRef = useRef<Beam[]>([]);
   const animationFrameRef = useRef<number>(0);
   const MINIMUM_BEAMS = 20;
-  const mode = usePerformanceMode();
+  const { mode, canAnimateContinuously } = useAnimationBudget();
 
   const opacityMap = {
     subtle: 1.1,
@@ -228,7 +228,7 @@ export function BeamsBackground({
       animationFrameRef.current = requestAnimationFrame(animate);
     }
 
-    if (mode === "cinematic") {
+    if (mode === "cinematic" && canAnimateContinuously) {
       animate();
     } else {
       drawStatic();
@@ -240,7 +240,7 @@ export function BeamsBackground({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [intensity, mode]);
+  }, [intensity, mode, canAnimateContinuously]);
 
   return (
     <div className={cn("relative min-h-screen w-full", className)}>

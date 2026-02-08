@@ -17,45 +17,5 @@ export function PerformanceModeRoot() {
     }
   }, [mode]);
 
-  useIsomorphicLayoutEffect(() => {
-    if (typeof window === "undefined" || typeof document === "undefined") {
-      return;
-    }
-
-    let timeoutId: number | undefined;
-
-    const setScrolling = (value: boolean) => {
-      if (value) {
-        document.documentElement.dataset.scrolling = "true";
-        if (document.body) {
-          document.body.dataset.scrolling = "true";
-        }
-      } else {
-        delete document.documentElement.dataset.scrolling;
-        if (document.body) {
-          delete document.body.dataset.scrolling;
-        }
-      }
-    };
-
-    const onScroll = () => {
-      setScrolling(true);
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-      timeoutId = window.setTimeout(() => setScrolling(false), 140);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-      setScrolling(false);
-    };
-  }, []);
-
   return null;
 }

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { cn } from "@/lib/utils";
-import { usePerformanceMode } from "@/lib/usePerformanceMode";
+import { useAnimationBudget } from "@/lib/usePerformanceMode";
 
 export default function AnimatedShaderBackground({
   className,
@@ -11,9 +11,10 @@ export default function AnimatedShaderBackground({
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mode = usePerformanceMode();
+  const { mode, canAnimateContinuously } = useAnimationBudget();
   const isPerformance = mode === "performance";
   const isReduced = mode === "reduced";
+  const shouldAnimate = mode === "cinematic" && canAnimateContinuously;
 
   useEffect(() => {
     if (isPerformance) return;
@@ -134,7 +135,7 @@ export default function AnimatedShaderBackground({
       renderer.render(scene, camera);
     };
 
-    if (isReduced) {
+    if (isReduced || !shouldAnimate) {
       renderFrame(0.8);
     } else {
       const animate = () => {
@@ -160,7 +161,7 @@ export default function AnimatedShaderBackground({
       material.dispose();
       renderer?.dispose();
     };
-  }, [isPerformance, isReduced]);
+  }, [isPerformance, isReduced, shouldAnimate]);
 
   return (
     <div

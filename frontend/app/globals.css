@@ -459,31 +459,3 @@ input:focus, textarea:focus, button:focus-visible {
 :root[data-performance="performance"] .blur-\[120px\] {
   filter: none;
 }
-
-:root[data-scrolling="true"] .grain-overlay {
-  opacity: 0.2;
-}
-
-:root[data-scrolling="true"] .glass-panel,
-:root[data-scrolling="true"] .glass-panel-strong {
-  backdrop-filter: none;
-}
-
-:root[data-scrolling="true"] .glass-input,
-:root[data-scrolling="true"] .glass-outline,
-:root[data-scrolling="true"] .glass-pill {
-  backdrop-filter: none;
-}
-
-:root[data-scrolling="true"] .shadow-glow {
-  box-shadow: none;
-}
-
-:root[data-scrolling="true"] .beams-overlay {
-  animation: none;
-  backdrop-filter: none;
-}
-
-:root[data-scrolling="true"] .blur-\[120px\] {
-  filter: blur(40px);
-}
