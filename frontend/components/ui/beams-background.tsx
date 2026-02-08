@@ -116,6 +116,7 @@ export function BeamsBackground({
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    const context = ctx;
 
     let viewportWidth = window.innerWidth;
     let viewportHeight = window.innerHeight;
@@ -136,7 +137,7 @@ export function BeamsBackground({
       canvas.height = viewportHeight * dpr;
       canvas.style.width = `${viewportWidth}px`;
       canvas.style.height = `${viewportHeight}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       const totalBeams = Math.max(
         8,
@@ -206,14 +207,14 @@ export function BeamsBackground({
     }
 
     function drawStatic() {
-      ctx.clearRect(0, 0, viewportWidth, viewportHeight);
-      ctx.filter = settings.blur ? `blur(${settings.blur}px)` : "none";
-      beamsRef.current.forEach((beam) => drawBeam(ctx, beam));
+      context.clearRect(0, 0, viewportWidth, viewportHeight);
+      context.filter = settings.blur ? `blur(${settings.blur}px)` : "none";
+      beamsRef.current.forEach((beam) => drawBeam(context, beam));
     }
 
     function animate() {
-      ctx.clearRect(0, 0, viewportWidth, viewportHeight);
-      ctx.filter = settings.blur ? `blur(${settings.blur}px)` : "none";
+      context.clearRect(0, 0, viewportWidth, viewportHeight);
+      context.filter = settings.blur ? `blur(${settings.blur}px)` : "none";
 
       const totalBeams = beamsRef.current.length;
       beamsRef.current.forEach((beam, index) => {
@@ -224,7 +225,7 @@ export function BeamsBackground({
           resetBeam(beam, index, totalBeams);
         }
 
-        drawBeam(ctx, beam);
+        drawBeam(context, beam);
       });
 
       animationFrameRef.current = requestAnimationFrame(animate);
