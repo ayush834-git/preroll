@@ -320,7 +320,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
     "executiveSummary",
     ...SECTION_ORDER,
   ];
-  const sectionRefs = useRef(new Map<SectionKey, HTMLDivElement>());
+  const sectionRefs = useRef(new Map<SectionKey, HTMLElement>());
   const sectionsConfig: Array<{
     key: SectionKey;
     label: string;
