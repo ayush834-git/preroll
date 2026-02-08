@@ -6,7 +6,7 @@
 
 Preroll is an AI-assisted tool that helps filmmakers and creators plan their projects before filming begins. It uses AI to generate creative outputs such as screenplay breakdowns, budgeting insights, role suggestions, and scene design ideas — all in a smooth, modern UI.
 
-This project was built within a **24-hour campus hackathon (NASSCOM × IBM – Introduction to GenAI)** and placed in the **Top 30** out of ~150–200 teams. It combines modern web development with applied GenAI workflows and polished UI/UX.
+This project was built within a campus hackathon (NASSCOM × IBM – Introduction to GenAI)** and placed in the **Top 30** . It combines modern web development with applied GenAI workflows and polished UI/UX.
 
 ---
 
@@ -27,8 +27,13 @@ Pre-production planning is often fragmented and manual. Preroll brings structure
 - 🌐 Live deployment on Vercel  
 - 🧠 Integrated AI generation (script breakdowns, roles, budgets)  
 - 💡 Clear UX with polished UI and structured layout
+- ⚙️ **Adaptive performance system**
+  - High-end devices retain full cinematic visuals  
+  - Low-end devices automatically reduce motion and effects for smooth performance  
+  - Respects user accessibility preferences (`prefers-reduced-motion`)  
 
-> Note: The current deployment demonstrates the product concept and UX. Core AI flows can be expanded in future versions.
+> The current version focuses on UX, visual identity, and conceptual AI workflows. Core logic and persistence are planned for future iterations.
+
 
 ---
 
