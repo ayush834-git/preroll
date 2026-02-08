@@ -1,3 +1,5 @@
-export function ShaderBackgroundDemo() {
-  return <div className="relative min-h-screen bg-bg" />;
+import { BeamsBackground } from "@/components/ui/beams-background";
+
+export function BeamsBackgroundDemo() {
+  return <BeamsBackground />;
 }
