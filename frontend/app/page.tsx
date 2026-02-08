@@ -63,7 +63,7 @@ const workflow = [
 const spotlightStats = [
   { label: "Generation Modes", value: "Scene / Sound / Budget", glow: "orange" },
   { label: "Production Reports", value: "Structured, shareable docs", glow: "blue" },
-  { label: "Performance Modes", value: "Cinematic → Reduced", glow: "green" },
+  { label: "Constraint-driven generation", value: "Structured inputs → structured outputs", glow: "green" },
 ] as const;
 
 export default function LandingPage() {
