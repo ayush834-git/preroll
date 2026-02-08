@@ -627,7 +627,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
         {blocks.length > 0 &&
           blocks.map((block, index) => {
             const headingMatch = block.heading.match(
-              /^(INT\\.|EXT\\.|INT\\/EXT\\.|EXT\\/INT\\.)\\s*(.*)$/i
+              /^(INT\.|EXT\.|INT\/EXT\.|EXT\/INT\.)\s*(.*)$/i
             );
             const prefix = headingMatch?.[1] ?? "";
             const rest = headingMatch?.[2] ?? block.heading;
