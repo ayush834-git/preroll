@@ -66,19 +66,35 @@ const SECTION_ORDER: SectionKey[] = [
   "assumptionsMade",
 ];
 
-const bulletRegex = /^[-*•]\s+/;
+const bulletRegex = /^[-*\u2022]\s+/;
 const numberedRegex = /^\d+[\).]\s+/;
+
+const stripMarkdown = (text: string) =>
+  text
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+const cleanLine = (line: string) =>
+  stripMarkdown(line)
+    .replace(bulletRegex, "")
+    .replace(numberedRegex, "")
+    .trim();
 
 const splitToBullets = (text: string) =>
   text
     .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => line.replace(bulletRegex, "").replace(numberedRegex, ""));
+    .map(cleanLine)
+    .filter(Boolean);
 
 const normalizeList = (value: unknown) => {
   if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
+    return value
+      .map((item) => stripMarkdown(String(item)))
+      .filter(Boolean);
   }
   if (typeof value === "string") {
     return splitToBullets(value);
@@ -87,21 +103,21 @@ const normalizeList = (value: unknown) => {
 };
 
 const normalizeText = (value: unknown) =>
-  typeof value === "string" ? value.trim() : "";
+  typeof value === "string" ? stripMarkdown(value) : "";
 
 const normalizeCharacters = (value: unknown): CharacterRole[] => {
   if (Array.isArray(value)) {
     return value
       .map((item) => {
         if (typeof item === "string") {
-          return { name: item.trim(), role: "", notes: "" };
+          return { name: stripMarkdown(item), role: "", notes: "" };
         }
         if (item && typeof item === "object") {
           const record = item as Record<string, unknown>;
           return {
-            name: String(record.name ?? "").trim(),
-            role: String(record.role ?? "").trim(),
-            notes: String(record.notes ?? "").trim(),
+            name: stripMarkdown(String(record.name ?? "")),
+            role: stripMarkdown(String(record.role ?? "")),
+            notes: stripMarkdown(String(record.notes ?? "")),
           };
         }
         return null;
@@ -111,7 +127,7 @@ const normalizeCharacters = (value: unknown): CharacterRole[] => {
 
   if (typeof value === "string") {
     return splitToBullets(value).map((line) => {
-      const parts = line.split(/\s[-–—:]\s|\s-\s|:\s/).filter(Boolean);
+      const parts = line.split(/\s[-:]\s|:\s/).filter(Boolean);
       return {
         name: parts[0] ?? line,
         role: parts[1] ?? "",
@@ -128,6 +144,7 @@ const parseFromHeadings = (text: string): AIResult => {
     "EXECUTIVE SUMMARY": "executiveSummary",
     "SCENE OVERVIEW": "sceneOverview",
     "KEY ACTIONS": "keyActions",
+    "SCREENPLAY": "sceneOverview",
     "CHARACTERS & ROLES": "charactersRoles",
     "CHARACTERS AND ROLES": "charactersRoles",
     "CHARACTERS": "charactersRoles",
@@ -173,7 +190,7 @@ const parseFromHeadings = (text: string): AIResult => {
 
   return {
     executiveSummary: normalizeList(buckets.executiveSummary.join("\n")),
-    sceneOverview: buckets.sceneOverview.join("\n").trim(),
+    sceneOverview: normalizeText(buckets.sceneOverview.join("\n")),
     keyActions: normalizeList(buckets.keyActions.join("\n")),
     charactersRoles: normalizeCharacters(buckets.charactersRoles.join("\n")),
     visualStyle: normalizeList(buckets.visualStyle.join("\n")),
@@ -320,6 +337,10 @@ export default function ProjectPageClient({ id }: { id: string }) {
     "executiveSummary",
     ...SECTION_ORDER,
   ];
+  const optionStyle = {
+    backgroundColor: "#131316",
+    color: "#F5F5F7",
+  } as const;
   const sectionRefs = useRef(new Map<SectionKey, HTMLElement>());
   const sectionsConfig: Array<{
     key: SectionKey;
@@ -510,13 +531,164 @@ export default function ProjectPageClient({ id }: { id: string }) {
     );
   };
 
+  type SceneBlock = {
+    heading: string;
+    meta: Array<{ label: string; value: string }>;
+    body: string[];
+  };
+
+  const parseSceneOverview = (text: string) => {
+    const lines = text
+      .split(/\r?\n/)
+      .map(cleanLine)
+      .filter(Boolean);
+
+    const kvPairs: Array<{ label: string; value: string }> = [];
+    const blocks: SceneBlock[] = [];
+    let current: SceneBlock | null = null;
+
+    const isSceneHeading = /^(INT\.|EXT\.|INT\/EXT\.|EXT\/INT\.)/i;
+    const isMetaLine =
+      /^(LOCATION|BG|TIME|SFX|FX|CAMERA|SHOT|WEATHER|VFX)\s*:/i;
+    const isKeyValue = /^([A-Za-z][A-Za-z /&-]{1,24}):\s*(.+)$/;
+
+    lines.forEach((line) => {
+      if (isSceneHeading.test(line)) {
+        if (current) blocks.push(current);
+        current = { heading: line, meta: [], body: [] };
+        return;
+      }
+
+      const kvMatch = line.match(isKeyValue);
+      if (!current && kvMatch) {
+        kvPairs.push({ label: kvMatch[1], value: kvMatch[2] });
+        return;
+      }
+
+      if (!current) {
+        current = { heading: "Scene Notes", meta: [], body: [] };
+      }
+
+      if (isMetaLine.test(line)) {
+        const [label, ...rest] = line.split(":");
+        current.meta.push({
+          label: label.trim().toUpperCase(),
+          value: rest.join(":").trim(),
+        });
+        return;
+      }
+
+      current.body.push(line);
+    });
+
+    if (current) blocks.push(current);
+
+    const paragraphs =
+      blocks.length === 0 && kvPairs.length === 0
+        ? text
+            .split(/\n\s*\n/)
+            .map((paragraph) => stripMarkdown(paragraph))
+            .map((paragraph) => paragraph.trim())
+            .filter(Boolean)
+        : [];
+
+    return { kvPairs, blocks, paragraphs };
+  };
+
+  const renderSceneOverview = (text: string) => {
+    if (!text.trim()) {
+      return (
+        <p className="text-sm text-white/50">
+          Scene overview was not provided.
+        </p>
+      );
+    }
+
+    const { kvPairs, blocks, paragraphs } = parseSceneOverview(text);
+
+    return (
+      <div className="space-y-4">
+        {kvPairs.length > 0 && (
+          <div className="grid gap-3 md:grid-cols-2">
+            {kvPairs.map((pair) => (
+              <div
+                key={`${pair.label}-${pair.value}`}
+                className="rounded-xl border border-white/10 bg-white/5 p-3"
+              >
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                  {pair.label}
+                </p>
+                <p className="text-sm text-white/80 mt-1">{pair.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {blocks.length > 0 &&
+          blocks.map((block, index) => {
+            const headingMatch = block.heading.match(
+              /^(INT\\.|EXT\\.|INT\\/EXT\\.|EXT\\/INT\\.)\\s*(.*)$/i
+            );
+            const prefix = headingMatch?.[1] ?? "";
+            const rest = headingMatch?.[2] ?? block.heading;
+            return (
+              <div
+                key={`${block.heading}-${index}`}
+                className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  {prefix && (
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-white/60 border border-white/20 rounded-full px-2 py-1">
+                      {prefix.replace(".", "")}
+                    </span>
+                  )}
+                  <p className="text-sm text-white/85 uppercase tracking-[0.2em]">
+                    {rest}
+                  </p>
+                </div>
+
+                {block.meta.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {block.meta.map((meta, metaIndex) => (
+                      <span
+                        key={`${meta.label}-${metaIndex}`}
+                        className="glass-pill px-2.5 py-1 text-[11px] text-white/70 rounded-full"
+                      >
+                        {meta.label}: {meta.value || "—"}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="space-y-2 text-sm text-white/75 leading-relaxed">
+                  {block.body.map((line, lineIndex) => (
+                    <p key={`${block.heading}-${lineIndex}`}>{line}</p>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+        {paragraphs.length > 0 && (
+          <div className="space-y-3">
+            {paragraphs.map((paragraph, index) => (
+              <p
+                key={`${paragraph.slice(0, 16)}-${index}`}
+                className="text-sm text-white/75 leading-relaxed whitespace-pre-line"
+              >
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderSectionContent = (key: SectionKey, data: AIResult) => {
     switch (key) {
       case "sceneOverview":
-        return renderParagraph(
-          data.sceneOverview,
-          "Scene overview was not provided."
-        );
+        return renderSceneOverview(data.sceneOverview);
       case "keyActions":
         return renderBullets(
           data.keyActions,
@@ -721,11 +893,21 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
                         disabled={loading}
                       >
-                        <option value="Scene Breakdown">Scene Breakdown</option>
-                        <option value="Sound Design">Sound Design</option>
-                        <option value="Budget Plan">Budget Plan</option>
-                        <option value="Visual Direction">Visual Direction</option>
-                        <option value="Production Notes">Production Notes</option>
+                        <option value="Scene Breakdown" style={optionStyle}>
+                          Scene Breakdown
+                        </option>
+                        <option value="Sound Design" style={optionStyle}>
+                          Sound Design
+                        </option>
+                        <option value="Budget Plan" style={optionStyle}>
+                          Budget Plan
+                        </option>
+                        <option value="Visual Direction" style={optionStyle}>
+                          Visual Direction
+                        </option>
+                        <option value="Production Notes" style={optionStyle}>
+                          Production Notes
+                        </option>
                       </select>
                     </div>
                     <div>
@@ -760,9 +942,15 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
                         disabled={loading}
                       >
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
+                        <option value="Low" style={optionStyle}>
+                          Low
+                        </option>
+                        <option value="Medium" style={optionStyle}>
+                          Medium
+                        </option>
+                        <option value="High" style={optionStyle}>
+                          High
+                        </option>
                       </select>
                     </div>
                     <div>
@@ -814,9 +1002,15 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
                         disabled={loading}
                       >
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
+                        <option value="Low" style={optionStyle}>
+                          Low
+                        </option>
+                        <option value="Medium" style={optionStyle}>
+                          Medium
+                        </option>
+                        <option value="High" style={optionStyle}>
+                          High
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -1050,7 +1244,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                               className="rounded-lg glass-input px-2.5 py-2 text-xs text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
                             >
                               {copySectionOptions.map((key) => (
-                                <option key={key} value={key}>
+                                <option key={key} value={key} style={optionStyle}>
                                   {SECTION_LABELS[key]}
                                 </option>
                               ))}

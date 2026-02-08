@@ -22,12 +22,12 @@ client = Groq(api_key=GROQ_API_KEY)
 # ----------- Model Configuration -----------
 MODEL_NAME = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
 MAX_TOKENS = int(os.getenv("GROQ_MAX_TOKENS", "1400"))
-TEMPERATURE = float(os.getenv("GROQ_TEMPERATURE", "0.6"))
+TEMPERATURE = float(os.getenv("GROQ_TEMPERATURE", "0.4"))
 MAX_PROMPT_CHARS = int(os.getenv("MAX_PROMPT_CHARS", "3000"))
 
 SYSTEM_PROMPT = """You are a professional assistant director and script supervisor working on an independent film production.
 
-Return ONLY valid JSON with the exact schema below (no extra text):
+Return ONLY valid JSON with the exact schema below (no extra text, no markdown, no code fences):
 {
   "executive_summary": [string],
   "scene_overview": string,
@@ -42,10 +42,16 @@ Return ONLY valid JSON with the exact schema below (no extra text):
 
 Rules:
 - Tone: professional, practical, neutral. No emojis. No poetic language.
-- Always include all keys. If info is limited, keep sections short rather than omitting.
-- Executive summary: 3-5 concise bullets.
-- Key actions: bullet list only (no paragraphs).
-- Keep each list item short and skimmable. Limit lists to 4-6 bullets (assumptions 2-4).
+- Do NOT write screenplay, dialogue, or scene script.
+- Always include all keys. No empty arrays.
+- If info is limited, use short, practical placeholders (e.g., "Not specified") rather than omitting.
+- Executive summary: 3-5 bullets.
+- Scene overview: 2-4 concise sentences.
+- Key actions: 4-8 bullets, no paragraphs.
+- Characters roles: 2-5 entries with name, role, notes.
+- Visual style, sound design, budget, director notes: 3-6 bullets each.
+- Assumptions made: 2-4 bullets.
+- Keep each bullet under 20 words.
 """
 
 # FastAPI app

@@ -95,6 +95,16 @@ select {
   color-scheme: dark;
 }
 
+select.glass-input {
+  background-color: rgba(19, 19, 22, 0.9);
+  color: var(--foreground);
+}
+
+select.glass-input option {
+  background-color: #131316;
+  color: #F5F5F7;
+}
+
 select option {
   background-color: #131316;
   color: #F5F5F7;
