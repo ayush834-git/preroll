@@ -264,11 +264,8 @@ const formatResultForCopy = (result: AIResult) => {
   ];
 
   return sections
-    .map((section) => `${section.label}
-${section.content}`.trim())
-    .join("
-
-");
+    .map((section) => `${section.label}\n${section.content}`.trim())
+    .join("\n\n");
 };
 
 export default function ProjectPageClient({ id }: { id: string }) {
