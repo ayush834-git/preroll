@@ -1,36 +1,158 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# 🎬 Preroll — AI-Powered Film Pre-Production Tool
 
-First, run the development server:
+**Live Demo:** https://preroll-zciu.vercel.app/  
+**Repository:** https://github.com/ayush834-git/preroll
+
+Preroll is an AI-assisted tool that helps filmmakers and creators plan their projects before filming begins. It uses AI to generate creative outputs such as screenplay breakdowns, budgeting insights, role suggestions, and scene design ideas — all in a smooth, modern UI.
+
+This project was built within a **24-hour campus hackathon (NASSCOM × IBM – Introduction to GenAI)** and placed in the **Top 30** out of ~150–200 teams. It combines modern web development with applied GenAI workflows and polished UI/UX.
+
+---
+
+## 🧠 Why Preroll Matters
+
+Pre-production planning is often fragmented and manual. Preroll brings structure to early creative decisions using AI-generated insights, enabling creators to:
+- Visualize story ideas
+- Generate structured screenplay content
+- Explore budgeting and role recommendations
+- Build confidence ahead of filming
+
+---
+
+## 🌟 Features
+
+- 🚀 **Modern landing page** and product presentation  
+- 📑 Conceptual workflow from idea to pre-production output  
+- 🌐 Live deployment on Vercel  
+- 🧠 Integrated AI generation (script breakdowns, roles, budgets)  
+- 💡 Clear UX with polished UI and structured layout
+
+> Note: The current deployment demonstrates the product concept and UX. Core AI flows can be expanded in future versions.
+
+---
+
+## 🛠 Technology Stack
+
+**Frontend**
+- Next.js (App Router)
+- React
+- Tailwind CSS
+- shadcn/ui components
+- Framer Motion for animations
+
+**AI & Tooling**
+- Prompt-driven GenAI integration
+- Development assisted with ChatGPT / Codex / Cursor
+- Tailored UI components from 21st.dev
+
+**Deployment**
+- Vercel for CI/CD and hosting
+
+---
+
+## 📦 Getting Started
+
+### Prerequisites
+Make sure you have Node.js and npm installed:
+
+```bash
+node --version
+npm --version
+````
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/ayush834-git/preroll.git
+cd preroll
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open your browser at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+pre[roll/
+├─ app/                 # Next.js app routes and pages
+├─ components/          # Reusable UI components
+│   ├─ ui/              # Shadcn / Tailwind UI components
+│   ├─ evervault-card.tsx
+│   ├─ beams-background.tsx
+│   └─ …
+├─ public/              # Static assets
+├─ styles/              # Global styles
+├─ tailwind.config.js   # Tailwind configuration
+├─ next.config.js       # Next.js configuration
+└─ README.md
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🧩 Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+* This project focuses on UI/UX and conceptual GenAI integration.
+* Some AI generation flows may be mocked or simplified in the current version.
+* Future development could include backend persistence, real model integration, and collaborative workflows.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## ✨ Acknowledgements
+
+Built during the **NASSCOM × IBM – Introduction to GenAI** campus hackathon by:
+
+* **Team Preroll**
+
+  * Developer
+  * Tester & Bug Fixer
+  * Frontend & Animation Provider
+  * UX Reviewer & Suggestion Lead
+
+---
+
+## 🚀 What’s Next?
+
+Preroll is a foundation — with continued iteration, it can evolve into:
+
+* Full AI screenplay generation pipeline
+* Collaboration tools
+* Persistent project storage
+* Rich export formats (PDF, DOCX, etc.)
+
+---
+
+## 📩 Connect
+
+Feel free to connect or follow for updates ✨
+
+* GitHub: [https://github.com/ayush834-git](https://github.com/ayush834-git)
+
+---
+
+*Preroll — Where Films Begin 🎬*
+
+```
+
+---
+
