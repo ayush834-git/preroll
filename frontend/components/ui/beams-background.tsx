@@ -121,7 +121,7 @@ export function BeamsBackground({
         createBeam(viewportWidth, viewportHeight, settings)
       );
 
-      if (mode === "performance") {
+      if (mode !== "cinematic") {
         drawStatic();
       }
     };
@@ -218,10 +218,10 @@ export function BeamsBackground({
       animationFrameRef.current = requestAnimationFrame(animate);
     }
 
-    if (mode === "performance") {
-      drawStatic();
-    } else {
+    if (mode === "cinematic") {
       animate();
+    } else {
+      drawStatic();
     }
 
     return () => {

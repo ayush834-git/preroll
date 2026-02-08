@@ -26,7 +26,7 @@ export const EvervaultCard = ({
   const [randomString, setRandomString] = useState("");
 
   useEffect(() => {
-    const length = isCinematic ? 1500 : isReduced ? 700 : 0;
+    const length = isCinematic ? 1500 : isReduced ? 500 : 0;
     const str = length > 0 ? generateRandomString(length) : "";
     setRandomString(str);
   }, [isCinematic, isReduced]);
@@ -36,12 +36,12 @@ export const EvervaultCard = ({
     clientX,
     clientY,
   }: React.MouseEvent<HTMLDivElement>) {
-    if (mode === "performance") return;
+    if (!isCinematic) return;
     const { left, top } = currentTarget.getBoundingClientRect();
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
 
-    const length = isCinematic ? 1500 : 700;
+    const length = 1500;
     const str = generateRandomString(length);
     setRandomString(str);
   }
@@ -94,11 +94,15 @@ export function CardPattern({
   randomString: string;
   mode: "cinematic" | "reduced" | "performance";
 }) {
+  if (mode === "performance") {
+    return null;
+  }
+
   const maskImage = useMotionTemplate`radial-gradient(250px at ${mouseX}px ${mouseY}px, white, transparent)`;
   const style =
-    mode === "performance"
-      ? undefined
-      : { maskImage, WebkitMaskImage: maskImage };
+    mode === "cinematic"
+      ? { maskImage, WebkitMaskImage: maskImage }
+      : undefined;
 
   return (
     <div className="pointer-events-none">

@@ -94,11 +94,16 @@ export function ShaderAnimation() {
     onWindowResize()
     window.addEventListener("resize", onWindowResize, false)
 
-    const timeScale = isReduced ? 0.5 : 1
+    const renderFrame = (timeValue: number) => {
+      if (!renderer) return
+      uniforms.time.value = timeValue
+      renderer.render(scene, camera)
+    }
+
     const animate = () => {
       const animationId = requestAnimationFrame(animate)
       if (!renderer) return
-      uniforms.time.value += 0.05 * timeScale
+      uniforms.time.value += 0.05
       renderer.render(scene, camera)
 
       if (sceneRef.current) {
@@ -114,7 +119,11 @@ export function ShaderAnimation() {
       animationId: 0,
     }
 
-    animate()
+    if (isReduced) {
+      renderFrame(1.2)
+    } else {
+      animate()
+    }
 
     return () => {
       window.removeEventListener("resize", onWindowResize)

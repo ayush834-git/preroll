@@ -124,20 +124,31 @@ export default function AnimatedShaderBackground({
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    let frameId: number;
-    const timeScale = isReduced ? 0.5 : 1;
-    const animate = () => {
+    let frameId: number | undefined;
+    const renderFrame = (timeValue: number) => {
       if (!renderer) return;
-      material.uniforms.iTime.value += 0.016 * timeScale;
+      material.uniforms.iTime.value = timeValue;
       renderer.render(scene, camera);
-      frameId = requestAnimationFrame(animate);
     };
-    animate();
+
+    if (isReduced) {
+      renderFrame(0.8);
+    } else {
+      const animate = () => {
+        if (!renderer) return;
+        material.uniforms.iTime.value += 0.016;
+        renderer.render(scene, camera);
+        frameId = requestAnimationFrame(animate);
+      };
+      animate();
+    }
 
     window.addEventListener("resize", resizeToContainer);
 
     return () => {
-      cancelAnimationFrame(frameId);
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
       window.removeEventListener("resize", resizeToContainer);
       if (renderer) {
         container.removeChild(renderer.domElement);

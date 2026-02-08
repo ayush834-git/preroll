@@ -43,7 +43,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
   const isReduced = mode === "reduced";
 
   useEffect(() => {
-    if (mode === "performance") return;
+    if (!isCinematic) return;
     const syncPointer = (e: PointerEvent) => {
       const { clientX: x, clientY: y } = e;
 
@@ -63,7 +63,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
 
     document.addEventListener("pointermove", syncPointer);
     return () => document.removeEventListener("pointermove", syncPointer);
-  }, [mode]);
+  }, [isCinematic]);
 
   const { base, spread } = glowColorMap[glowColor];
 
@@ -83,7 +83,9 @@ const GlowCard: React.FC<GlowCardProps> = ({
       "--backdrop": "hsl(240 12% 16% / 0.6)",
       "--backup-border": "var(--backdrop)",
       "--size": "200",
-      "--outer": isCinematic ? "1" : isReduced ? "0.8" : "0.6",
+      "--outer": isCinematic ? "1" : isReduced ? "0.75" : "0",
+      "--bg-spot-opacity": isCinematic ? "0.1" : isReduced ? "0.06" : "0",
+      "--border-spot-opacity": isCinematic ? "1" : isReduced ? "0.6" : "0",
       "--border-size": "calc(var(--border, 2) * 1px)",
       "--spotlight-size": "calc(var(--size, 150) * 1px)",
       "--hue": "calc(var(--base) + (var(--xp, 0) * var(--spread, 0)))",
