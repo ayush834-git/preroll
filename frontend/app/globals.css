@@ -91,6 +91,15 @@ html {
   backdrop-filter: blur(14px);
 }
 
+select {
+  color-scheme: dark;
+}
+
+select option {
+  background-color: #131316;
+  color: #F5F5F7;
+}
+
 .glass-outline {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.16);
