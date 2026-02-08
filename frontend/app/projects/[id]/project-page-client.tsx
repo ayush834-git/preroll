@@ -19,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import { generateScript, type GenerationParams } from "@/lib/api";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { EvervaultCard } from "@/components/ui/evervault-card";
 import { Reveal } from "@/components/ui/reveal";
 
@@ -605,18 +606,66 @@ export default function ProjectPageClient({ id }: { id: string }) {
     }
   };
 
-  const downloadText = (filename: string, text: string) => {
+  const downloadPdf = async (filename: string, text: string) => {
     setDownloadError("");
     if (!text.trim()) {
       setDownloadError("Nothing to download yet.");
       return;
     }
     try {
-      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const pdfDoc = await PDFDocument.create();
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const fontSize = 11;
+      const lineHeight = fontSize * 1.45;
+      const margin = 48;
+      const pageSize: [number, number] = [612, 792];
+      let page = pdfDoc.addPage(pageSize);
+      let y = pageSize[1] - margin;
+
+      const wrapLine = (line: string) => {
+        if (!line.trim()) return [""];
+        const words = line.split(/\s+/).filter(Boolean);
+        const wrapped: string[] = [];
+        let current = "";
+        words.forEach((word) => {
+          const candidate = current ? `${current} ${word}` : word;
+          const width = font.widthOfTextAtSize(candidate, fontSize);
+          if (width > pageSize[0] - margin * 2 && current) {
+            wrapped.push(current);
+            current = word;
+          } else {
+            current = candidate;
+          }
+        });
+        if (current) wrapped.push(current);
+        return wrapped;
+      };
+
+      const lines = text.split(/\r?\n/);
+      lines.forEach((line) => {
+        const wrapped = wrapLine(line);
+        wrapped.forEach((chunk) => {
+          if (y < margin) {
+            page = pdfDoc.addPage(pageSize);
+            y = pageSize[1] - margin;
+          }
+          page.drawText(chunk, {
+            x: margin,
+            y,
+            size: fontSize,
+            font,
+            color: rgb(0.05, 0.05, 0.08),
+          });
+          y -= lineHeight;
+        });
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = filename;
+      link.download = filename.endsWith(".pdf") ? filename : `${filename}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -1461,7 +1510,10 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         <div className="flex flex-wrap items-center gap-2">
                           <button
                             onClick={() =>
-                              downloadText("preroll-report.txt", formattedOutput)
+                              void downloadPdf(
+                                "preroll-report.pdf",
+                                formattedOutput
+                              )
                             }
                             className="text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-violet inline-flex items-center gap-2"
                           >
