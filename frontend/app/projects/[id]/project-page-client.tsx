@@ -28,7 +28,7 @@ type CharacterRole = {
   notes: string;
 };
 
-type AIResult = {
+type LegacyAIResult = {
   executiveSummary: string[];
   sceneOverview: string;
   keyActions: string[];
@@ -41,9 +41,21 @@ type AIResult = {
   raw?: string;
 };
 
-type SectionKey = keyof Omit<AIResult, "raw">;
+type SectionBlock = {
+  id: string;
+  title: string;
+  bullets: string[];
+};
 
-const SECTION_LABELS: Record<SectionKey, string> = {
+type AIResult = LegacyAIResult & {
+  generationType?: string;
+  sections?: SectionBlock[];
+};
+
+type LegacySectionKey = keyof Omit<LegacyAIResult, "raw">;
+type SectionKey = string;
+
+const SECTION_LABELS: Record<LegacySectionKey, string> = {
   executiveSummary: "Executive Summary",
   sceneOverview: "Scene Overview",
   keyActions: "Key Actions",
@@ -55,7 +67,7 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   assumptionsMade: "Assumptions Made",
 };
 
-const SECTION_ORDER: SectionKey[] = [
+const SECTION_ORDER: LegacySectionKey[] = [
   "sceneOverview",
   "keyActions",
   "charactersRoles",
@@ -68,6 +80,15 @@ const SECTION_ORDER: SectionKey[] = [
 
 const bulletRegex = /^[-*\u2022]\s+/;
 const numberedRegex = /^\d+[\).]\s+/;
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const buildSectionId = (title: string, index: number) =>
+  `${slugify(title) || "section"}-${index}`;
 
 const stripMarkdown = (text: string) =>
   text
@@ -139,8 +160,8 @@ const normalizeCharacters = (value: unknown): CharacterRole[] => {
   return [];
 };
 
-const parseFromHeadings = (text: string): AIResult => {
-  const headingMap: Record<string, SectionKey> = {
+const parseFromHeadings = (text: string): LegacyAIResult => {
+  const headingMap: Record<string, LegacySectionKey> = {
     "EXECUTIVE SUMMARY": "executiveSummary",
     "SCENE OVERVIEW": "sceneOverview",
     "KEY ACTIONS": "keyActions",
@@ -159,7 +180,7 @@ const parseFromHeadings = (text: string): AIResult => {
     "ASSUMPTIONS": "assumptionsMade",
   };
 
-  const buckets: Record<SectionKey, string[]> = {
+  const buckets: Record<LegacySectionKey, string[]> = {
     executiveSummary: [],
     sceneOverview: [],
     keyActions: [],
@@ -171,7 +192,7 @@ const parseFromHeadings = (text: string): AIResult => {
     assumptionsMade: [],
   };
 
-  let currentKey: SectionKey = "sceneOverview";
+  let currentKey: LegacySectionKey = "sceneOverview";
   text.split(/\r?\n/).forEach((line) => {
     const trimmed = line.trim();
     if (!trimmed) return;
@@ -202,6 +223,45 @@ const parseFromHeadings = (text: string): AIResult => {
   };
 };
 
+const parseSectionsFromJson = (
+  parsed: Record<string, unknown>
+): { sections: SectionBlock[]; generationType?: string } | null => {
+  const rawSections = parsed.sections;
+  if (!Array.isArray(rawSections)) return null;
+  const sections = rawSections
+    .map((section, index) => {
+      if (!section || typeof section !== "object") return null;
+      const record = section as Record<string, unknown>;
+      const rawTitle =
+        record.title || record.heading || record.name || record.section;
+      if (!rawTitle) return null;
+      const title = stripMarkdown(String(rawTitle)).trim();
+      if (!title) return null;
+      const bullets = normalizeList(
+        record.bullets ??
+          record.items ??
+          record.points ??
+          record.content ??
+          record.lines ??
+          []
+      );
+      return {
+        id: buildSectionId(title, index),
+        title,
+        bullets: bullets.length ? bullets : ["Not specified"],
+      };
+    })
+    .filter(Boolean) as SectionBlock[];
+
+  if (!sections.length) return null;
+
+  const generationType = String(
+    parsed.generation_type ?? parsed.generationType ?? ""
+  ).trim();
+
+  return { sections, generationType: generationType || undefined };
+};
+
 const parseAIResult = (text: string): AIResult => {
   try {
     const trimmed = text.trim();
@@ -214,6 +274,22 @@ const parseAIResult = (text: string): AIResult => {
       return trimmed;
     })();
     const parsed = JSON.parse(jsonCandidate) as Record<string, unknown>;
+    const structured = parseSectionsFromJson(parsed);
+    if (structured) {
+      return {
+        executiveSummary: [],
+        sceneOverview: "",
+        keyActions: [],
+        charactersRoles: [],
+        visualStyle: [],
+        soundDesign: [],
+        budgetConsiderations: [],
+        directorNotes: [],
+        assumptionsMade: [],
+        raw: text,
+        ...structured,
+      };
+    }
     return {
       executiveSummary: normalizeList(parsed.executive_summary),
       sceneOverview: normalizeText(parsed.scene_overview),
@@ -227,7 +303,8 @@ const parseAIResult = (text: string): AIResult => {
       raw: text,
     };
   } catch {
-    return parseFromHeadings(text);
+    const legacy = parseFromHeadings(text);
+    return { ...legacy };
   }
 };
 
@@ -235,6 +312,14 @@ const formatBullets = (items: string[]) =>
   items.map((item) => `- ${item}`).join("\n");
 
 const formatResultForCopy = (result: AIResult) => {
+  if (result.sections?.length) {
+    return result.sections
+      .map((section) =>
+        `${section.title}\n${formatBullets(section.bullets)}`.trim()
+      )
+      .join("\n\n");
+  }
+
   const sections: Array<{ label: string; content: string }> = [
     {
       label: SECTION_LABELS.executiveSummary,
@@ -285,6 +370,40 @@ const formatResultForCopy = (result: AIResult) => {
     .join("\n\n");
 };
 
+const iconForTitle = (title: string): ReactNode => {
+  const normalized = title.toLowerCase();
+  if (normalized.includes("sound")) return <Mic className="h-4 w-4" />;
+  if (normalized.includes("budget") || normalized.includes("cost")) {
+    return <DollarSign className="h-4 w-4" />;
+  }
+  if (
+    normalized.includes("cast") ||
+    normalized.includes("character") ||
+    normalized.includes("performance")
+  ) {
+    return <Users className="h-4 w-4" />;
+  }
+  if (
+    normalized.includes("visual") ||
+    normalized.includes("camera") ||
+    normalized.includes("lighting")
+  ) {
+    return <Camera className="h-4 w-4" />;
+  }
+  if (
+    normalized.includes("director") ||
+    normalized.includes("production") ||
+    normalized.includes("continuity") ||
+    normalized.includes("logistics")
+  ) {
+    return <FileText className="h-4 w-4" />;
+  }
+  if (normalized.includes("scene") || normalized.includes("location")) {
+    return <Film className="h-4 w-4" />;
+  }
+  return <ListChecks className="h-4 w-4" />;
+};
+
 export default function ProjectPageClient({ id }: { id: string }) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -308,17 +427,25 @@ export default function ProjectPageClient({ id }: { id: string }) {
     generationType: "Scene Breakdown",
   });
 
-  const navSections: Array<{ key: SectionKey; label: string }> = [
-    { key: "executiveSummary", label: "Summary" },
-    { key: "sceneOverview", label: "Overview" },
-    { key: "keyActions", label: "Actions" },
-    { key: "charactersRoles", label: "Characters" },
-    { key: "visualStyle", label: "Visual" },
-    { key: "soundDesign", label: "Sound" },
-    { key: "budgetConsiderations", label: "Budget" },
-    { key: "directorNotes", label: "Director" },
-    { key: "assumptionsMade", label: "Assumptions" },
-  ];
+  const navSections: Array<{ key: SectionKey; label: string }> = useMemo(() => {
+    if (result?.sections?.length) {
+      return result.sections.map((section) => ({
+        key: section.id,
+        label: section.title,
+      }));
+    }
+    return [
+      { key: "executiveSummary", label: "Summary" },
+      { key: "sceneOverview", label: "Overview" },
+      { key: "keyActions", label: "Actions" },
+      { key: "charactersRoles", label: "Characters" },
+      { key: "visualStyle", label: "Visual" },
+      { key: "soundDesign", label: "Sound" },
+      { key: "budgetConsiderations", label: "Budget" },
+      { key: "directorNotes", label: "Director" },
+      { key: "assumptionsMade", label: "Assumptions" },
+    ];
+  }, [result]);
   const navColors = [
     "glass-amber",
     "glass-emerald",
@@ -333,17 +460,19 @@ export default function ProjectPageClient({ id }: { id: string }) {
     "btn-rose",
     "btn-violet",
   ];
-  const copySectionOptions: SectionKey[] = [
-    "executiveSummary",
-    ...SECTION_ORDER,
-  ];
+  const copySectionOptions: SectionKey[] = useMemo(() => {
+    if (result?.sections?.length) {
+      return result.sections.map((section) => section.id);
+    }
+    return ["executiveSummary", ...SECTION_ORDER];
+  }, [result]);
   const optionStyle = {
     backgroundColor: "#131316",
     color: "#F5F5F7",
   } as const;
   const sectionRefs = useRef(new Map<SectionKey, HTMLElement>());
-  const sectionsConfig: Array<{
-    key: SectionKey;
+  const legacySectionsConfig: Array<{
+    key: LegacySectionKey;
     label: string;
     icon: ReactNode;
     hint: string;
@@ -398,6 +527,38 @@ export default function ProjectPageClient({ id }: { id: string }) {
     },
   ];
 
+  const activeSectionsConfig: Array<{
+    key: SectionKey;
+    label: string;
+    icon: ReactNode;
+    hint: string;
+  }> = useMemo(() => {
+    if (result?.sections?.length) {
+      return result.sections.map((section) => ({
+        key: section.id,
+        label: section.title,
+        icon: iconForTitle(section.title),
+        hint: "",
+      }));
+    }
+    return legacySectionsConfig;
+  }, [legacySectionsConfig, result]);
+
+  const sectionLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (result?.sections?.length) {
+      result.sections.forEach((section) => {
+        map.set(section.id, section.title);
+      });
+      return map;
+    }
+    map.set("executiveSummary", SECTION_LABELS.executiveSummary);
+    legacySectionsConfig.forEach((section) => {
+      map.set(section.key, section.label);
+    });
+    return map;
+  }, [legacySectionsConfig, result]);
+
   const formatTimestamp = (value: Date | null) =>
     value
       ? new Intl.DateTimeFormat("en-US", {
@@ -413,7 +574,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
     return `${trimmed.slice(0, 140)}...`;
   };
 
-  const getSectionText = (key: SectionKey, data: AIResult) => {
+  const getSectionText = (key: LegacySectionKey, data: LegacyAIResult) => {
     switch (key) {
       case "executiveSummary":
         return formatBullets(data.executiveSummary);
@@ -473,7 +634,12 @@ export default function ProjectPageClient({ id }: { id: string }) {
     () => summarizePrompt(lastPrompt || prompt),
     [lastPrompt, prompt]
   );
-  const generationType = lastParams?.generationType || params.generationType;
+  const hasStructuredSections = Boolean(result?.sections?.length);
+  const defaultOpenSection = hasStructuredSections
+    ? result?.sections?.[0]?.id
+    : "sceneOverview";
+  const generationType =
+    result?.generationType || lastParams?.generationType || params.generationType;
 
   const renderBullets = (items: string[], emptyText: string) => {
     if (!items.length) {
@@ -685,7 +851,10 @@ export default function ProjectPageClient({ id }: { id: string }) {
     );
   };
 
-  const renderSectionContent = (key: SectionKey, data: AIResult) => {
+  const renderLegacySectionContent = (
+    key: LegacySectionKey,
+    data: LegacyAIResult
+  ) => {
     switch (key) {
       case "sceneOverview":
         return renderSceneOverview(data.sceneOverview);
@@ -750,10 +919,16 @@ export default function ProjectPageClient({ id }: { id: string }) {
     }
   };
 
-  const selectedSectionText = useMemo(
-    () => (result ? getSectionText(selectedSection, result) : ""),
-    [result, selectedSection]
-  );
+  const selectedSectionText = useMemo(() => {
+    if (!result) return "";
+    if (result.sections?.length) {
+      const section = result.sections.find(
+        (item) => item.id === selectedSection
+      );
+      return section ? formatBullets(section.bullets) : "";
+    }
+    return getSectionText(selectedSection as LegacySectionKey, result);
+  }, [result, selectedSection]);
 
   const scrollToSection = (key: SectionKey) => {
     const target = sectionRefs.current.get(key);
@@ -789,7 +964,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
       setVersion((prev) => prev + 1);
       setLastPrompt(prompt.trim());
       setLastParams({ ...params });
-      setSelectedSection("executiveSummary");
+      setSelectedSection(parsed.sections?.[0]?.id ?? "executiveSummary");
     } catch (err) {
       const message =
         err instanceof Error
@@ -1140,39 +1315,41 @@ export default function ProjectPageClient({ id }: { id: string }) {
 
               {result && (
                 <>
-                  <div
-                    className="rounded-2xl p-6 mb-6 glass-panel"
-                    id="section-executiveSummary"
-                    ref={(node) => {
-                      if (node) {
-                        sectionRefs.current.set("executiveSummary", node);
-                      } else {
-                        sectionRefs.current.delete("executiveSummary");
-                      }
-                    }}
-                  >
-                    <div id="sections-top" className="scroll-mt-24" />
-                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                      <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-primary" />
-                        Executive Summary
-                      </h2>
-                      <button
-                        onClick={() =>
-                          handleCopy(
-                            formatBullets(result.executiveSummary),
-                            SECTION_LABELS.executiveSummary
-                          )
+                  {!hasStructuredSections && (
+                    <div
+                      className="rounded-2xl p-6 mb-6 glass-panel"
+                      id="section-executiveSummary"
+                      ref={(node) => {
+                        if (node) {
+                          sectionRefs.current.set("executiveSummary", node);
+                        } else {
+                          sectionRefs.current.delete("executiveSummary");
                         }
-                        className="text-xs text-white/60 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-sky"
-                      >
-                        {copiedSection === SECTION_LABELS.executiveSummary
-                          ? "Copied"
-                          : "Copy summary"}
-                      </button>
+                      }}
+                    >
+                      <div id="sections-top" className="scroll-mt-24" />
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                        <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-primary" />
+                          Executive Summary
+                        </h2>
+                        <button
+                          onClick={() =>
+                            handleCopy(
+                              formatBullets(result.executiveSummary),
+                              SECTION_LABELS.executiveSummary
+                            )
+                          }
+                          className="text-xs text-white/60 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-sky"
+                        >
+                          {copiedSection === SECTION_LABELS.executiveSummary
+                            ? "Copied"
+                            : "Copy summary"}
+                        </button>
+                      </div>
+                      {renderLegacySectionContent("executiveSummary", result)}
                     </div>
-                    {renderSectionContent("executiveSummary", result)}
-                  </div>
+                  )}
 
                   <div className="rounded-2xl p-6 glass-panel">
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -1186,7 +1363,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                     </div>
 
                     <div className="grid gap-4">
-                      {sectionsConfig.map((section) => (
+                      {activeSectionsConfig.map((section) => (
                         <details
                           key={section.key}
                           id={`section-${section.key}`}
@@ -1198,7 +1375,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                             }
                           }}
                           className="glass-outline rounded-2xl p-5"
-                          open={section.key === "sceneOverview"}
+                          open={section.key === defaultOpenSection}
                         >
                           <summary className="flex flex-wrap items-center justify-between gap-3 cursor-pointer list-none">
                             <div className="flex items-center gap-3">
@@ -1209,9 +1386,11 @@ export default function ProjectPageClient({ id }: { id: string }) {
                                 <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">
                                   {section.label}
                                 </p>
-                                <p className="text-xs text-white/60 mt-1">
-                                  {section.hint}
-                                </p>
+                                {section.hint && (
+                                  <p className="text-xs text-white/60 mt-1">
+                                    {section.hint}
+                                  </p>
+                                )}
                               </div>
                             </div>
                             <span className="text-[11px] text-white/40">
@@ -1219,7 +1398,17 @@ export default function ProjectPageClient({ id }: { id: string }) {
                             </span>
                           </summary>
                           <div className="mt-4 space-y-3">
-                            {renderSectionContent(section.key, result)}
+                            {hasStructuredSections
+                              ? renderBullets(
+                                  result.sections?.find(
+                                    (item) => item.id === section.key
+                                  )?.bullets ?? [],
+                                  "No details were provided."
+                                )
+                              : renderLegacySectionContent(
+                                  section.key as LegacySectionKey,
+                                  result
+                                )}
                           </div>
                         </details>
                       ))}
@@ -1245,7 +1434,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                             >
                               {copySectionOptions.map((key) => (
                                 <option key={key} value={key} style={optionStyle}>
-                                  {SECTION_LABELS[key]}
+                                  {sectionLabelMap.get(key) || key}
                                 </option>
                               ))}
                             </select>
@@ -1253,14 +1442,17 @@ export default function ProjectPageClient({ id }: { id: string }) {
                               onClick={() =>
                                 handleCopy(
                                   selectedSectionText,
-                                  SECTION_LABELS[selectedSection]
+                                  sectionLabelMap.get(selectedSection) ||
+                                    selectedSection
                                 )
                               }
                               disabled={!selectedSectionText}
                               className="text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-emerald disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
                             >
                               <Copy className="h-3.5 w-3.5" />
-                              {copiedSection === SECTION_LABELS[selectedSection]
+                              {copiedSection ===
+                              (sectionLabelMap.get(selectedSection) ||
+                                selectedSection)
                                 ? "Copied"
                                 : "Copy section"}
                             </button>
