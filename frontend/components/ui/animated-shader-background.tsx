@@ -117,7 +117,10 @@ export default function AnimatedShaderBackground({
     };
 
     resizeToContainer();
-    renderer.setPixelRatio(isReduced ? 1 : window.devicePixelRatio);
+    const deviceRatio = window.devicePixelRatio || 1;
+    renderer.setPixelRatio(
+      isReduced ? 1 : deviceRatio
+    );
     container.appendChild(renderer.domElement);
 
     const geometry = new THREE.PlaneGeometry(2, 2);

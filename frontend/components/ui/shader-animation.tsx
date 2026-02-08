@@ -79,7 +79,8 @@ export function ShaderAnimation() {
     } catch {
       return
     }
-    renderer.setPixelRatio(isReduced ? 1 : window.devicePixelRatio)
+    const deviceRatio = window.devicePixelRatio || 1
+    renderer.setPixelRatio(isReduced ? 1 : deviceRatio)
     container.appendChild(renderer.domElement)
 
     const onWindowResize = () => {

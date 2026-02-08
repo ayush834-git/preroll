@@ -27,7 +27,7 @@ function detectPerformanceMode(
     /Mobi|Android|iPhone|iPad|iPod/i.test(userAgent);
 
   if (deviceMemory > 0) {
-    if (deviceMemory >= 24) return "cinematic";
+    if (deviceMemory > 16) return "cinematic";
     if (deviceMemory >= 12) return "reduced";
     return "performance";
   }

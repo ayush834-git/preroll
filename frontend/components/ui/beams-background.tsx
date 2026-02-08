@@ -197,8 +197,17 @@ export function BeamsBackground({
       });
     }
 
-    function animate() {
+    let lastFrame = 0;
+    const frameInterval = mode === "cinematic" ? 0 : 1000 / 45;
+
+    function animate(timestamp = 0) {
       if (!canvas || !ctx) return;
+
+      if (frameInterval > 0 && timestamp - lastFrame < frameInterval) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrame = timestamp;
 
       ctx.clearRect(0, 0, viewportWidth, viewportHeight);
       ctx.filter = settings.blur ? `blur(${settings.blur}px)` : "none";
