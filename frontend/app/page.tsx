@@ -138,12 +138,6 @@ export default function LandingPage() {
               >
                 Get Started
               </Link>
-              <Link
-                href="/auth"
-                className="glass-outline text-white/90 px-6 py-3.5 rounded-xl hover:bg-white/10 hover:border-white/20 transition-all btn-animated btn-sky btn-ghost"
-              >
-                Request Demo
-              </Link>
               </div>
 
               <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-white/60">
