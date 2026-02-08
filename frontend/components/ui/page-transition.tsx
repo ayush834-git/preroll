@@ -8,6 +8,9 @@ import { usePerformanceMode } from "@/lib/usePerformanceMode";
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const mode = usePerformanceMode();
+  if (mode === "performance") {
+    return <div>{children}</div>;
+  }
   const isCinematic = mode === "cinematic";
   const isReduced = mode === "reduced";
   const easeOut: [number, number, number, number] = [0.16, 1, 0.3, 1];

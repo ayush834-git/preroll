@@ -67,6 +67,7 @@ export function BeamsBackground({
   };
 
   useEffect(() => {
+    if (mode === "performance") return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -255,26 +256,29 @@ export function BeamsBackground({
           )}
         />
 
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 h-full w-full z-10"
-          style={{
-            filter:
-              mode === "cinematic"
-                ? "blur(4px)"
-                : mode === "reduced"
-                ? "blur(2px)"
-                : "none",
-            opacity:
-              mode === "cinematic"
-                ? 0.95
-                : mode === "reduced"
-                ? 0.7
-                : 0.45,
-          }}
-        />
-
-        <div className="absolute inset-0 z-20 beams-overlay" />
+        {mode !== "performance" && (
+          <>
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 h-full w-full z-10"
+              style={{
+                filter:
+                  mode === "cinematic"
+                    ? "blur(4px)"
+                    : mode === "reduced"
+                    ? "blur(2px)"
+                    : "none",
+                opacity:
+                  mode === "cinematic"
+                    ? 0.95
+                    : mode === "reduced"
+                    ? 0.7
+                    : 0.45,
+              }}
+            />
+            <div className="absolute inset-0 z-20 beams-overlay" />
+          </>
+        )}
       </div>
 
       {children ? (

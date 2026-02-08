@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { usePerformanceMode } from "@/lib/usePerformanceMode";
 
 export function PerformanceModeRoot() {
   const mode = usePerformanceMode();
 
-  useEffect(() => {
+  const useIsomorphicLayoutEffect =
+    typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+  useIsomorphicLayoutEffect(() => {
     if (typeof document === "undefined") return;
     document.documentElement.dataset.performance = mode;
     if (document.body) {

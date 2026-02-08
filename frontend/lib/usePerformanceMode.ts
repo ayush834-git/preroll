@@ -1,48 +1,48 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 export type PerformanceMode = "cinematic" | "reduced" | "performance";
 
-const DEFAULT_MODE: PerformanceMode = "cinematic";
+const DEFAULT_MODE: PerformanceMode = "reduced";
 
-function detectPerformanceMode(
-  prefersReduced: boolean
-): PerformanceMode {
+function detectPerformanceMode(prefersReduced: boolean): PerformanceMode {
   if (prefersReduced) return "performance";
 
-  if (typeof navigator === "undefined") return DEFAULT_MODE;
-
-  const nav = navigator as Navigator & {
-    deviceMemory?: number;
-    hardwareConcurrency?: number;
-    userAgentData?: { mobile?: boolean };
-  };
-
-  const deviceMemory = nav.deviceMemory ?? 0;
-  const hardwareConcurrency = nav.hardwareConcurrency ?? 0;
-  const userAgent = nav.userAgent ?? "";
-  const isMobile =
-    nav.userAgentData?.mobile ??
-    /Mobi|Android|iPhone|iPad|iPod/i.test(userAgent);
-
-  if (deviceMemory > 0) {
-    if (deviceMemory > 16) return "cinematic";
-    if (deviceMemory >= 12) return "reduced";
-    return "performance";
+  if (typeof navigator === "undefined" || typeof window === "undefined") {
+    return DEFAULT_MODE;
   }
 
-  if (isMobile || (hardwareConcurrency > 0 && hardwareConcurrency <= 4)) {
+  const nav = navigator as Navigator & {
+    hardwareConcurrency?: number;
+    maxTouchPoints?: number;
+  };
+
+  const isTouch =
+    (nav.maxTouchPoints ?? 0) > 0 || "ontouchstart" in window;
+
+  if (isTouch) return "performance";
+
+  const hardwareConcurrency = nav.hardwareConcurrency ?? 0;
+
+  if (hardwareConcurrency > 0 && hardwareConcurrency <= 4) {
     return "reduced";
   }
 
-  return "cinematic";
+  if (hardwareConcurrency >= 8) {
+    return "cinematic";
+  }
+
+  return "reduced";
 }
 
 export function usePerformanceMode(): PerformanceMode {
   const [mode, setMode] = useState<PerformanceMode>(DEFAULT_MODE);
 
-  useEffect(() => {
+  const useIsomorphicLayoutEffect =
+    typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+  useIsomorphicLayoutEffect(() => {
     if (typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia(

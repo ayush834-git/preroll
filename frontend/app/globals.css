@@ -348,7 +348,7 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .grain-overlay {
-  opacity: 0.18;
+  opacity: 0;
 }
 
 :root[data-performance="reduced"] .glass-panel {
@@ -356,7 +356,7 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .glass-panel {
-  backdrop-filter: blur(6px) saturate(100%);
+  backdrop-filter: none;
 }
 
 :root[data-performance="reduced"] .glass-panel-strong {
@@ -364,7 +364,7 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .glass-panel-strong {
-  backdrop-filter: blur(8px) saturate(105%);
+  backdrop-filter: none;
 }
 
 :root[data-performance="reduced"] .glass-input,
@@ -376,7 +376,7 @@ input:focus, textarea:focus, button:focus-visible {
 :root[data-performance="performance"] .glass-input,
 :root[data-performance="performance"] .glass-outline,
 :root[data-performance="performance"] .glass-pill {
-  backdrop-filter: blur(4px);
+  backdrop-filter: none;
 }
 
 :root[data-performance="reduced"] .beams-overlay {
@@ -386,7 +386,7 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .beams-overlay {
-  background: rgba(10, 10, 11, 0.03);
+  background: transparent;
   backdrop-filter: none;
   animation: none;
 }
@@ -425,7 +425,7 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .shadow-glow {
-  box-shadow: 0 0 10px rgba(124, 124, 255, 0.18);
+  box-shadow: none;
 }
 
 :root[data-performance="reduced"] .backdrop-blur-sm {
@@ -433,7 +433,7 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .backdrop-blur-sm {
-  backdrop-filter: blur(2px);
+  backdrop-filter: none;
 }
 
 :root[data-performance="reduced"] .backdrop-blur-md {
@@ -441,7 +441,7 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .backdrop-blur-md {
-  backdrop-filter: blur(3px);
+  backdrop-filter: none;
 }
 
 :root[data-performance="reduced"] .backdrop-blur-xl {
@@ -449,7 +449,7 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .backdrop-blur-xl {
-  backdrop-filter: blur(4px);
+  backdrop-filter: none;
 }
 
 :root[data-performance="reduced"] .blur-\[120px\] {
@@ -457,5 +457,5 @@ input:focus, textarea:focus, button:focus-visible {
 }
 
 :root[data-performance="performance"] .blur-\[120px\] {
-  filter: blur(40px);
+  filter: none;
 }
