@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Optional
 from dotenv import load_dotenv
 import os
 
@@ -17,6 +18,35 @@ if not GROQ_API_KEY:
 
 # Initialize Groq client
 client = Groq(api_key=GROQ_API_KEY)
+
+# ----------- Model Configuration -----------
+MODEL_NAME = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+MAX_TOKENS = int(os.getenv("GROQ_MAX_TOKENS", "1400"))
+TEMPERATURE = float(os.getenv("GROQ_TEMPERATURE", "0.6"))
+MAX_PROMPT_CHARS = int(os.getenv("MAX_PROMPT_CHARS", "3000"))
+
+SYSTEM_PROMPT = """You are a professional assistant director and script supervisor working on an independent film production.
+
+Return ONLY valid JSON with the exact schema below (no extra text):
+{
+  "executive_summary": [string],
+  "scene_overview": string,
+  "key_actions": [string],
+  "characters_roles": [{"name": string, "role": string, "notes": string}],
+  "visual_style": [string],
+  "sound_design": [string],
+  "budget_considerations": [string],
+  "director_notes": [string],
+  "assumptions_made": [string]
+}
+
+Rules:
+- Tone: professional, practical, neutral. No emojis. No poetic language.
+- Always include all keys. If info is limited, keep sections short rather than omitting.
+- Executive summary: 3-5 concise bullets.
+- Key actions: bullet list only (no paragraphs).
+- Keep each list item short and skimmable. Limit lists to 4-6 bullets (assumptions 2-4).
+"""
 
 # FastAPI app
 app = FastAPI(title="Preroll AI API")
@@ -40,8 +70,17 @@ app.add_middleware(
 
 # ----------- Schemas -----------
 
+class GenerateParams(BaseModel):
+    genre: Optional[str] = None
+    budgetTier: Optional[str] = None
+    runtimeEstimate: Optional[str] = None
+    locationCount: Optional[str] = None
+    sceneComplexity: Optional[str] = None
+    generationType: Optional[str] = None
+
 class GenerateRequest(BaseModel):
     prompt: str
+    params: Optional[GenerateParams] = None
 
 class GenerateResponse(BaseModel):
     output: str
@@ -55,25 +94,57 @@ def health():
 @app.post("/generate", response_model=GenerateResponse)
 def generate_text(data: GenerateRequest):
     try:
+        user_prompt = data.prompt.strip()
+        if not user_prompt:
+            raise HTTPException(status_code=400, detail="Prompt cannot be empty.")
+        params = data.params or GenerateParams()
+
+        param_lines = [
+            f"Generation type: {params.generationType or 'Scene Breakdown'}",
+            f"Genre: {params.genre or 'Unspecified'}",
+            f"Budget tier: {params.budgetTier or 'Unspecified'}",
+            f"Runtime estimate: {params.runtimeEstimate or 'Unspecified'}",
+            f"Location count: {params.locationCount or 'Unspecified'}",
+            f"Scene complexity: {params.sceneComplexity or 'Unspecified'}",
+        ]
+
+        combined_prompt = "\n".join(
+            [
+                "Project brief:",
+                user_prompt,
+                "",
+                "Production parameters:",
+                *param_lines,
+            ]
+        ).strip()
+
+        if len(combined_prompt) > MAX_PROMPT_CHARS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Prompt too long. Max {MAX_PROMPT_CHARS} characters.",
+            )
+
         completion = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model=MODEL_NAME,
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an AI assistant helping with film pre-production, scripts, scenes, and creative ideas."
+                    "content": SYSTEM_PROMPT
                 },
                 {
                     "role": "user",
-                    "content": data.prompt
+                    "content": combined_prompt
                 }
             ],
-            temperature=0.7,
-            max_tokens=1200,
+            temperature=TEMPERATURE,
+            max_tokens=MAX_TOKENS,
         )
 
         return {
-            "output": completion.choices[0].message.content
+            "output": completion.choices[0].message.content.strip()
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

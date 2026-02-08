@@ -1,42 +1,16 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.trim() || "";
 
-const SYSTEM_PROMPT = `You are a professional screenwriter, character designer, and sound designer.
-
-Based on the user's idea, generate:
-
-1. SCREENPLAY
-- Proper scene headings (INT./EXT.)
-- Dialogue and actions
-- For each scene, include BG (background sound/atmosphere) and LOCATION
-
-2. CHARACTER PROFILES
-For each main character include:
-- Name
-- Age
-- Role
-- Personality traits
-- Character arc
-
-3. SOUND DESIGN PLAN
-- Overall mood
-- Scene-wise sound effects
-- Music style
-- Silence / pauses
-
-4. CASTING RECOMMENDATIONS
-- 2-3 actors per character
-- Short justification
-- Prefer well-known actors
-
-5. ESTIMATED BUDGET
-- Low budget estimate (range + key assumptions)
-- Medium budget estimate (range + key assumptions)
-- High budget estimate (range + key assumptions)
-
-Return clean, structured text.`;
-
 export type GenerateResult = {
   output: string;
+};
+
+export type GenerationParams = {
+  genre: string;
+  budgetTier: "Low" | "Medium" | "High";
+  runtimeEstimate: string;
+  locationCount: string;
+  sceneComplexity: "Low" | "Medium" | "High";
+  generationType: string;
 };
 
 export type GenerateError = {
@@ -45,6 +19,7 @@ export type GenerateError = {
 
 export async function generateScript(
   userPrompt: string,
+  params: GenerationParams,
   signal?: AbortSignal
 ): Promise<GenerateResult> {
   const trimmed = userPrompt.trim();
@@ -52,12 +27,10 @@ export async function generateScript(
     return { output: "" };
   }
 
-  const wrappedPrompt = `${SYSTEM_PROMPT}\n\nUser idea:\n${trimmed}`;
-
   const response = await fetch(`${API_BASE}/api/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: wrappedPrompt }),
+    body: JSON.stringify({ prompt: trimmed, params }),
     signal,
   });
 

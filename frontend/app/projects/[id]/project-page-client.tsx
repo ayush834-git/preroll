@@ -1,47 +1,309 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
+  Camera,
+  Clock,
+  Copy,
   DollarSign,
   Film,
   FileText,
+  Info,
   Loader2,
+  RotateCcw,
+  Save,
+  ListChecks,
+  Download,
   Mic,
-  Sparkles,
   Users,
 } from "lucide-react";
-import { generateScript } from "@/lib/api";
-import { GlowCard } from "@/components/ui/spotlight-card";
+import { generateScript, type GenerationParams } from "@/lib/api";
 import { EvervaultCard } from "@/components/ui/evervault-card";
 import { Reveal } from "@/components/ui/reveal";
 
+type CharacterRole = {
+  name: string;
+  role: string;
+  notes: string;
+};
+
+type AIResult = {
+  executiveSummary: string[];
+  sceneOverview: string;
+  keyActions: string[];
+  charactersRoles: CharacterRole[];
+  visualStyle: string[];
+  soundDesign: string[];
+  budgetConsiderations: string[];
+  directorNotes: string[];
+  assumptionsMade: string[];
+  raw?: string;
+};
+
+type SectionKey = keyof Omit<AIResult, "raw">;
+
+const SECTION_LABELS: Record<SectionKey, string> = {
+  executiveSummary: "Executive Summary",
+  sceneOverview: "Scene Overview",
+  keyActions: "Key Actions",
+  charactersRoles: "Characters & Roles",
+  visualStyle: "Visual Style & Cinematography",
+  soundDesign: "Sound & Mood Design",
+  budgetConsiderations: "Budget Considerations",
+  directorNotes: "Director / Production Notes",
+  assumptionsMade: "Assumptions Made",
+};
+
+const SECTION_ORDER: SectionKey[] = [
+  "sceneOverview",
+  "keyActions",
+  "charactersRoles",
+  "visualStyle",
+  "soundDesign",
+  "budgetConsiderations",
+  "directorNotes",
+  "assumptionsMade",
+];
+
+const bulletRegex = /^[-*•]\s+/;
+const numberedRegex = /^\d+[\).]\s+/;
+
+const splitToBullets = (text: string) =>
+  text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.replace(bulletRegex, "").replace(numberedRegex, ""));
+
+const normalizeList = (value: unknown) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return splitToBullets(value);
+  }
+  return [];
+};
+
+const normalizeText = (value: unknown) =>
+  typeof value === "string" ? value.trim() : "";
+
+const normalizeCharacters = (value: unknown): CharacterRole[] => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === "string") {
+          return { name: item.trim(), role: "", notes: "" };
+        }
+        if (item && typeof item === "object") {
+          const record = item as Record<string, unknown>;
+          return {
+            name: String(record.name ?? "").trim(),
+            role: String(record.role ?? "").trim(),
+            notes: String(record.notes ?? "").trim(),
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as CharacterRole[];
+  }
+
+  if (typeof value === "string") {
+    return splitToBullets(value).map((line) => {
+      const parts = line.split(/\s[-–—:]\s|\s-\s|:\s/).filter(Boolean);
+      return {
+        name: parts[0] ?? line,
+        role: parts[1] ?? "",
+        notes: parts.slice(2).join(" ") ?? "",
+      };
+    });
+  }
+
+  return [];
+};
+
+const parseFromHeadings = (text: string): AIResult => {
+  const headingMap: Record<string, SectionKey> = {
+    "EXECUTIVE SUMMARY": "executiveSummary",
+    "SCENE OVERVIEW": "sceneOverview",
+    "KEY ACTIONS": "keyActions",
+    "CHARACTERS & ROLES": "charactersRoles",
+    "CHARACTERS AND ROLES": "charactersRoles",
+    "CHARACTERS": "charactersRoles",
+    "VISUAL STYLE & CINEMATOGRAPHY": "visualStyle",
+    "VISUAL STYLE": "visualStyle",
+    "SOUND & MOOD DESIGN": "soundDesign",
+    "SOUND DESIGN": "soundDesign",
+    "BUDGET CONSIDERATIONS": "budgetConsiderations",
+    "DIRECTOR / PRODUCTION NOTES": "directorNotes",
+    "DIRECTOR NOTES": "directorNotes",
+    "ASSUMPTIONS MADE": "assumptionsMade",
+    "ASSUMPTIONS": "assumptionsMade",
+  };
+
+  const buckets: Record<SectionKey, string[]> = {
+    executiveSummary: [],
+    sceneOverview: [],
+    keyActions: [],
+    charactersRoles: [],
+    visualStyle: [],
+    soundDesign: [],
+    budgetConsiderations: [],
+    directorNotes: [],
+    assumptionsMade: [],
+  };
+
+  let currentKey: SectionKey = "sceneOverview";
+  text.split(/\r?\n/).forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    const normalized = trimmed
+      .replace(/\*+/g, "")
+      .replace(/^\d+[\).]\s+/, "")
+      .replace(/[:\-\s]+$/g, "")
+      .toUpperCase();
+    const mapped = headingMap[normalized];
+    if (mapped) {
+      currentKey = mapped;
+      return;
+    }
+    buckets[currentKey].push(trimmed);
+  });
+
+  return {
+    executiveSummary: normalizeList(buckets.executiveSummary.join("\n")),
+    sceneOverview: buckets.sceneOverview.join("\n").trim(),
+    keyActions: normalizeList(buckets.keyActions.join("\n")),
+    charactersRoles: normalizeCharacters(buckets.charactersRoles.join("\n")),
+    visualStyle: normalizeList(buckets.visualStyle.join("\n")),
+    soundDesign: normalizeList(buckets.soundDesign.join("\n")),
+    budgetConsiderations: normalizeList(buckets.budgetConsiderations.join("\n")),
+    directorNotes: normalizeList(buckets.directorNotes.join("\n")),
+    assumptionsMade: normalizeList(buckets.assumptionsMade.join("\n")),
+    raw: text,
+  };
+};
+
+const parseAIResult = (text: string): AIResult => {
+  try {
+    const trimmed = text.trim();
+    const jsonCandidate = (() => {
+      const start = trimmed.indexOf("{");
+      const end = trimmed.lastIndexOf("}");
+      if (start >= 0 && end > start) {
+        return trimmed.slice(start, end + 1);
+      }
+      return trimmed;
+    })();
+    const parsed = JSON.parse(jsonCandidate) as Record<string, unknown>;
+    return {
+      executiveSummary: normalizeList(parsed.executive_summary),
+      sceneOverview: normalizeText(parsed.scene_overview),
+      keyActions: normalizeList(parsed.key_actions),
+      charactersRoles: normalizeCharacters(parsed.characters_roles),
+      visualStyle: normalizeList(parsed.visual_style),
+      soundDesign: normalizeList(parsed.sound_design),
+      budgetConsiderations: normalizeList(parsed.budget_considerations),
+      directorNotes: normalizeList(parsed.director_notes),
+      assumptionsMade: normalizeList(parsed.assumptions_made),
+      raw: text,
+    };
+  } catch {
+    return parseFromHeadings(text);
+  }
+};
+
+const formatBullets = (items: string[]) =>
+  items.map((item) => `- ${item}`).join("\n");
+
+const formatResultForCopy = (result: AIResult) => {
+  const sections: Array<{ label: string; content: string }> = [
+    {
+      label: SECTION_LABELS.executiveSummary,
+      content: formatBullets(result.executiveSummary),
+    },
+    {
+      label: SECTION_LABELS.sceneOverview,
+      content: result.sceneOverview,
+    },
+    {
+      label: SECTION_LABELS.keyActions,
+      content: formatBullets(result.keyActions),
+    },
+    {
+      label: SECTION_LABELS.charactersRoles,
+      content: formatBullets(
+        result.charactersRoles.map((character) =>
+          [character.name, character.role, character.notes]
+            .filter(Boolean)
+            .join(" - ")
+        )
+      ),
+    },
+    {
+      label: SECTION_LABELS.visualStyle,
+      content: formatBullets(result.visualStyle),
+    },
+    {
+      label: SECTION_LABELS.soundDesign,
+      content: formatBullets(result.soundDesign),
+    },
+    {
+      label: SECTION_LABELS.budgetConsiderations,
+      content: formatBullets(result.budgetConsiderations),
+    },
+    {
+      label: SECTION_LABELS.directorNotes,
+      content: formatBullets(result.directorNotes),
+    },
+    {
+      label: SECTION_LABELS.assumptionsMade,
+      content: formatBullets(result.assumptionsMade),
+    },
+  ];
+
+  return sections
+    .map((section) => `${section.label}
+${section.content}`.trim())
+    .join("
+
+");
+};
+
 export default function ProjectPageClient({ id }: { id: string }) {
   const [prompt, setPrompt] = useState("");
-  const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState("");
+  const [result, setResult] = useState<AIResult | null>(null);
+  const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
+  const [version, setVersion] = useState(0);
+  const [lastPrompt, setLastPrompt] = useState("");
+  const [lastParams, setLastParams] = useState<GenerationParams | null>(null);
+  const [selectedSection, setSelectedSection] =
+    useState<SectionKey>("executiveSummary");
+  const [params, setParams] = useState<GenerationParams>({
+    genre: "",
+    budgetTier: "Medium",
+    runtimeEstimate: "",
+    locationCount: "",
+    sceneComplexity: "Medium",
+    generationType: "Scene Breakdown",
+  });
 
-  const sectionHeadings = [
-    "SCREENPLAY",
-    "CHARACTER PROFILES",
-    "SOUND DESIGN PLAN",
-    "CASTING RECOMMENDATIONS",
-    "ESTIMATED BUDGET",
-    "BUDGET",
-    "LOW BUDGET",
-    "MEDIUM BUDGET",
-    "HIGH BUDGET",
-  ];
-  const navSections = [
-    { key: "screenplay", label: "Screenplay", match: "SCREENPLAY" },
-    { key: "characters", label: "Characters", match: "CHARACTER" },
-    { key: "sound", label: "Sound Design", match: "SOUND" },
-    { key: "casting", label: "Casting", match: "CASTING" },
-    { key: "budget", label: "Budget", match: "BUDGET" },
+  const navSections: Array<{ key: SectionKey; label: string }> = [
+    { key: "executiveSummary", label: "Summary" },
+    { key: "sceneOverview", label: "Overview" },
+    { key: "keyActions", label: "Actions" },
+    { key: "charactersRoles", label: "Characters" },
+    { key: "visualStyle", label: "Visual" },
+    { key: "soundDesign", label: "Sound" },
+    { key: "budgetConsiderations", label: "Budget" },
+    { key: "directorNotes", label: "Director" },
+    { key: "assumptionsMade", label: "Assumptions" },
   ];
   const navColors = [
     "glass-amber",
@@ -57,178 +319,111 @@ export default function ProjectPageClient({ id }: { id: string }) {
     "btn-rose",
     "btn-violet",
   ];
-  const sectionRefs = useRef(new Map<string, HTMLDivElement>());
-
-  type OutputSection = {
-    title: string;
-    body: string;
-  };
-
-  type BudgetCard = {
-    id: string;
+  const copySectionOptions: SectionKey[] = [
+    "executiveSummary",
+    ...SECTION_ORDER,
+  ];
+  const sectionRefs = useRef(new Map<SectionKey, HTMLDivElement>());
+  const sectionsConfig: Array<{
+    key: SectionKey;
     label: string;
-    text: string;
-    filename?: string;
-    placeholder?: boolean;
+    icon: ReactNode;
+    hint: string;
+  }> = [
+    {
+      key: "sceneOverview",
+      label: SECTION_LABELS.sceneOverview,
+      icon: <Film className="h-4 w-4" />,
+      hint: "Purpose, narrative function, and scene intent.",
+    },
+    {
+      key: "keyActions",
+      label: SECTION_LABELS.keyActions,
+      icon: <ListChecks className="h-4 w-4" />,
+      hint: "Major beats and actions in bullet form.",
+    },
+    {
+      key: "charactersRoles",
+      label: SECTION_LABELS.charactersRoles,
+      icon: <Users className="h-4 w-4" />,
+      hint: "Who is on screen and why they matter.",
+    },
+    {
+      key: "visualStyle",
+      label: SECTION_LABELS.visualStyle,
+      icon: <Camera className="h-4 w-4" />,
+      hint: "Lighting, lensing, and composition notes.",
+    },
+    {
+      key: "soundDesign",
+      label: SECTION_LABELS.soundDesign,
+      icon: <Mic className="h-4 w-4" />,
+      hint: "Ambience, music cues, and silence beats.",
+    },
+    {
+      key: "budgetConsiderations",
+      label: SECTION_LABELS.budgetConsiderations,
+      icon: <DollarSign className="h-4 w-4" />,
+      hint: "Cost drivers and practical constraints.",
+    },
+    {
+      key: "directorNotes",
+      label: SECTION_LABELS.directorNotes,
+      icon: <FileText className="h-4 w-4" />,
+      hint: "Blocking, pacing, and continuity notes.",
+    },
+    {
+      key: "assumptionsMade",
+      label: SECTION_LABELS.assumptionsMade,
+      icon: <Info className="h-4 w-4" />,
+      hint: "Explicit assumptions used for generation.",
+    },
+  ];
+
+  const formatTimestamp = (value: Date | null) =>
+    value
+      ? new Intl.DateTimeFormat("en-US", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(value)
+      : "—";
+
+  const summarizePrompt = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return "—";
+    if (trimmed.length <= 140) return trimmed;
+    return `${trimmed.slice(0, 140)}...`;
   };
 
-  const isHeadingLine = (line: string) => {
-    const trimmed = line.trim();
-    if (!trimmed) return false;
-    const normalized = trimmed.replace(/\*+/g, "").toUpperCase();
-
-    if (sectionHeadings.some((heading) => normalized.startsWith(heading))) {
-      return true;
+  const getSectionText = (key: SectionKey, data: AIResult) => {
+    switch (key) {
+      case "executiveSummary":
+        return formatBullets(data.executiveSummary);
+      case "sceneOverview":
+        return data.sceneOverview;
+      case "keyActions":
+        return formatBullets(data.keyActions);
+      case "charactersRoles":
+        return formatBullets(
+          data.charactersRoles.map((character) =>
+            [character.name, character.role, character.notes]
+              .filter(Boolean)
+              .join(" - ")
+          )
+        );
+      case "visualStyle":
+        return formatBullets(data.visualStyle);
+      case "soundDesign":
+        return formatBullets(data.soundDesign);
+      case "budgetConsiderations":
+        return formatBullets(data.budgetConsiderations);
+      case "directorNotes":
+        return formatBullets(data.directorNotes);
+      case "assumptionsMade":
+        return formatBullets(data.assumptionsMade);
+      default:
+        return "";
     }
-
-    if (/^\d+[\).]\s+\S/.test(trimmed)) return true;
-    if (trimmed.endsWith(":") && trimmed.length <= 60) return true;
-    if (/^\*{2}.+\*{2}$/.test(trimmed)) return true;
-
-    const withoutSymbols = normalized.replace(/[^A-Z0-9\s]/g, "");
-    const words = withoutSymbols.trim().split(/\s+/);
-    if (words.length > 0 && words.length <= 6 && withoutSymbols === normalized) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const normalizeHeading = (line: string) =>
-    line.trim().replace(/\*+/g, "").toUpperCase();
-
-  const headingIdForLine = (line: string) => {
-    const normalized = normalizeHeading(line);
-    const match = navSections.find((section) =>
-      normalized.includes(section.match)
-    );
-    return match ? `section-${match.key}` : undefined;
-  };
-
-  const matchSectionKey = (title: string) => {
-    const normalized = normalizeHeading(title);
-    const match = navSections.find((section) =>
-      normalized.includes(section.match)
-    );
-    return match?.key;
-  };
-
-  const getSectionMeta = (title: string) => {
-    const normalized = title.toUpperCase();
-    if (normalized.includes("SCREENPLAY")) {
-      return { label: "Screenplay", icon: <Film className="h-4 w-4" /> };
-    }
-    if (normalized.includes("CHARACTER")) {
-      return { label: "Characters", icon: <Users className="h-4 w-4" /> };
-    }
-    if (normalized.includes("SOUND")) {
-      return { label: "Sound Design", icon: <Mic className="h-4 w-4" /> };
-    }
-    if (normalized.includes("CASTING")) {
-      return { label: "Casting", icon: <Users className="h-4 w-4" /> };
-    }
-    if (normalized.includes("BUDGET")) {
-      return { label: "Budget", icon: <DollarSign className="h-4 w-4" /> };
-    }
-    if (normalized.includes("OUTLINE") || normalized.includes("SUMMARY")) {
-      return { label: "Overview", icon: <Sparkles className="h-4 w-4" /> };
-    }
-    return { label: "Section", icon: <FileText className="h-4 w-4" /> };
-  };
-
-  const splitOutputSections = (text: string): OutputSection[] => {
-    const lines = text.split(/\r?\n/);
-    const sections: OutputSection[] = [];
-    let currentTitle = "Overview";
-    let buffer: string[] = [];
-
-    const pushSection = () => {
-      const body = buffer.join("\n").trim();
-      if (body) {
-        sections.push({ title: currentTitle, body });
-      }
-      buffer = [];
-    };
-
-    lines.forEach((line) => {
-      if (isHeadingLine(line)) {
-        const normalized = line.trim().replace(/\*+/g, "");
-        pushSection();
-        currentTitle = normalized || "Overview";
-      } else {
-        buffer.push(line);
-      }
-    });
-
-    pushSection();
-
-    if (sections.length === 0 && text.trim()) {
-      return [{ title: "Overview", body: text.trim() }];
-    }
-
-    return sections;
-  };
-
-  const splitBudgetSections = (text: string) => {
-    const lines = text.split(/\r?\n/);
-    let budgetStart = -1;
-    for (let i = 0; i < lines.length; i += 1) {
-      const normalized = lines[i].trim().replace(/\*+/g, "").toUpperCase();
-      if (
-        normalized.startsWith("ESTIMATED BUDGET") ||
-        normalized.startsWith("BUDGET")
-      ) {
-        budgetStart = i;
-        break;
-      }
-    }
-
-    if (budgetStart === -1) {
-      return { budget: "", rest: text, low: "", medium: "", high: "" };
-    }
-
-    const beforeBudget = lines.slice(0, budgetStart).join("\n");
-    const budgetLines = lines.slice(budgetStart);
-
-    const findIndex = (label: string) =>
-      budgetLines.findIndex(
-        (line) =>
-          line.trim().replace(/\*+/g, "").toUpperCase().startsWith(label)
-      );
-
-    const lowIdx = findIndex("LOW BUDGET");
-    const medIdx = findIndex("MEDIUM BUDGET");
-    const highIdx = findIndex("HIGH BUDGET");
-
-    const indices = [
-      { key: "low", idx: lowIdx },
-      { key: "medium", idx: medIdx },
-      { key: "high", idx: highIdx },
-    ]
-      .filter((entry) => entry.idx >= 0)
-      .sort((a, b) => a.idx - b.idx);
-
-    const slices: Record<string, string> = {
-      low: "",
-      medium: "",
-      high: "",
-    };
-
-    indices.forEach((entry, index) => {
-      const start = entry.idx;
-      const end = index + 1 < indices.length ? indices[index + 1].idx : undefined;
-      slices[entry.key] = budgetLines.slice(start, end).join("\n");
-    });
-
-    const budget = budgetLines.join("\n");
-
-    return {
-      budget,
-      rest: beforeBudget,
-      low: slices.low,
-      medium: slices.medium,
-      high: slices.high,
-    };
   };
 
   const downloadText = (filename: string, text: string) => {
@@ -252,46 +447,119 @@ export default function ProjectPageClient({ id }: { id: string }) {
     }
   };
 
-  const previewText = (text: string, maxLines = 8) => {
-    const lines = text.split(/\r?\n/).filter((line) => line.trim());
-    if (lines.length <= maxLines) return text.trim();
-    return `${lines.slice(0, maxLines).join("\n")}\n...`;
+  const formattedOutput = useMemo(
+    () => (result ? formatResultForCopy(result) : ""),
+    [result]
+  );
+  const promptSummary = useMemo(
+    () => summarizePrompt(lastPrompt || prompt),
+    [lastPrompt, prompt]
+  );
+  const generationType = lastParams?.generationType || params.generationType;
+
+  const renderBullets = (items: string[], emptyText: string) => {
+    if (!items.length) {
+      return <p className="text-sm text-white/50">{emptyText}</p>;
+    }
+    return (
+      <ul className="space-y-2 text-sm text-white/75 list-disc list-inside">
+        {items.map((item, index) => (
+          <li key={`${item.slice(0, 12)}-${index}`}>{item}</li>
+        ))}
+      </ul>
+    );
   };
 
-  const renderSectionBody = (text: string) => {
-    const lines = text
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean);
-    const listLines = lines.filter(
-      (line) => /^[-•]\s+/.test(line) || /^\d+[\).]\s+/.test(line)
+  const renderParagraph = (text: string, emptyText: string) => {
+    if (!text.trim()) {
+      return <p className="text-sm text-white/50">{emptyText}</p>;
+    }
+    return (
+      <p className="text-sm text-white/75 leading-relaxed whitespace-pre-line">
+        {text.trim()}
+      </p>
     );
+  };
 
-    if (listLines.length >= Math.min(3, lines.length)) {
+  const renderCharacters = (items: CharacterRole[]) => {
+    if (!items.length) {
       return (
-        <ul className="space-y-2 text-sm text-white/75 list-disc list-inside">
-          {lines.map((line, index) => (
-            <li key={`${line.slice(0, 12)}-${index}`}>
-              {line.replace(/^[-•]\s+/, "").replace(/^\d+[\).]\s+/, "")}
-            </li>
-          ))}
-        </ul>
+        <p className="text-sm text-white/50">
+          No character details were provided.
+        </p>
       );
     }
+    return (
+      <div className="grid gap-3 md:grid-cols-2">
+        {items.map((character, index) => (
+          <div
+            key={`${character.name}-${index}`}
+            className="rounded-xl border border-white/10 bg-white/5 p-3"
+          >
+            <p className="text-sm text-white font-medium">
+              {character.name || "Unnamed Character"}
+            </p>
+            {character.role && (
+              <p className="text-xs text-white/60 mt-1">{character.role}</p>
+            )}
+            {character.notes && (
+              <p className="text-xs text-white/50 mt-2">
+                {character.notes}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
-    const paragraphs = text
-      .split(/\n\s*\n/)
-      .map((paragraph) => paragraph.trim())
-      .filter(Boolean);
-
-    return paragraphs.map((paragraph, index) => (
-      <p
-        key={`${paragraph.slice(0, 12)}-${index}`}
-        className="text-sm text-white/75 leading-relaxed whitespace-pre-line"
-      >
-        {paragraph}
-      </p>
-    ));
+  const renderSectionContent = (key: SectionKey, data: AIResult) => {
+    switch (key) {
+      case "sceneOverview":
+        return renderParagraph(
+          data.sceneOverview,
+          "Scene overview was not provided."
+        );
+      case "keyActions":
+        return renderBullets(
+          data.keyActions,
+          "Key actions were not provided."
+        );
+      case "charactersRoles":
+        return renderCharacters(data.charactersRoles);
+      case "visualStyle":
+        return renderBullets(
+          data.visualStyle,
+          "Visual style notes were not provided."
+        );
+      case "soundDesign":
+        return renderBullets(
+          data.soundDesign,
+          "Sound design notes were not provided."
+        );
+      case "budgetConsiderations":
+        return renderBullets(
+          data.budgetConsiderations,
+          "Budget considerations were not provided."
+        );
+      case "directorNotes":
+        return renderBullets(
+          data.directorNotes,
+          "Director notes were not provided."
+        );
+      case "assumptionsMade":
+        return renderBullets(
+          data.assumptionsMade,
+          "No explicit assumptions were listed."
+        );
+      case "executiveSummary":
+        return renderBullets(
+          data.executiveSummary,
+          "Executive summary will appear here."
+        );
+      default:
+        return null;
+    }
   };
 
   const handleCopy = async (text: string, scope?: string) => {
@@ -313,32 +581,12 @@ export default function ProjectPageClient({ id }: { id: string }) {
     }
   };
 
-  const budgetSlices = useMemo(
-    () => splitBudgetSections(output),
-    [output]
-  );
-  const mainText = budgetSlices.rest || output;
-  const sections = useMemo(
-    () => (mainText ? splitOutputSections(mainText) : []),
-    [mainText]
-  );
-  const sectionKeyMap = useMemo(() => {
-    const used = new Set<string>();
-    return sections.map((section) => {
-      const key = matchSectionKey(section.title);
-      if (key && !used.has(key)) {
-        used.add(key);
-        return key;
-      }
-      return null;
-    });
-  }, [sections]);
-  const matchedKeys = useMemo(
-    () => new Set(sectionKeyMap.filter(Boolean) as string[]),
-    [sectionKeyMap]
+  const selectedSectionText = useMemo(
+    () => (result ? getSectionText(selectedSection, result) : ""),
+    [result, selectedSection]
   );
 
-  const scrollToSection = (key: string) => {
+  const scrollToSection = (key: SectionKey) => {
     const target = sectionRefs.current.get(key);
     if (target) {
       const top = target.getBoundingClientRect().top + window.scrollY - 96;
@@ -353,83 +601,26 @@ export default function ProjectPageClient({ id }: { id: string }) {
       window.scrollTo({ top, behavior: "smooth" });
     }
   };
-  const visibleSections = sections;
-  const sectionHasBudget = useMemo(
-    () => sections.some((section) => /budget/i.test(section.title)),
-    [sections]
-  );
-  const budgetFallbackText = useMemo(() => {
-    if (budgetSlices.budget?.trim()) return budgetSlices.budget;
-    if (!output.trim()) return "";
-    const lines = output.split(/\r?\n/).filter(Boolean);
-    const budgetLines = lines.filter((line) =>
-      /budget|cost|\$|usd|inr|gbp|eur/i.test(line)
-    );
-    return budgetLines.join("\n");
-  }, [budgetSlices.budget, output]);
-  const budgetCards = useMemo<BudgetCard[]>(() => {
-    const cards = [
-      {
-        id: "low",
-        label: "Low Budget",
-        text: budgetSlices.low,
-        filename: "preroll-low-budget.txt",
-      },
-      {
-        id: "medium",
-        label: "Medium Budget",
-        text: budgetSlices.medium,
-        filename: "preroll-medium-budget.txt",
-      },
-      {
-        id: "high",
-        label: "High Budget",
-        text: budgetSlices.high,
-        filename: "preroll-high-budget.txt",
-      },
-    ].filter((item) => item.text && item.text.trim());
-
-    if (cards.length) return cards;
-    if (sectionHasBudget) return [];
-    if (budgetFallbackText.trim()) {
-      return [
-        {
-          id: "budget",
-          label: "Budget Overview",
-          text: budgetFallbackText,
-          filename: "preroll-budget.txt",
-        },
-      ];
-    }
-
-    return [
-      {
-        id: "budget",
-        label: "Budget",
-        text: "Budget details were not included in this response. Try regenerating with “include a budget breakdown.”",
-        placeholder: true,
-      },
-    ];
-  }, [
-    budgetSlices.low,
-    budgetSlices.medium,
-    budgetSlices.high,
-    budgetFallbackText,
-    sectionHasBudget,
-  ]);
 
   const generate = async () => {
     if (!prompt.trim()) return;
 
     setLoading(true);
     setError("");
-    setOutput("");
+    setResult(null);
     setDownloadError("");
+    setCopiedSection(null);
 
     try {
-      const data = await generateScript(prompt);
-      setOutput(data.output);
+      const data = await generateScript(prompt, params);
+      const parsed = parseAIResult(data.output || "");
+      setResult(parsed);
       setCopied(false);
+      setGeneratedAt(new Date());
+      setVersion((prev) => prev + 1);
+      setLastPrompt(prompt.trim());
+      setLastParams({ ...params });
+      setSelectedSection("executiveSummary");
     } catch (err) {
       const message =
         err instanceof Error
@@ -470,7 +661,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 <p className="text-lg font-light text-white">{id}</p>
               </div>
 
-              {output && (
+              {result && (
                 <div className="mt-6">
                   <p className="text-xs text-white/50 uppercase tracking-widest mb-2">
                     Jump to
@@ -513,6 +704,126 @@ export default function ProjectPageClient({ id }: { id: string }) {
                   className="w-full min-h-[160px] rounded-xl glass-input px-4 py-3.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors resize-y disabled:opacity-60"
                   disabled={loading}
                 />
+                <div className="mt-5">
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+                    Production Parameters
+                  </p>
+                  <div className="mt-3 grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Generation Type
+                      </label>
+                      <select
+                        value={params.generationType}
+                        onChange={(e) =>
+                          setParams((prev) => ({
+                            ...prev,
+                            generationType: e.target.value,
+                          }))
+                        }
+                        className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
+                        disabled={loading}
+                      >
+                        <option value="Scene Breakdown">Scene Breakdown</option>
+                        <option value="Sound Design">Sound Design</option>
+                        <option value="Budget Plan">Budget Plan</option>
+                        <option value="Visual Direction">Visual Direction</option>
+                        <option value="Production Notes">Production Notes</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Genre
+                      </label>
+                      <input
+                        value={params.genre}
+                        onChange={(e) =>
+                          setParams((prev) => ({
+                            ...prev,
+                            genre: e.target.value,
+                          }))
+                        }
+                        placeholder="e.g. Neo-noir thriller"
+                        className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Budget Tier
+                      </label>
+                      <select
+                        value={params.budgetTier}
+                        onChange={(e) =>
+                          setParams((prev) => ({
+                            ...prev,
+                            budgetTier: e.target.value as GenerationParams["budgetTier"],
+                          }))
+                        }
+                        className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
+                        disabled={loading}
+                      >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Runtime Estimate
+                      </label>
+                      <input
+                        value={params.runtimeEstimate}
+                        onChange={(e) =>
+                          setParams((prev) => ({
+                            ...prev,
+                            runtimeEstimate: e.target.value,
+                          }))
+                        }
+                        placeholder="e.g. 3-5 minutes"
+                        className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Location Count
+                      </label>
+                      <input
+                        value={params.locationCount}
+                        onChange={(e) =>
+                          setParams((prev) => ({
+                            ...prev,
+                            locationCount: e.target.value,
+                          }))
+                        }
+                        placeholder="e.g. 2 locations"
+                        className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Scene Complexity
+                      </label>
+                      <select
+                        value={params.sceneComplexity}
+                        onChange={(e) =>
+                          setParams((prev) => ({
+                            ...prev,
+                            sceneComplexity: e.target.value as GenerationParams["sceneComplexity"],
+                          }))
+                        }
+                        className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
+                        disabled={loading}
+                      >
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
                 <button
                   onClick={generate}
                   disabled={loading || !prompt.trim()}
@@ -529,6 +840,71 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 </button>
               </div>
 
+              {result && (
+                <div className="rounded-2xl p-6 mb-6 glass-panel">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+                        Results Report
+                      </p>
+                      <h2 className="text-2xl font-light text-white mt-2">
+                        Project <span className="text-primary">{id}</span>
+                      </h2>
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] text-white/60">
+                      <span className="glass-pill px-2.5 py-1 rounded-full">
+                        v{version || 1}
+                      </span>
+                      <span className="glass-pill px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {formatTimestamp(generatedAt)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Prompt Summary
+                      </p>
+                      <p className="text-sm text-white/75 mt-2">
+                        {promptSummary}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Generation Details
+                      </p>
+                      <div className="mt-2 space-y-1 text-sm text-white/70">
+                        <p>
+                          <span className="text-white/50">Type:</span>{" "}
+                          {generationType || "Scene Breakdown"}
+                        </p>
+                        <p>
+                          <span className="text-white/50">Genre:</span>{" "}
+                          {lastParams?.genre || params.genre || "Unspecified"}
+                        </p>
+                        <p>
+                          <span className="text-white/50">Budget tier:</span>{" "}
+                          {lastParams?.budgetTier || params.budgetTier}
+                        </p>
+                        <p>
+                          <span className="text-white/50">Runtime:</span>{" "}
+                          {lastParams?.runtimeEstimate || params.runtimeEstimate || "Unspecified"}
+                        </p>
+                        <p>
+                          <span className="text-white/50">Locations:</span>{" "}
+                          {lastParams?.locationCount || params.locationCount || "Unspecified"}
+                        </p>
+                        <p>
+                          <span className="text-white/50">Complexity:</span>{" "}
+                          {lastParams?.sceneComplexity || params.sceneComplexity}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {loading && (
                 <div className="rounded-2xl p-6 mb-6 glass-panel">
                   <div className="grid gap-6 md:grid-cols-[220px_minmax(0,1fr)] items-center">
@@ -543,7 +919,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         Building your production pack
                       </h3>
                       <p className="text-sm text-white/60 mt-2">
-                        We’re structuring scenes, character beats, and budget
+                        We're structuring scenes, character beats, and budget
                         tiers. Hover the card to watch the cipher react.
                       </p>
                       <div className="mt-4 flex items-center gap-2 text-sm text-white/70">
@@ -571,150 +947,165 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 </div>
               )}
 
-              {output && (
-                <div className="rounded-2xl p-6 glass-panel">
-                  <div id="sections-top" className="scroll-mt-24" />
-                  <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-                    <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-primary" />
-                      AI Output
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={() => handleCopy(output)}
-                        className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-sky"
-                      >
-                        {copied ? "Copied" : "Copy all"}
-                      </button>
+              {result && (
+                <>
+                  <div
+                    className="rounded-2xl p-6 mb-6 glass-panel"
+                    id="section-executiveSummary"
+                    ref={(node) => {
+                      if (node) {
+                        sectionRefs.current.set("executiveSummary", node);
+                      } else {
+                        sectionRefs.current.delete("executiveSummary");
+                      }
+                    }}
+                  >
+                    <div id="sections-top" className="scroll-mt-24" />
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                      <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary" />
+                        Executive Summary
+                      </h2>
                       <button
                         onClick={() =>
-                          downloadText(
-                            "preroll-response.txt",
-                            mainText || output
+                          handleCopy(
+                            formatBullets(result.executiveSummary),
+                            SECTION_LABELS.executiveSummary
                           )
                         }
-                        className="text-xs text-white/70 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-violet"
+                        className="text-xs text-white/60 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-sky"
                       >
-                        Download Response
+                        {copiedSection === SECTION_LABELS.executiveSummary
+                          ? "Copied"
+                          : "Copy summary"}
                       </button>
                     </div>
+                    {renderSectionContent("executiveSummary", result)}
                   </div>
 
-                  <div className="sr-only" aria-hidden="true">
-                    {navSections
-                      .filter((section) => !matchedKeys.has(section.key))
-                      .map((section) => (
-                        <span key={section.key} id={`section-${section.key}`} />
-                      ))}
-                  </div>
+                  <div className="rounded-2xl p-6 glass-panel">
+                    <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+                      <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary" />
+                        Production Breakdown
+                      </h2>
+                      <span className="text-xs text-white/50 uppercase tracking-[0.3em]">
+                        Structured Sections
+                      </span>
+                    </div>
 
-                  {budgetCards.length > 0 && (
-                    <div className="mb-6 grid gap-4 md:grid-cols-3">
-                    {budgetCards.map((budget) => {
-                      const hasDownload =
-                        Boolean(budget.filename) && budget.text.trim();
-                      return (
-                        <GlowCard
-                          key={budget.id}
-                          customSize
-                          glowColor={
-                            budget.id === "low"
-                              ? "green"
-                              : budget.id === "medium"
-                                ? "blue"
-                                : "orange"
-                          }
-                          className="w-full p-4"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-xs text-white/60 uppercase tracking-[0.2em]">
-                              <DollarSign className="h-3.5 w-3.5 text-primary" />
-                              {budget.label}
-                            </div>
-                            {hasDownload ? (
-                              <button
-                                onClick={() =>
-                                  downloadText(
-                                    budget.filename ?? "preroll-budget.txt",
-                                    budget.text || ""
-                                  )
-                                }
-                                className="text-[11px] text-white/60 hover:text-white px-2.5 py-1 rounded-md glass-outline transition-colors btn-animated btn-emerald"
-                              >
-                                Download
-                              </button>
-                            ) : (
-                              <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">
-                                No data
-                              </span>
-                            )}
-                          </div>
-                          <div className="mt-3 space-y-2">
-                            {renderSectionBody(
-                              previewText(budget.text || "")
-                            )}
-                          </div>
-                        </GlowCard>
-                      );
-                    })}
-                  </div>
-                )}
-
-                  <div className="grid gap-4">
-                    {visibleSections.map((section, index) => {
-                      const meta = getSectionMeta(section.title);
-                      const matchedKey = sectionKeyMap[index];
-                      const sectionId = matchedKey
-                        ? `section-${matchedKey}`
-                        : `section-${index}`;
-                      return (
-                        <div
-                          key={`${section.title}-${index}`}
-                          id={sectionId}
+                    <div className="grid gap-4">
+                      {sectionsConfig.map((section) => (
+                        <details
+                          key={section.key}
+                          id={`section-${section.key}`}
                           ref={(node) => {
-                            if (!matchedKey) return;
                             if (node) {
-                              sectionRefs.current.set(matchedKey, node);
+                              sectionRefs.current.set(section.key, node);
                             } else {
-                              sectionRefs.current.delete(matchedKey);
+                              sectionRefs.current.delete(section.key);
                             }
                           }}
-                          className="glass-outline rounded-2xl p-5 scroll-mt-24"
+                          className="glass-outline rounded-2xl p-5"
+                          open={section.key === "sceneOverview"}
                         >
-                          <div className="flex flex-wrap items-center justify-between gap-3">
+                          <summary className="flex flex-wrap items-center justify-between gap-3 cursor-pointer list-none">
                             <div className="flex items-center gap-3">
                               <div className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-primary">
-                                {meta.icon}
+                                {section.icon}
                               </div>
                               <div>
                                 <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">
-                                  {meta.label}
+                                  {section.label}
                                 </p>
-                                <h3 className="text-lg font-medium text-white">
-                                  {section.title}
-                                </h3>
+                                <p className="text-xs text-white/60 mt-1">
+                                  {section.hint}
+                                </p>
                               </div>
                             </div>
+                            <span className="text-[11px] text-white/40">
+                              Click to expand
+                            </span>
+                          </summary>
+                          <div className="mt-4 space-y-3">
+                            {renderSectionContent(section.key, result)}
+                          </div>
+                        </details>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => handleCopy(formattedOutput)}
+                            className="text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-sky inline-flex items-center gap-2"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                            {copied ? "Copied" : "Copy all"}
+                          </button>
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={selectedSection}
+                              onChange={(e) =>
+                                setSelectedSection(e.target.value as SectionKey)
+                              }
+                              className="rounded-lg glass-input px-2.5 py-2 text-xs text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+                            >
+                              {copySectionOptions.map((key) => (
+                                <option key={key} value={key}>
+                                  {SECTION_LABELS[key]}
+                                </option>
+                              ))}
+                            </select>
                             <button
                               onClick={() =>
-                                handleCopy(section.body, section.title)
+                                handleCopy(
+                                  selectedSectionText,
+                                  SECTION_LABELS[selectedSection]
+                                )
                               }
-                              className="text-xs text-white/60 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-sky"
+                              disabled={!selectedSectionText}
+                              className="text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-emerald disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
                             >
-                              {copiedSection === section.title
+                              <Copy className="h-3.5 w-3.5" />
+                              {copiedSection === SECTION_LABELS[selectedSection]
                                 ? "Copied"
                                 : "Copy section"}
                             </button>
                           </div>
-                          <div className="mt-4 space-y-3">
-                            {renderSectionBody(section.body)}
-                          </div>
                         </div>
-                      );
-                    })}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() =>
+                              downloadText("preroll-report.txt", formattedOutput)
+                            }
+                            className="text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-violet inline-flex items-center gap-2"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            Download
+                          </button>
+                          <button
+                            disabled
+                            className="text-xs text-white/50 px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-amber disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                            title="Coming soon"
+                          >
+                            <RotateCcw className="h-3.5 w-3.5" />
+                            Regenerate section
+                          </button>
+                          <button
+                            disabled
+                            className="text-xs text-white/50 px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-amber disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                            title="Coming soon"
+                          >
+                            <Save className="h-3.5 w-3.5" />
+                            Save version
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-
-                </div>
+                </>
               )}
             </div>
             </div>
