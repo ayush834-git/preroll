@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import {
-  Brain,
+  Camera,
   ChevronDown,
-  Infinity,
-  Play,
-  Rocket,
+  DollarSign,
+  ListChecks,
+  Mic,
   Shield,
   Star,
   Timer,
@@ -16,24 +16,24 @@ import { Reveal } from "@/components/ui/reveal";
 
 const features = [
   {
-    title: "Script Breakdown",
-    body: "Analyze scripts, tag elements, and organize production requirements automatically.",
-    icon: <Brain className="h-5 w-5 text-primary" />,
+    title: "Scene Breakdown Reports",
+    body: "Assistant Director-style breakdowns with objectives, locations, props, beats, and coverage needs.",
+    icon: <ListChecks className="h-5 w-5 text-primary" />,
   },
   {
-    title: "Storyboarding",
-    body: "Visualize every scene with intuitive storyboards and shot planning.",
-    icon: <Play className="h-5 w-5 text-primary" />,
+    title: "Sound Design Sheets",
+    body: "Ambient beds, diegetic cues, transitions, and mixing notes crafted per scene.",
+    icon: <Mic className="h-5 w-5 text-primary" />,
   },
   {
-    title: "Team Collaboration",
-    body: "Real-time collaboration for directors, DPs, and production designers.",
-    icon: <Infinity className="h-5 w-5 text-primary" />,
+    title: "Budget Plan Line Items",
+    body: "Cast, crew, locations, gear, VFX, marketing, and post with cost ranges and savings.",
+    icon: <DollarSign className="h-5 w-5 text-primary" />,
   },
   {
-    title: "Mood Boards",
-    body: "Collect references, define visual tone, and share creative vision.",
-    icon: <Rocket className="h-5 w-5 text-primary" />,
+    title: "Visual Direction",
+    body: "Cinematography and production design guidance for lighting, palette, and framing.",
+    icon: <Camera className="h-5 w-5 text-primary" />,
   },
 ];
 
@@ -61,9 +61,9 @@ const workflow = [
 ];
 
 const spotlightStats = [
-  { label: "Screenplay Studio", value: "Beat sheets + scenes", glow: "orange" },
-  { label: "Sound Design", value: "Scene-wise cues", glow: "blue" },
-  { label: "Budgeting", value: "Low / Mid / High tiers", glow: "green" },
+  { label: "Generation Modes", value: "Scene / Sound / Budget", glow: "orange" },
+  { label: "Production Reports", value: "Structured, shareable docs", glow: "blue" },
+  { label: "Performance Modes", value: "Cinematic → Reduced", glow: "green" },
 ] as const;
 
 export default function LandingPage() {
