@@ -1,5 +1,5 @@
-import { BeamsBackground } from "@/components/ui/beams-background";
+import AnimatedShaderBackground from "@/components/ui/animated-shader-background";
 
-export function BeamsBackgroundDemo() {
-  return <BeamsBackground />;
+export function ShaderBackgroundDemo() {
+  return <AnimatedShaderBackground className="relative min-h-screen" />;
 }

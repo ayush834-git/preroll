@@ -169,17 +169,17 @@ export default function AnimatedShaderBackground({
       className={cn(
         "absolute inset-0 pointer-events-none",
         mode === "cinematic"
-          ? "opacity-70"
+          ? "opacity-85"
           : mode === "reduced"
-          ? "opacity-50"
-          : "opacity-40",
+          ? "opacity-60"
+          : "opacity-45",
         className
       )}
       style={
         isPerformance
           ? {
               background:
-                "radial-gradient(120% 120% at 50% 15%, rgba(100,120,255,0.35), transparent 60%), radial-gradient(120% 120% at 50% 85%, rgba(90,160,255,0.25), transparent 60%)",
+                "radial-gradient(130% 130% at 50% 12%, rgba(100,120,255,0.4), transparent 60%), radial-gradient(130% 130% at 50% 88%, rgba(90,160,255,0.3), transparent 60%)",
             }
           : undefined
       }

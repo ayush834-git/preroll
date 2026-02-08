@@ -173,16 +173,6 @@ input:focus, textarea:focus, button:focus-visible {
   }
 }
 
-@keyframes beamsPulse {
-  0%,
-  100% {
-    opacity: 0.05;
-  }
-  50% {
-    opacity: 0.14;
-  }
-}
-
 @keyframes borderSpin {
   to {
     transform: rotate(1turn);
@@ -222,11 +212,6 @@ input:focus, textarea:focus, button:focus-visible {
   animation-delay: 0.4s;
 }
 
-.beams-overlay {
-  background: rgba(10, 10, 11, 0.05);
-  backdrop-filter: blur(18px);
-  animation: beamsPulse 10s ease-in-out infinite;
-}
 
 .btn-animated {
   position: relative;
@@ -379,17 +364,6 @@ input:focus, textarea:focus, button:focus-visible {
   backdrop-filter: none;
 }
 
-:root[data-performance="reduced"] .beams-overlay {
-  background: rgba(10, 10, 11, 0.04);
-  backdrop-filter: blur(12px);
-  animation-duration: 16s;
-}
-
-:root[data-performance="performance"] .beams-overlay {
-  background: transparent;
-  backdrop-filter: none;
-  animation: none;
-}
 
 :root[data-performance="reduced"] .btn-animated {
   box-shadow: 0 0 0 1px var(--btn-accent), 0 0 8px var(--btn-accent-glow);
