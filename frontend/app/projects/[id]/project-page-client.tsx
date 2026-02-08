@@ -71,8 +71,8 @@ const numberedRegex = /^\d+[\).]\s+/;
 
 const stripMarkdown = (text: string) =>
   text
-    .replace(/\*\*(.*-)\*\*/g, "$1")
-    .replace(/__(.*-)__/g, "$1")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/[\u2013\u2014]/g, "-")
     .replace(/\s{2,}/g, " ")
@@ -86,7 +86,7 @@ const cleanLine = (line: string) =>
 
 const splitToBullets = (text: string) =>
   text
-    .split(/\r-\n/)
+    .split(/\r?\n/)
     .map(cleanLine)
     .filter(Boolean);
 
@@ -103,7 +103,7 @@ const normalizeList = (value: unknown) => {
 };
 
 const normalizeText = (value: unknown) =>
-  typeof value === "string" - stripMarkdown(value) : "";
+  typeof value === "string" ? stripMarkdown(value) : "";
 
 const normalizeCharacters = (value: unknown): CharacterRole[] => {
   if (Array.isArray(value)) {
@@ -115,9 +115,9 @@ const normalizeCharacters = (value: unknown): CharacterRole[] => {
         if (item && typeof item === "object") {
           const record = item as Record<string, unknown>;
           return {
-            name: stripMarkdown(String(record.name -- "")),
-            role: stripMarkdown(String(record.role -- "")),
-            notes: stripMarkdown(String(record.notes -- "")),
+            name: stripMarkdown(String(record.name ?? "")),
+            role: stripMarkdown(String(record.role ?? "")),
+            notes: stripMarkdown(String(record.notes ?? "")),
           };
         }
         return null;
@@ -129,9 +129,9 @@ const normalizeCharacters = (value: unknown): CharacterRole[] => {
     return splitToBullets(value).map((line) => {
       const parts = line.split(/\s[-:]\s|:\s/).filter(Boolean);
       return {
-        name: parts[0] -- line,
-        role: parts[1] -- "",
-        notes: parts.slice(2).join(" ") -- "",
+        name: parts[0] ?? line,
+        role: parts[1] ?? "",
+        notes: parts.slice(2).join(" ") ?? "",
       };
     });
   }
@@ -172,7 +172,7 @@ const parseFromHeadings = (text: string): AIResult => {
   };
 
   let currentKey: SectionKey = "sceneOverview";
-  text.split(/\r-\n/).forEach((line) => {
+  text.split(/\r?\n/).forEach((line) => {
     const trimmed = line.trim();
     if (!trimmed) return;
     const normalized = trimmed
@@ -400,15 +400,15 @@ export default function ProjectPageClient({ id }: { id: string }) {
 
   const formatTimestamp = (value: Date | null) =>
     value
-      - new Intl.DateTimeFormat("en-US", {
+      ? new Intl.DateTimeFormat("en-US", {
           dateStyle: "medium",
           timeStyle: "short",
         }).format(value)
-      : "—";
+      : "-";
 
   const summarizePrompt = (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed) return "—";
+    if (!trimmed) return "-";
     if (trimmed.length <= 140) return trimmed;
     return `${trimmed.slice(0, 140)}...`;
   };
@@ -466,14 +466,14 @@ export default function ProjectPageClient({ id }: { id: string }) {
   };
 
   const formattedOutput = useMemo(
-    () => (result - formatResultForCopy(result) : ""),
+    () => (result ? formatResultForCopy(result) : ""),
     [result]
   );
   const promptSummary = useMemo(
     () => summarizePrompt(lastPrompt || prompt),
     [lastPrompt, prompt]
   );
-  const generationType = lastParams-.generationType || params.generationType;
+  const generationType = lastParams?.generationType || params.generationType;
 
   const renderBullets = (items: string[], emptyText: string) => {
     if (!items.length) {
@@ -539,7 +539,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
 
   const parseSceneOverview = (text: string) => {
     const lines = text
-      .split(/\r-\n/)
+      .split(/\r?\n/)
       .map(cleanLine)
       .filter(Boolean);
 
@@ -585,7 +585,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
 
     const paragraphs =
       blocks.length === 0 && kvPairs.length === 0
-        - text
+        ? text
             .split(/\n\s*\n/)
             .map((paragraph) => stripMarkdown(paragraph))
             .map((paragraph) => paragraph.trim())
@@ -629,8 +629,8 @@ export default function ProjectPageClient({ id }: { id: string }) {
             const headingMatch = block.heading.match(
               /^(INT\.|EXT\.|INT\/EXT\.|EXT\/INT\.)\s*(.*)$/i
             );
-            const prefix = headingMatch-.[1] -- "";
-            const rest = headingMatch-.[2] -- block.heading;
+            const prefix = headingMatch?.[1] ?? "";
+            const rest = headingMatch?.[2] ?? block.heading;
             return (
               <div
                 key={`${block.heading}-${index}`}
@@ -654,7 +654,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         key={`${meta.label}-${metaIndex}`}
                         className="glass-pill px-2.5 py-1 text-[11px] text-white/70 rounded-full"
                       >
-                        {meta.label}: {meta.value || "—"}
+                        {meta.label}: {meta.value || "-"}
                       </span>
                     ))}
                   </div>
@@ -731,7 +731,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
     }
   };
 
-  const handleCopy = async (text: string, scope-: string) => {
+  const handleCopy = async (text: string, scope?: string) => {
     try {
       await navigator.clipboard.writeText(text);
       if (scope) {
@@ -751,7 +751,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
   };
 
   const selectedSectionText = useMemo(
-    () => (result - getSectionText(selectedSection, result) : ""),
+    () => (result ? getSectionText(selectedSection, result) : ""),
     [result, selectedSection]
   );
 
@@ -763,7 +763,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
       return;
     }
     const fallback =
-      document.getElementById(`section-${key}`) --
+      document.getElementById(`section-${key}`) ??
       document.getElementById("sections-top");
     if (fallback) {
       const top = fallback.getBoundingClientRect().top + window.scrollY - 96;
@@ -793,7 +793,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
     } catch (err) {
       const message =
         err instanceof Error
-          - err.message
+          ? err.message
           : "Failed to reach the server. Please try again.";
       setError(message);
     } finally {
@@ -1020,7 +1020,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                   disabled={loading || !prompt.trim()}
                   className="mt-4 bg-primary text-bg px-6 py-3.5 rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-all shadow-glow btn-animated btn-amber btn-cta"
                 >
-                  {loading - (
+                  {loading ? (
                     <span className="inline-flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Generating...
@@ -1072,23 +1072,23 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         </p>
                         <p>
                           <span className="text-white/50">Genre:</span>{" "}
-                          {lastParams-.genre || params.genre || "Unspecified"}
+                          {lastParams?.genre || params.genre || "Unspecified"}
                         </p>
                         <p>
                           <span className="text-white/50">Budget tier:</span>{" "}
-                          {lastParams-.budgetTier || params.budgetTier}
+                          {lastParams?.budgetTier || params.budgetTier}
                         </p>
                         <p>
                           <span className="text-white/50">Runtime:</span>{" "}
-                          {lastParams-.runtimeEstimate || params.runtimeEstimate || "Unspecified"}
+                          {lastParams?.runtimeEstimate || params.runtimeEstimate || "Unspecified"}
                         </p>
                         <p>
                           <span className="text-white/50">Locations:</span>{" "}
-                          {lastParams-.locationCount || params.locationCount || "Unspecified"}
+                          {lastParams?.locationCount || params.locationCount || "Unspecified"}
                         </p>
                         <p>
                           <span className="text-white/50">Complexity:</span>{" "}
-                          {lastParams-.sceneComplexity || params.sceneComplexity}
+                          {lastParams?.sceneComplexity || params.sceneComplexity}
                         </p>
                       </div>
                     </div>
@@ -1167,7 +1167,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         className="text-xs text-white/60 hover:text-white px-3 py-1.5 rounded-lg glass-outline transition-colors btn-animated btn-sky"
                       >
                         {copiedSection === SECTION_LABELS.executiveSummary
-                          - "Copied"
+                          ? "Copied"
                           : "Copy summary"}
                       </button>
                     </div>
@@ -1233,7 +1233,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                             className="text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-sky inline-flex items-center gap-2"
                           >
                             <Copy className="h-3.5 w-3.5" />
-                            {copied - "Copied" : "Copy all"}
+                            {copied ? "Copied" : "Copy all"}
                           </button>
                           <div className="flex items-center gap-2">
                             <select
@@ -1261,7 +1261,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                             >
                               <Copy className="h-3.5 w-3.5" />
                               {copiedSection === SECTION_LABELS[selectedSection]
-                                - "Copied"
+                                ? "Copied"
                                 : "Copy section"}
                             </button>
                           </div>
