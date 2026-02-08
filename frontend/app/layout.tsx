@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { DM_Serif_Display, Manrope, Playfair_Display } from "next/font/google";
 import { PageTransition } from "@/components/ui/page-transition";
 import { PerformanceModeRoot } from "@/components/ui/performance-mode-root";
-import AnimatedShaderBackground from "@/components/ui/animated-shader-background";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -43,7 +42,6 @@ export default function RootLayout({
       >
         <PerformanceModeRoot />
         <div className="relative min-h-screen text-white">
-          <AnimatedShaderBackground className="z-0 opacity-[0.85]" />
           <PageTransition>{children}</PageTransition>
         </div>
       </body>
