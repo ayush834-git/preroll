@@ -1,163 +1,155 @@
+# 🎬 Preroll
 
-# 🎬 Preroll — AI-Powered Film Pre-Production Tool
+**Preroll** is an AI-assisted film pre-production workspace designed to generate *exactly what the user asks for* — no more, no less.
 
-**Live Demo:** https://preroll-zciu.vercel.app/  
-**Repository:** https://github.com/ayush834-git/preroll
+Instead of a one-click “do everything” AI tool, Preroll focuses on **intent-driven generation**: scene breakdowns, sound design notes, visual direction, budget considerations, and production insights — generated selectively based on user choice.
 
-Preroll is an AI-assisted tool that helps filmmakers and creators plan their projects before filming begins. It uses AI to generate creative outputs such as screenplay breakdowns, budgeting insights, role suggestions, and scene design ideas — all in a smooth, modern UI.
-
-This project was built within a campus hackathon (NASSCOM × IBM – Introduction to GenAI)** and placed in the **Top 30** . It combines modern web development with applied GenAI workflows and polished UI/UX.
-
----
-
-## 🧠 Why Preroll Matters
-
-Pre-production planning is often fragmented and manual. Preroll brings structure to early creative decisions using AI-generated insights, enabling creators to:
-- Visualize story ideas
-- Generate structured screenplay content
-- Explore budgeting and role recommendations
-- Build confidence ahead of filming
+This project began as a campus hackathon submission and is now being actively developed as a reusable platform for future hackathons and product iterations.
+> **Note**  
+> Preroll is my **first end-to-end project** and an early-stage prototype.  
+> It was built while learning modern web development and GenAI workflows, with heavy use of AI-assisted tools for design, debugging, and iteration.  
+>  
+> The goal of this project is not perfection, but exploration — understanding product flow, UX decisions, and how AI-assisted systems can be shaped into usable tools.
 
 ---
 
-## 🌟 Features
+## 🔗 Live & Code
 
-- 🚀 **Modern landing page** and product presentation  
-- 📑 Conceptual workflow from idea to pre-production output  
-- 🌐 Live deployment on Vercel  
-- 🧠 Integrated AI generation (script breakdowns, roles, budgets)  
-- 💡 Clear UX with polished UI and structured layout
-- ⚙️ **Adaptive performance system**
-  - High-end devices retain full cinematic visuals  
-  - Low-end devices automatically reduce motion and effects for smooth performance  
-  - Respects user accessibility preferences (`prefers-reduced-motion`)  
-
-> The current version focuses on UX, visual identity, and conceptual AI workflows. Core logic and persistence are planned for future iterations.
-
+- **Live Demo:** https://preroll-zciu.vercel.app/
+- **Repository:** https://github.com/ayush834-git/preroll
 
 ---
 
-## 🛠 Technology Stack
+## 🧠 Product Philosophy
 
-**Frontend**
-- Next.js (App Router)
-- React
-- Tailwind CSS
-- shadcn/ui components
-- Framer Motion for animations
+Preroll is built on three core ideas:
 
-**AI & Tooling**
-- Prompt-driven GenAI integration
-- Development assisted with ChatGPT / Codex / Cursor
-- Tailored UI components from 21st.dev
+1. **Selective Generation**  
+   Users choose *what* they want generated (scene breakdown, sound, budget, etc.).  
+   The system does not generate unnecessary sections.
 
-**Deployment**
-- Vercel for CI/CD and hosting
+2. **Workspace → Report Flow**  
+   Input happens in a focused workspace.  
+   Output is presented as a structured, professional report — not a chat response.
 
----
+3. **Usability over Novelty**  
+   The goal is clarity, structure, and usefulness — not AI spectacle.
 
-## 📦 Getting Started
-
-### Prerequisites
-Make sure you have Node.js and npm installed:
-
-```bash
-node --version
-npm --version
-````
-
-### Clone the Repository
-
-```bash
-git clone https://github.com/ayush834-git/preroll.git
-cd preroll
-```
-
-### Install Dependencies
-
-```bash
-npm install
-```
-
-### Run Locally
-
-```bash
-npm run dev
-```
-
-Open your browser at `http://localhost:3000`.
-
-### Production Build
-
-```bash
-npm run build
-npm start
-```
+This mirrors how real pre-production planning works in practice.
 
 ---
 
-## 📁 Project Structure
+## ✨ What Preroll Does
 
-```
-pre[roll/
-├─ app/                 # Next.js app routes and pages
-├─ components/          # Reusable UI components
-│   ├─ ui/              # Shadcn / Tailwind UI components
-│   ├─ evervault-card.tsx
-│   ├─ beams-background.tsx
-│   └─ …
-├─ public/              # Static assets
-├─ styles/              # Global styles
-├─ tailwind.config.js   # Tailwind configuration
-├─ next.config.js       # Next.js configuration
-└─ README.md
-```
+- Structured AI-generated **pre-production reports**
+- User-controlled generation types:
+  - Scene Breakdown
+  - Visual Direction
+  - Sound & Mood Design
+  - Budget Considerations
+  - Director / Production Notes
+- Professional, skimmable output format
+- Versioned results with metadata
+- Adaptive UI performance (cinematic on capable devices, reduced on low-end)
 
----
-
-## 🧩 Notes
-
-* This project focuses on UI/UX and conceptual GenAI integration.
-* Some AI generation flows may be mocked or simplified in the current version.
-* Future development could include backend persistence, real model integration, and collaborative workflows.
+> Preroll generates **only what is requested** by the user.  
+> It is optimized for intent, not completeness.
 
 ---
 
-## ✨ Acknowledgements
+## 🧭 Core Flow
 
-Built during the **NASSCOM × IBM – Introduction to GenAI** campus hackathon by:
-
-* **Team Preroll**
-
-  * Developer
-  * Tester & Bug Fixer
-  * Frontend & Animation Provider
-  * UX Reviewer & Suggestion Lead
+1. Create a project
+2. Define production parameters (genre, budget tier, complexity, etc.)
+3. Choose the generation type
+4. Provide a creative prompt
+5. Generate a structured results report
+6. Copy, regenerate, or iterate sections as needed
 
 ---
 
-## 🚀 What’s Next?
+## 🛠 Tech Stack
 
-Preroll is a foundation — with continued iteration, it can evolve into:
+### Frontend
+- **Next.js (App Router)**
+- **React**
+- **TypeScript**
+- **Tailwind CSS**
+- **shadcn/ui**
+- **Framer Motion**
 
-* Full AI screenplay generation pipeline
-* Collaboration tools
-* Persistent project storage
-* Rich export formats (PDF, DOCX, etc.)
+### AI
+- **Groq API**
+- **LLaMA 3.1 8B (instant)**
+- Structured, role-based prompting
+- Token-optimized generation
 
----
-
-## 📩 Connect
-
-Feel free to connect or follow for updates ✨
-
-* GitHub: [https://github.com/ayush834-git](https://github.com/ayush834-git)
-
----
-
-*Preroll — Where Films Begin 🎬*
-
-```
+### Deployment
+- **Vercel**
 
 ---
 
+## ⚙️ Performance & Accessibility
+
+Preroll includes an adaptive performance system:
+
+- **Cinematic Mode**  
+  Full animations and visual effects on capable devices
+
+- **Reduced Mode**  
+  Shorter animations and lighter effects for mid-range devices
+
+- **Performance Mode**  
+  Minimal motion and static visuals for low-end devices or users with reduced-motion preferences
+
+The layout and content remain identical across modes.
+
+---
+
+## 🧪 Project Status
+
+- No authentication (demo workspace)
+- No persistent backend storage (yet)
+- Focused on:
+  - UX clarity
+  - output structure
+  - product direction
+
+This repository represents an **early but intentional stage**, not a finished product.
+
+---
+
+## 🚀 Why This Project Exists
+
+Preroll is used as:
+- a reusable base for future hackathons
+- a sandbox for exploring GenAI workflows
+- a portfolio project demonstrating product thinking
+- a controlled environment for improving AI output quality
+
+The project continues to evolve with each iteration.
+
+---
+
+## 🏆 Origins
+
+Built during a **campus hackathon (NASSCOM × IBM – Introduction to GenAI)**  
+Placed in the **Top 30** among ~150–200 teams (1st–4th year students).
+
+The college permitted continued development and reuse for future hackathons.
+
+---
+
+## 📌 Closing Note
+
+Preroll is not a “finished app.”
+
+It is a **designed system**:
+- opinionated
+- selective
+- evolving
+
+The goal is not to generate everything —  
+but to generate **exactly what is needed, when it is needed**.
+
+🎬 *Where films begin — before the camera rolls.*
