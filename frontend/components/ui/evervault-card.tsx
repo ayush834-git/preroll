@@ -8,6 +8,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { usePerformanceMode } from "@/lib/usePerformanceMode";
 
 export const EvervaultCard = ({
   text,
@@ -18,24 +19,30 @@ export const EvervaultCard = ({
 }) => {
   const mouseX = useMotionValue<number>(0);
   const mouseY = useMotionValue<number>(0);
+  const mode = usePerformanceMode();
+  const isCinematic = mode === "cinematic";
+  const isReduced = mode === "reduced";
 
   const [randomString, setRandomString] = useState("");
 
   useEffect(() => {
-    const str = generateRandomString(1500);
+    const length = isCinematic ? 1500 : isReduced ? 700 : 0;
+    const str = length > 0 ? generateRandomString(length) : "";
     setRandomString(str);
-  }, []);
+  }, [isCinematic, isReduced]);
 
   function onMouseMove({
     currentTarget,
     clientX,
     clientY,
   }: React.MouseEvent<HTMLDivElement>) {
+    if (mode === "performance") return;
     const { left, top } = currentTarget.getBoundingClientRect();
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
 
-    const str = generateRandomString(1500);
+    const length = isCinematic ? 1500 : 700;
+    const str = generateRandomString(length);
     setRandomString(str);
   }
 
@@ -54,10 +61,20 @@ export const EvervaultCard = ({
           mouseX={mouseX}
           mouseY={mouseY}
           randomString={randomString}
+          mode={mode}
         />
         <div className="relative z-10 flex items-center justify-center">
           <div className="relative h-44 w-44 rounded-full flex items-center justify-center text-textPrimary font-bold text-4xl">
-            <div className="absolute w-full h-full bg-surface/80 dark:bg-bg/80 blur-sm rounded-full" />
+            <div
+              className={cn(
+                "absolute w-full h-full bg-surface/80 dark:bg-bg/80 rounded-full",
+                mode === "cinematic"
+                  ? "blur-sm"
+                  : mode === "reduced"
+                  ? "blur-[1px]"
+                  : "blur-0"
+              )}
+            />
             <span className="text-textPrimary z-20">{text}</span>
           </div>
         </div>
@@ -70,19 +87,31 @@ export function CardPattern({
   mouseX,
   mouseY,
   randomString,
+  mode,
 }: {
   mouseX: MotionValue<number>;
   mouseY: MotionValue<number>;
   randomString: string;
+  mode: "cinematic" | "reduced" | "performance";
 }) {
   const maskImage = useMotionTemplate`radial-gradient(250px at ${mouseX}px ${mouseY}px, white, transparent)`;
-  const style = { maskImage, WebkitMaskImage: maskImage };
+  const style =
+    mode === "performance"
+      ? undefined
+      : { maskImage, WebkitMaskImage: maskImage };
 
   return (
     <div className="pointer-events-none">
       <div className="absolute inset-0 rounded-2xl [mask-image:linear-gradient(white,transparent)] group-hover/card:opacity-50"></div>
       <motion.div
-        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/70 to-accent/60 opacity-0 group-hover/card:opacity-100 backdrop-blur-xl transition duration-500"
+        className={cn(
+          "absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/70 to-accent/60 opacity-0 group-hover/card:opacity-100 transition duration-500",
+          mode === "cinematic"
+            ? "backdrop-blur-xl"
+            : mode === "reduced"
+            ? "backdrop-blur-md"
+            : "backdrop-blur-0"
+        )}
         style={style}
       />
       <motion.div

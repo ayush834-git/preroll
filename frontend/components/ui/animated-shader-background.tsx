@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { cn } from "@/lib/utils";
+import { usePerformanceMode } from "@/lib/usePerformanceMode";
 
 export default function AnimatedShaderBackground({
   className,
@@ -10,8 +11,12 @@ export default function AnimatedShaderBackground({
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const mode = usePerformanceMode();
+  const isPerformance = mode === "performance";
+  const isReduced = mode === "reduced";
 
   useEffect(() => {
+    if (isPerformance) return;
     if (!containerRef.current) return;
 
     const container = containerRef.current;
@@ -112,7 +117,7 @@ export default function AnimatedShaderBackground({
     };
 
     resizeToContainer();
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(isReduced ? 1 : window.devicePixelRatio);
     container.appendChild(renderer.domElement);
 
     const geometry = new THREE.PlaneGeometry(2, 2);
@@ -120,9 +125,10 @@ export default function AnimatedShaderBackground({
     scene.add(mesh);
 
     let frameId: number;
+    const timeScale = isReduced ? 0.5 : 1;
     const animate = () => {
       if (!renderer) return;
-      material.uniforms.iTime.value += 0.016;
+      material.uniforms.iTime.value += 0.016 * timeScale;
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(animate);
     };
@@ -140,15 +146,28 @@ export default function AnimatedShaderBackground({
       material.dispose();
       renderer?.dispose();
     };
-  }, []);
+  }, [isPerformance, isReduced]);
 
   return (
     <div
       ref={containerRef}
       className={cn(
-        "absolute inset-0 pointer-events-none opacity-70",
+        "absolute inset-0 pointer-events-none",
+        mode === "cinematic"
+          ? "opacity-70"
+          : mode === "reduced"
+          ? "opacity-50"
+          : "opacity-40",
         className
       )}
+      style={
+        isPerformance
+          ? {
+              background:
+                "radial-gradient(120% 120% at 50% 15%, rgba(100,120,255,0.35), transparent 60%), radial-gradient(120% 120% at 50% 85%, rgba(90,160,255,0.25), transparent 60%)",
+            }
+          : undefined
+      }
     />
   );
 }

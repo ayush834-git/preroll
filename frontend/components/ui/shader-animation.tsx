@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
+import { usePerformanceMode } from "@/lib/usePerformanceMode"
 
 export function ShaderAnimation() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -12,8 +13,12 @@ export function ShaderAnimation() {
     uniforms: any
     animationId: number
   } | null>(null)
+  const mode = usePerformanceMode()
+  const isPerformance = mode === "performance"
+  const isReduced = mode === "reduced"
 
   useEffect(() => {
+    if (isPerformance) return
     if (!containerRef.current) return
 
     const container = containerRef.current
@@ -74,7 +79,7 @@ export function ShaderAnimation() {
     } catch {
       return
     }
-    renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.setPixelRatio(isReduced ? 1 : window.devicePixelRatio)
     container.appendChild(renderer.domElement)
 
     const onWindowResize = () => {
@@ -89,10 +94,11 @@ export function ShaderAnimation() {
     onWindowResize()
     window.addEventListener("resize", onWindowResize, false)
 
+    const timeScale = isReduced ? 0.5 : 1
     const animate = () => {
       const animationId = requestAnimationFrame(animate)
       if (!renderer) return
-      uniforms.time.value += 0.05
+      uniforms.time.value += 0.05 * timeScale
       renderer.render(scene, camera)
 
       if (sceneRef.current) {
@@ -125,14 +131,16 @@ export function ShaderAnimation() {
         material.dispose()
       }
     }
-  }, [])
+  }, [isPerformance, isReduced])
 
   return (
     <div
       ref={containerRef}
       className="w-full h-screen"
       style={{
-        background: "var(--background)",
+        background: isPerformance
+          ? "radial-gradient(120% 120% at 50% 20%, rgba(96,128,255,0.3), transparent 60%), radial-gradient(120% 120% at 50% 85%, rgba(80,150,255,0.2), transparent 60%)"
+          : "var(--background)",
         overflow: "hidden",
       }}
     />

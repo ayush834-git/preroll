@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Serif_Display, Manrope, Playfair_Display } from "next/font/google";
 import { BeamsBackground } from "@/components/ui/beams-background";
 import { PageTransition } from "@/components/ui/page-transition";
+import { PerformanceModeRoot } from "@/components/ui/performance-mode-root";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${dmSerif.variable} ${playfair.variable} antialiased`}
       >
+        <PerformanceModeRoot />
         <BeamsBackground className="text-white">
           <PageTransition>{children}</PageTransition>
         </BeamsBackground>

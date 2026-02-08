@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import AnimatedShaderBackground from "@/components/ui/animated-shader-background";
+import { usePerformanceMode } from "@/lib/usePerformanceMode";
 
 interface AnimatedGradientBackgroundProps {
   className?: string;
@@ -23,19 +24,28 @@ interface Beam {
   pulseSpeed: number;
 }
 
-function createBeam(width: number, height: number): Beam {
+function createBeam(
+  width: number,
+  height: number,
+  settings: {
+    speedScale: number;
+    opacityScale: number;
+    pulseScale: number;
+    widthScale: number;
+  }
+): Beam {
   const angle = -35 + Math.random() * 10;
   return {
     x: Math.random() * width * 1.5 - width * 0.25,
     y: Math.random() * height * 1.5 - height * 0.25,
-    width: 90 + Math.random() * 140,
+    width: (90 + Math.random() * 140) * settings.widthScale,
     length: height * 2.5,
     angle: angle,
-    speed: 0.6 + Math.random() * 1.2,
-    opacity: 0.28 + Math.random() * 0.22,
+    speed: (0.6 + Math.random() * 1.2) * settings.speedScale,
+    opacity: (0.28 + Math.random() * 0.22) * settings.opacityScale,
     hue: 235 + Math.random() * 12,
     pulse: Math.random() * Math.PI * 2,
-    pulseSpeed: 0.02 + Math.random() * 0.03,
+    pulseSpeed: (0.02 + Math.random() * 0.03) * settings.pulseScale,
   };
 }
 
@@ -48,6 +58,7 @@ export function BeamsBackground({
   const beamsRef = useRef<Beam[]>([]);
   const animationFrameRef = useRef<number>(0);
   const MINIMUM_BEAMS = 20;
+  const mode = usePerformanceMode();
 
   const opacityMap = {
     subtle: 1.1,
@@ -64,6 +75,33 @@ export function BeamsBackground({
 
     let viewportWidth = window.innerWidth;
     let viewportHeight = window.innerHeight;
+    const settings =
+      mode === "cinematic"
+        ? {
+            beamMultiplier: 1.5,
+            speedScale: 1,
+            opacityScale: 1,
+            pulseScale: 1,
+            widthScale: 1,
+            blur: 14,
+          }
+        : mode === "reduced"
+        ? {
+            beamMultiplier: 1,
+            speedScale: 0.5,
+            opacityScale: 0.65,
+            pulseScale: 0.6,
+            widthScale: 0.85,
+            blur: 8,
+          }
+        : {
+            beamMultiplier: 0.6,
+            speedScale: 0,
+            opacityScale: 0.45,
+            pulseScale: 0,
+            widthScale: 0.8,
+            blur: 0,
+          };
 
     const updateCanvasSize = () => {
       const dpr = window.devicePixelRatio || 1;
@@ -75,10 +113,17 @@ export function BeamsBackground({
       canvas.style.height = `${viewportHeight}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const totalBeams = MINIMUM_BEAMS * 1.5;
-      beamsRef.current = Array.from({ length: totalBeams }, () =>
-        createBeam(viewportWidth, viewportHeight)
+      const totalBeams = Math.max(
+        8,
+        Math.round(MINIMUM_BEAMS * settings.beamMultiplier)
       );
+      beamsRef.current = Array.from({ length: totalBeams }, () =>
+        createBeam(viewportWidth, viewportHeight, settings)
+      );
+
+      if (mode === "performance") {
+        drawStatic();
+      }
     };
 
     updateCanvasSize();
@@ -95,10 +140,13 @@ export function BeamsBackground({
         column * spacing +
         spacing / 2 +
         (Math.random() - 0.5) * spacing * 0.5;
-      beam.width = 160 + Math.random() * 160;
-      beam.speed = 0.5 + Math.random() * 0.4;
+      beam.width =
+        (160 + Math.random() * 160) * settings.widthScale;
+      beam.speed =
+        (0.5 + Math.random() * 0.4) * settings.speedScale;
       beam.hue = 235 + (index * 12) / totalBeams;
-      beam.opacity = 0.34 + Math.random() * 0.16;
+      beam.opacity =
+        (0.34 + Math.random() * 0.16) * settings.opacityScale;
       return beam;
     }
 
@@ -138,11 +186,22 @@ export function BeamsBackground({
       ctx.restore();
     }
 
+    function drawStatic() {
+      if (!canvas || !ctx) return;
+
+      ctx.clearRect(0, 0, viewportWidth, viewportHeight);
+      ctx.filter = settings.blur ? `blur(${settings.blur}px)` : "none";
+
+      beamsRef.current.forEach((beam) => {
+        drawBeam(ctx, beam);
+      });
+    }
+
     function animate() {
       if (!canvas || !ctx) return;
 
       ctx.clearRect(0, 0, viewportWidth, viewportHeight);
-      ctx.filter = "blur(14px)";
+      ctx.filter = settings.blur ? `blur(${settings.blur}px)` : "none";
 
       const totalBeams = beamsRef.current.length;
       beamsRef.current.forEach((beam, index) => {
@@ -159,7 +218,11 @@ export function BeamsBackground({
       animationFrameRef.current = requestAnimationFrame(animate);
     }
 
-    animate();
+    if (mode === "performance") {
+      drawStatic();
+    } else {
+      animate();
+    }
 
     return () => {
       window.removeEventListener("resize", updateCanvasSize);
@@ -167,17 +230,39 @@ export function BeamsBackground({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [intensity]);
+  }, [intensity, mode]);
 
   return (
     <div className={cn("relative min-h-screen w-full", className)}>
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-bg">
-        <AnimatedShaderBackground className="absolute inset-0 z-0 opacity-70" />
+        <AnimatedShaderBackground
+          className={cn(
+            "absolute inset-0 z-0",
+            mode === "cinematic"
+              ? "opacity-70"
+              : mode === "reduced"
+              ? "opacity-55"
+              : "opacity-45"
+          )}
+        />
 
         <canvas
           ref={canvasRef}
           className="absolute inset-0 h-full w-full z-10"
-          style={{ filter: "blur(4px)", opacity: 0.95 }}
+          style={{
+            filter:
+              mode === "cinematic"
+                ? "blur(4px)"
+                : mode === "reduced"
+                ? "blur(2px)"
+                : "none",
+            opacity:
+              mode === "cinematic"
+                ? 0.95
+                : mode === "reduced"
+                ? 0.7
+                : 0.45,
+          }}
         />
 
         <div className="absolute inset-0 z-20 beams-overlay" />

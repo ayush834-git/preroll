@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, ReactNode } from "react";
+import { usePerformanceMode } from "@/lib/usePerformanceMode";
 
 interface GlowCardProps {
   children: ReactNode;
@@ -37,8 +38,12 @@ const GlowCard: React.FC<GlowCardProps> = ({
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
+  const mode = usePerformanceMode();
+  const isCinematic = mode === "cinematic";
+  const isReduced = mode === "reduced";
 
   useEffect(() => {
+    if (mode === "performance") return;
     const syncPointer = (e: PointerEvent) => {
       const { clientX: x, clientY: y } = e;
 
@@ -58,7 +63,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
 
     document.addEventListener("pointermove", syncPointer);
     return () => document.removeEventListener("pointermove", syncPointer);
-  }, []);
+  }, [mode]);
 
   const { base, spread } = glowColorMap[glowColor];
 
@@ -74,11 +79,11 @@ const GlowCard: React.FC<GlowCardProps> = ({
       "--base": base,
       "--spread": spread,
       "--radius": "14",
-      "--border": "3",
+      "--border": isCinematic ? "3" : "2",
       "--backdrop": "hsl(240 12% 16% / 0.6)",
       "--backup-border": "var(--backdrop)",
       "--size": "200",
-      "--outer": "1",
+      "--outer": isCinematic ? "1" : isReduced ? "0.8" : "0.6",
       "--border-size": "calc(var(--border, 2) * 1px)",
       "--spotlight-size": "calc(var(--size, 150) * 1px)",
       "--hue": "calc(var(--base) + (var(--xp, 0) * var(--spread, 0)))",
@@ -92,7 +97,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
       backgroundSize:
         "calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)))",
       backgroundPosition: "50% 50%",
-      backgroundAttachment: "fixed",
+      backgroundAttachment: isCinematic ? "fixed" : "scroll",
       border: "var(--border-size) solid var(--backup-border)",
       position: "relative",
       touchAction: "none",
@@ -178,10 +183,10 @@ const GlowCard: React.FC<GlowCardProps> = ({
           relative 
           grid 
           grid-rows-[1fr_auto] 
-          shadow-[0_1rem_2rem_-1rem_black] 
+          ${isCinematic ? "shadow-[0_1rem_2rem_-1rem_black]" : isReduced ? "shadow-[0_0.6rem_1.2rem_-0.8rem_black]" : "shadow-[0_0.3rem_0.6rem_-0.6rem_black]"} 
           p-4 
           gap-4 
-          backdrop-blur-[5px]
+          ${isCinematic ? "backdrop-blur-[5px]" : isReduced ? "backdrop-blur-[2px]" : "backdrop-blur-0"}
           ${className}
         `}
       >
