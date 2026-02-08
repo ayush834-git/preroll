@@ -38,7 +38,7 @@ type AIResult = {
   budgetConsiderations: string[];
   directorNotes: string[];
   assumptionsMade: string[];
-  raw-: string;
+  raw?: string;
 };
 
 type SectionKey = keyof Omit<AIResult, "raw">;
