@@ -115,7 +115,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
       backgroundAttachment: isCinematic ? "fixed" : "scroll",
       border: "var(--border-size) solid var(--backup-border)",
       position: "relative",
-      touchAction: "none",
+      touchAction: isCinematic ? "none" : "pan-y",
     };
 
     if (width !== undefined) {
