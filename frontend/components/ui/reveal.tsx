@@ -15,14 +15,16 @@ export function Reveal({
   delay?: number;
 }) {
   const mode = usePerformanceMode();
-  if (mode === "performance") {
-    return <div className={cn(className)}>{children}</div>;
-  }
   const isCinematic = mode === "cinematic";
   const isReduced = mode === "reduced";
+  const isPerformance = mode === "performance";
   const easeOut: [number, number, number, number] = [0.16, 1, 0.3, 1];
   const initial =
-    isCinematic ? { opacity: 0, y: 14 } : isReduced ? { opacity: 0, y: 6 } : false;
+    isPerformance
+      ? false
+      : isCinematic
+      ? { opacity: 0, y: 14 }
+      : { opacity: 0, y: 6 };
   const whileInView = { opacity: 1, y: 0 };
   const transition = isCinematic
     ? { duration: 0.6, ease: easeOut, delay }
