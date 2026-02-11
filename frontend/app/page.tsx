@@ -63,15 +63,12 @@ const workflow = [
 const spotlightStats = [
   { label: "Generation Modes", value: "Scene / Sound / Budget", glow: "orange" },
   { label: "Production Reports", value: "Structured, shareable docs", glow: "blue" },
-  { label: "Constraint-driven generation", value: "Structured inputs → structured outputs", glow: "green" },
+  { label: "Constraint-driven generation", value: "Structured inputs -> structured outputs", glow: "green" },
 ] as const;
 
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
-        <div className="absolute inset-0 z-0 grain-overlay" />
-        <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-primary/15 blur-[120px]" />
-
         <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 glass-panel">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-bg font-bold shadow-glow">
@@ -103,7 +100,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/dashboard"
-              className="bg-primary text-bg px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
+              className="glass-interactive text-white px-5 py-2.5 rounded-lg transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
             >
               Get Started
             </Link>
@@ -134,7 +131,7 @@ export default function LandingPage() {
               <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/dashboard"
-                className="bg-primary text-bg px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber btn-cta"
+                className="glass-interactive text-white px-6 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
               >
                 Get Started
               </Link>
@@ -301,7 +298,7 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="bg-primary text-bg px-7 py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber btn-cta"
+              className="glass-interactive text-white px-7 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
             >
               Get Started
             </Link>

@@ -18,26 +18,38 @@ export function Reveal({
   const isCinematic = mode === "cinematic";
   const isReduced = mode === "reduced";
   const isPerformance = mode === "performance";
-  const easeOut: [number, number, number, number] = [0.16, 1, 0.3, 1];
   const initial =
     isPerformance
       ? false
       : isCinematic
-      ? { opacity: 0, y: 14 }
-      : { opacity: 0, y: 6 };
-  const whileInView = { opacity: 1, y: 0 };
+      ? { opacity: 0, y: 18, scale: 0.992 }
+      : { opacity: 0, y: 8, scale: 0.996 };
+  const whileInView = { opacity: 1, y: 0, scale: 1 };
   const transition = isCinematic
-    ? { duration: 0.6, ease: easeOut, delay }
+    ? {
+        type: "spring",
+        stiffness: 140,
+        damping: 22,
+        mass: 0.8,
+        delay,
+      }
     : isReduced
-    ? { duration: 0.25, ease: easeOut, delay: delay * 0.5 }
+    ? {
+        type: "spring",
+        stiffness: 200,
+        damping: 26,
+        mass: 0.65,
+        delay: delay * 0.5,
+      }
     : { duration: 0 };
 
   return (
     <motion.div
       className={cn(className)}
+      style={{ willChange: isPerformance ? "auto" : "transform, opacity" }}
       initial={initial}
       whileInView={whileInView}
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: true, amount: 0.18 }}
       transition={transition}
     >
       {children}

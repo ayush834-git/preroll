@@ -1244,7 +1244,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 <button
                   onClick={generate}
                   disabled={loading || !prompt.trim()}
-                  className="mt-4 bg-primary text-bg px-6 py-3.5 rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none transition-all shadow-glow btn-animated btn-amber btn-cta"
+                  className="mt-4 glass-interactive text-white px-6 py-3.5 rounded-xl disabled:opacity-50 disabled:pointer-events-none transition-all shadow-glow btn-animated btn-amber btn-cta"
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
@@ -1336,7 +1336,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         Building your production pack
                       </h3>
                       <p className="text-sm text-white/60 mt-2">
-                        We're structuring scenes, character beats, and budget
+                        We&apos;re structuring scenes, character beats, and budget
                         tiers. Hover the card to watch the cipher react.
                       </p>
                       <div className="mt-4 flex items-center gap-2 text-sm text-white/70">

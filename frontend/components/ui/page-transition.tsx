@@ -11,29 +11,31 @@ export function PageTransition({ children }: { children: ReactNode }) {
   const isCinematic = mode === "cinematic";
   const isReduced = mode === "reduced";
   const isPerformance = mode === "performance";
-  const easeOut: [number, number, number, number] = [0.16, 1, 0.3, 1];
   const initial =
     isPerformance
       ? false
       : isCinematic
-      ? { opacity: 0, y: 12 }
-      : { opacity: 0, y: 6 };
-  const animate = { opacity: 1, y: 0 };
+      ? { opacity: 0, y: 16, scale: 0.996 }
+      : { opacity: 0, y: 8, scale: 0.998 };
+  const animate = { opacity: 1, y: 0, scale: 1 };
   const exit = isPerformance
-    ? { opacity: 1, y: 0 }
+    ? { opacity: 1, y: 0, scale: 1 }
     : isCinematic
-    ? { opacity: 0, y: -12 }
-    : { opacity: 0, y: -6 };
+    ? { opacity: 0, y: -12, scale: 1.002 }
+    : { opacity: 0, y: -6, scale: 1.001 };
   const transition = isPerformance
     ? { duration: 0 }
     : isCinematic
-    ? { duration: 0.35, ease: easeOut }
-    : { duration: 0.2, ease: easeOut };
+    ? { type: "spring", stiffness: 170, damping: 24, mass: 0.85 }
+    : isReduced
+    ? { type: "spring", stiffness: 220, damping: 28, mass: 0.7 }
+    : { duration: 0.2 };
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
+        style={{ willChange: isPerformance ? "auto" : "transform, opacity" }}
         initial={initial}
         animate={animate}
         exit={exit}
