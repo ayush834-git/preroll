@@ -1,317 +1,239 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Camera,
-  ChevronDown,
-  DollarSign,
-  ListChecks,
-  Mic,
-  Shield,
-  Star,
-  Timer,
-} from "lucide-react";
-import { GlowCard } from "@/components/ui/spotlight-card";
+import { ArrowRight, Clapperboard, Layers, Sparkles, Wand2 } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 
-const features = [
-  {
-    title: "Scene Breakdown Reports",
-    body: "Assistant Director-style breakdowns with objectives, locations, props, beats, and coverage needs.",
-    icon: <ListChecks className="h-5 w-5 text-primary" />,
-  },
-  {
-    title: "Sound Design Sheets",
-    body: "Ambient beds, diegetic cues, transitions, and mixing notes crafted per scene.",
-    icon: <Mic className="h-5 w-5 text-primary" />,
-  },
-  {
-    title: "Budget Plan Line Items",
-    body: "Cast, crew, locations, gear, VFX, marketing, and post with cost ranges and savings.",
-    icon: <DollarSign className="h-5 w-5 text-primary" />,
-  },
-  {
-    title: "Visual Direction",
-    body: "Cinematography and production design guidance for lighting, palette, and framing.",
-    icon: <Camera className="h-5 w-5 text-primary" />,
-  },
-];
+const scriptNodes = [
+  { label: "Characters", x: "12%", y: "26%", tone: "sky" },
+  { label: "Locations", x: "42%", y: "14%", tone: "violet" },
+  { label: "Coverage", x: "74%", y: "24%", tone: "amber" },
+  { label: "Mood", x: "22%", y: "62%", tone: "emerald" },
+  { label: "Budget", x: "52%", y: "56%", tone: "rose" },
+  { label: "Schedule", x: "82%", y: "66%", tone: "sky" },
+] as const;
 
-const workflow = [
-  {
-    step: "01",
-    title: "Ideate & Outline",
-    body: "Capture concepts, themes, and structure with AI-assisted prompts.",
-  },
-  {
-    step: "02",
-    title: "Breakdown & Schedule",
-    body: "Tag props, cast, and locations; generate production-ready documents.",
-  },
-  {
-    step: "03",
-    title: "Visualize",
-    body: "Create boards, lighting diagrams, and camera setups for every scene.",
-  },
-  {
-    step: "04",
-    title: "Collaborate & Refine",
-    body: "Share with your team, gather feedback, and iterate until ready.",
-  },
-];
+const timelineBars = [
+  { label: "Script Parse", width: "35%", tone: "sky" },
+  { label: "Beat Alignment", width: "62%", tone: "violet" },
+  { label: "Crew Mapping", width: "48%", tone: "amber" },
+  { label: "Budget Forecast", width: "72%", tone: "emerald" },
+] as const;
 
-const spotlightStats = [
-  { label: "Generation Modes", value: "Scene / Sound / Budget", glow: "orange" },
-  { label: "Production Reports", value: "Structured, shareable docs", glow: "blue" },
-  { label: "Constraint-driven generation", value: "Structured inputs -> structured outputs", glow: "green" },
+const storyboardFrames = [
+  "Opening setup",
+  "Conflict turn",
+  "Visual payoff",
+  "Closing beat",
 ] as const;
 
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen text-white overflow-hidden">
-        <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 glass-panel">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-bg font-bold shadow-glow">
-              P
-            </div>
-            <span className="font-semibold tracking-wide text-white">
-              PREROLL
-            </span>
+    <main className="relative min-h-screen overflow-hidden text-white">
+      <nav className="glass-panel triptych-nav relative z-20 mx-6 mt-6 flex items-center justify-between rounded-2xl px-5 py-4 md:mx-10">
+        <div className="flex items-center gap-3">
+          <div className="glass-interactive grid h-9 w-9 place-items-center rounded-lg text-white font-bold">
+            P
           </div>
+          <span className="text-sm font-semibold tracking-[0.22em] text-white/90">
+            PREROLL
+          </span>
+        </div>
 
-          <div className="hidden md:flex gap-8 text-sm text-white/70">
-            <a href="#features" className="hover:text-white transition-colors">
-              Features
-            </a>
-            <a href="#workflow" className="hover:text-white transition-colors">
-              Workflow
-            </a>
-            <a href="#pricing" className="hover:text-white transition-colors">
-              Pricing
-            </a>
-          </div>
+        <div className="hidden items-center gap-7 text-xs uppercase tracking-[0.2em] text-white/70 md:flex">
+          <span>Landing</span>
+          <span>Dashboard</span>
+          <span>Results</span>
+        </div>
 
-          <div className="flex gap-3">
-            <Link
-              href="/auth"
-              className="text-white/80 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors btn-animated btn-sky btn-ghost"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/dashboard"
-              className="glass-interactive text-white px-5 py-2.5 rounded-lg transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
-            >
-              Get Started
-            </Link>
-          </div>
-        </nav>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/auth"
+            className="glass-outline rounded-lg px-4 py-2 text-xs text-white/80 transition-colors hover:text-white btn-animated btn-sky"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/dashboard"
+            className="glass-interactive rounded-lg px-4 py-2 text-xs text-white transition-colors btn-animated btn-amber"
+          >
+            Open Tool
+          </Link>
+        </div>
+      </nav>
 
+      <section className="relative z-10 px-6 pb-10 pt-8 md:px-10 md:pt-10">
         <Reveal>
-          <section className="relative z-10 px-6 md:px-10 pt-24 pb-16">
-          <div className="mx-auto max-w-5xl">
-            <div>
-              <p className="text-xs tracking-[0.35em] text-primary mb-5">
-                PRE-PRODUCTION PLATFORM
-              </p>
-
-              <h1 className="font-hero-italic text-5xl md:text-6xl leading-tight">
-                Where Films Begin <br />
-                <span className="text-primary">
-                  Before the Camera Rolls
-                </span>
-              </h1>
-
-              <p className="mt-6 text-white/70 max-w-xl text-lg">
-                A cinematic workspace for directors, writers, and production
-                teams to shape scripts, plan shots, and align vision before the
-                first frame is captured.
-              </p>
-
-              <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-                href="/dashboard"
-                className="glass-interactive text-white px-6 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
-              >
-                Get Started
-              </Link>
-              </div>
-
-              <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-white/60">
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Live previews
-                </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  AI workflows
-                </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Team ready
-                </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Secure by design
-                </span>
-              </div>
-
-              <div className="mt-12 flex items-center gap-5 text-sm text-white/50">
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-primary" />
-                  <span>Trusted by indie studios</span>
+          <div className="triptych-shell mx-auto w-full max-w-[1900px]">
+            <div className="triptych-strip">
+              <article className="triptych-screen triptych-screen-left glass-panel-strong">
+                <div className="triptych-screen-head">
+                  <span className="triptych-dot" />
+                  <span className="text-[11px] uppercase tracking-[0.24em] text-white/60">
+                    Screen 1 - Landing
+                  </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Timer className="h-4 w-4 text-primary" />
-                  <span>Cut prep time by 40%</span>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div className="mx-auto mt-14 max-w-6xl grid gap-6 md:grid-cols-3">
-            {spotlightStats.map((item) => (
-              <GlowCard
-                key={item.label}
-                customSize
-                glowColor={item.glow}
-                className="w-full min-h-[160px] p-6"
-              >
-                <div className="flex h-full flex-col justify-between">
-                  <p className="text-white/60 text-sm">{item.label}</p>
-                  <p className="font-display text-3xl text-primary">
-                    {item.value}
+                <div className="glass-primary triptych-hero-card">
+                  <p className="text-[11px] uppercase tracking-[0.3em] text-white/65">
+                    AI Pre-Production Film Tool
                   </p>
-                </div>
-              </GlowCard>
-            ))}
-          </div>
-
-          <div className="mt-14 flex items-center gap-2 text-white/50">
-            <ChevronDown className="h-4 w-4" />
-            <span className="text-xs uppercase tracking-[0.25em]">Scroll</span>
-          </div>
-          </section>
-        </Reveal>
-
-        <Reveal>
-          <section
-            id="features"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
-          <div className="text-center mb-12">
-            <p className="text-xs tracking-[0.3em] text-primary mb-3">
-              FEATURES
-            </p>
-            <h2 className="font-hero-italic text-4xl md:text-5xl">
-              Everything Before Action
-            </h2>
-            <p className="mt-4 text-white/60 max-w-2xl mx-auto">
-              Professional tools designed for the crucial planning phase that
-              defines every great film.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {features.map((item) => (
-              <GlowCard
-                key={item.title}
-                customSize
-                glowColor="blue"
-                className="w-full p-6"
-              >
-                <div className="h-12 w-12 rounded-xl glass-outline flex items-center justify-center mb-4">
-                  {item.icon}
-                </div>
-                <h3 className="text-xl font-medium">{item.title}</h3>
-                <p className="text-white/60 mt-3">{item.body}</p>
-              </GlowCard>
-            ))}
-          </div>
-          </section>
-        </Reveal>
-
-
-        <Reveal>
-          <section
-            id="workflow"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
-            <div>
-            <p className="text-xs tracking-[0.3em] text-primary mb-3">
-              WORKFLOW
-            </p>
-              <h2 className="font-hero-italic text-4xl md:text-5xl">
-                Plan Every Shot
-              </h2>
-            </div>
-            <p className="text-white/60 max-w-xl">
-              From concept to shot list, Preroll keeps every department aligned
-              with a single cinematic source of truth.
-            </p>
-          </div>
-
-          <div className="grid gap-6">
-            {workflow.map((item) => (
-              <GlowCard
-                key={item.step}
-                customSize
-                glowColor="blue"
-                className="w-full p-6"
-              >
-                <div className="flex flex-col md:flex-row md:items-center gap-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full glass-outline flex items-center justify-center text-primary font-semibold">
-                      {item.step}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-medium">{item.title}</h3>
-                      <p className="text-white/60 mt-2">{item.body}</p>
-                    </div>
+                  <h1 className="mt-5 text-4xl font-semibold leading-[0.9] tracking-tight text-white md:text-5xl">
+                    FUTURE OF FILMMAKING AWAITS
+                  </h1>
+                  <p className="mt-5 max-w-xl text-sm text-white/70 md:text-base">
+                    Cinematic planning in one glass-first workspace: script analysis,
+                    production timing, and visual direction with calm, premium motion.
+                  </p>
+                  <div className="mt-8">
+                    <Link
+                      href="/dashboard"
+                      className="glass-interactive inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold tracking-[0.12em] text-white transition-colors hover:text-white btn-animated btn-amber"
+                    >
+                      START PROJECT
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
-                  <div className="md:ml-auto hidden md:flex items-center gap-3 text-white/50">
-                    <Shield className="h-4 w-4" />
-                    <span className="text-xs uppercase tracking-[0.2em]">
-                      Secure
+                </div>
+
+                <div className="triptych-subtle-note">
+                  <Sparkles className="h-4 w-4 text-white/60" />
+                  <span>Refractive hover depth, soft volumetric atmosphere</span>
+                </div>
+              </article>
+
+              <article className="triptych-screen triptych-screen-middle glass-panel-strong">
+                <div className="triptych-screen-head">
+                  <span className="triptych-dot" />
+                  <span className="text-[11px] uppercase tracking-[0.24em] text-white/60">
+                    Screen 2 - Dashboard
+                  </span>
+                </div>
+
+                <div className="triptych-dashboard-grid">
+                  <aside className="glass-outline triptych-sidebar">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-white/50">
+                      Workspace
+                    </p>
+                    <div className="mt-4 space-y-2 text-xs">
+                      {["Project", "Scenes", "Characters", "Timeline", "Assets"].map(
+                        (item, index) => (
+                          <div
+                            key={item}
+                            className={`triptych-nav-pill ${
+                              index === 1 ? "triptych-nav-pill-active" : ""
+                            }`}
+                          >
+                            {item}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </aside>
+
+                  <div className="space-y-4">
+                    <section className="glass-panel triptych-widget">
+                      <div className="triptych-widget-head">
+                        <div className="flex items-center gap-2">
+                          <Layers className="h-4 w-4 text-white/75" />
+                          <h2 className="text-sm font-medium text-white/90">
+                            Script Breakdown
+                          </h2>
+                        </div>
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">
+                          Live Graph
+                        </span>
+                      </div>
+                      <div className="triptych-node-map">
+                        {scriptNodes.map((node) => (
+                          <div
+                            key={node.label}
+                            className={`triptych-node triptych-node-${node.tone}`}
+                            style={{ left: node.x, top: node.y }}
+                          >
+                            <span>{node.label}</span>
+                          </div>
+                        ))}
+                        <div className="triptych-node-lines" />
+                      </div>
+                    </section>
+
+                    <section className="glass-panel triptych-widget">
+                      <div className="triptych-widget-head">
+                        <div className="flex items-center gap-2">
+                          <Clapperboard className="h-4 w-4 text-white/75" />
+                          <h2 className="text-sm font-medium text-white/90">
+                            Production Timeline
+                          </h2>
+                        </div>
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">
+                          Gantt Layer
+                        </span>
+                      </div>
+                      <div className="mt-4 space-y-3">
+                        {timelineBars.map((bar) => (
+                          <div key={bar.label} className="triptych-timeline-row">
+                            <p className="text-[11px] text-white/65">{bar.label}</p>
+                            <div className="triptych-timeline-track">
+                              <div
+                                className={`triptych-timeline-bar triptych-timeline-bar-${bar.tone}`}
+                                style={{ width: bar.width }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </article>
+
+              <article className="triptych-screen triptych-screen-right glass-panel-strong">
+                <div className="triptych-screen-head">
+                  <span className="triptych-dot" />
+                  <span className="text-[11px] uppercase tracking-[0.24em] text-white/60">
+                    Screen 3 - Results
+                  </span>
+                </div>
+
+                <section className="glass-primary triptych-result-card">
+                  <div className="triptych-widget-head">
+                    <div className="flex items-center gap-2">
+                      <Wand2 className="h-4 w-4 text-white/75" />
+                      <h2 className="text-base font-medium text-white/92">
+                        Final Output Reveal
+                      </h2>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">
+                      Holographic Storyboard
                     </span>
                   </div>
-                </div>
-              </GlowCard>
-            ))}
-          </div>
-          </section>
-        </Reveal>
 
-        <Reveal>
-          <section
-            id="pricing"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
-          <div className="glass-panel rounded-3xl p-10 md:p-12 text-center">
-            <p className="text-xs tracking-[0.3em] text-primary mb-3">
-              START CREATING
-            </p>
-            <h2 className="font-hero-italic text-4xl md:text-5xl">
-              Ready to Begin Your Pre-Production Journey?
-            </h2>
-            <p className="text-white/60 mt-4 max-w-2xl mx-auto">
-              Join filmmakers who plan their vision with precision before the
-              cameras roll.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/dashboard"
-              className="glass-interactive text-white px-7 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
-            >
-              Get Started
-            </Link>
-            <Link
-              href="/auth"
-              className="glass-outline text-white/90 px-7 py-3.5 rounded-xl hover:bg-white/10 transition-all btn-animated btn-sky btn-ghost"
-            >
-              Request Demo
-            </Link>
+                  <div className="triptych-storyboard">
+                    {storyboardFrames.map((frame, index) => (
+                      <div key={frame} className="triptych-frame-card">
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">
+                          Frame {index + 1}
+                        </span>
+                        <p className="mt-2 text-sm text-white/88">{frame}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <button className="glass-interactive rounded-lg px-4 py-2 text-xs text-white btn-animated btn-amber">
+                      EXPORT ASSETS
+                    </button>
+                    <button className="glass-outline rounded-lg px-4 py-2 text-xs text-white/80 btn-animated btn-sky">
+                      SHARE BOARD
+                    </button>
+                  </div>
+                </section>
+              </article>
             </div>
           </div>
-          </section>
         </Reveal>
+      </section>
     </main>
   );
 }
