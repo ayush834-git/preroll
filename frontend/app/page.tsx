@@ -1,20 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import {
   Camera,
   ChevronDown,
   DollarSign,
-  LayoutPanelTop,
   ListChecks,
   Mic,
-  Play,
   Shield,
-  Sparkles,
   Star,
   Timer,
-  X,
 } from "lucide-react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import { Reveal } from "@/components/ui/reveal";
@@ -84,8 +79,6 @@ const spotlightStats = [
 ] as const;
 
 export default function LandingPage() {
-  const [previewOpen, setPreviewOpen] = useState(false);
-
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
       <nav className="relative z-10 mx-4 mt-4 md:mx-8 md:mt-6 rounded-2xl border border-white/10 px-4 py-4 md:px-6 glass-nav animate-glass-in">
@@ -133,7 +126,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-6xl">
             {/* Keep one dominant hero shell so the interface reads as handcrafted glass, not scattered cards. */}
             <div className="glass-hero rounded-[32px] p-7 md:p-12">
-              <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+              <div>
                 <div>
                   <p className="text-xs tracking-[0.35em] text-primary mb-5">
                 PRE-PRODUCTION PLATFORM
@@ -157,14 +150,12 @@ export default function LandingPage() {
                     >
                       Get Started
                     </Link>
-                    <button
-                      type="button"
-                      onClick={() => setPreviewOpen(true)}
+                    <Link
+                      href="/auth"
                       className="glass-button glass-button-secondary text-white/90 px-6 py-3.5 rounded-xl transition-all btn-animated btn-sky btn-ghost inline-flex items-center gap-2"
                     >
-                      <LayoutPanelTop className="h-4 w-4" />
-                      Preview Overlay
-                    </button>
+                      Log In
+                    </Link>
                   </div>
 
                   <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-white/60">
@@ -192,26 +183,6 @@ export default function LandingPage() {
                       <span>Cut prep time by 40%</span>
                     </div>
                   </div>
-                </div>
-                <div className="glass-panel rounded-2xl p-6 md:p-7">
-                  <p className="text-xs uppercase tracking-[0.3em] text-primary">
-                    LIVE GLASS WORKSPACE
-                  </p>
-                  <h3 className="mt-4 text-2xl font-display text-[color:var(--text-primary)]">
-                    Build a production pack in minutes
-                  </h3>
-                  <p className="mt-3 text-sm text-[color:var(--text-secondary)]">
-                    Scene intent, camera notes, sound cues, and budget strategy
-                    all generated into clean sections your crew can use.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewOpen(true)}
-                    className="mt-6 glass-button glass-button-primary px-4 py-2.5 rounded-xl inline-flex items-center gap-2 text-sm btn-animated btn-amber"
-                  >
-                    <Play className="h-4 w-4" />
-                    Open Review Overlay
-                  </button>
                 </div>
               </div>
             </div>
@@ -363,77 +334,6 @@ export default function LandingPage() {
           </div>
         </section>
       </Reveal>
-
-      {previewOpen && (
-        <div
-          className="glass-modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Preview Review Overlay"
-          onClick={() => setPreviewOpen(false)}
-        >
-          <div
-            className="glass-modal-panel animate-glass-pop rounded-3xl p-6 md:p-8"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs tracking-[0.3em] text-primary">
-                  REVIEW OVERLAY
-                </p>
-                <h3 className="font-display text-3xl mt-2 text-[color:var(--text-primary)]">
-                  Producer Notes Layer
-                </h3>
-                <p className="mt-3 text-sm text-[color:var(--text-secondary)] max-w-xl">
-                  Floating glass overlays keep discussion contextual while the
-                  generated production pack remains visible underneath.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="glass-button glass-button-secondary rounded-lg p-2 text-white/80 hover:text-white btn-animated btn-sky"
-                onClick={() => setPreviewOpen(false)}
-                aria-label="Close overlay"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <div className="glass-panel rounded-2xl p-4 md:p-5">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-white/50">
-                  Script Focus
-                </p>
-                <ul className="mt-3 space-y-2 text-sm text-white/80">
-                  <li className="inline-flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    Sharpen scene objective before exterior reveal.
-                  </li>
-                  <li className="inline-flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    Add one emotional beat for lead performance.
-                  </li>
-                </ul>
-              </div>
-              <div className="glass-panel rounded-2xl p-4 md:p-5">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-white/50">
-                  Production Focus
-                </p>
-                <ul className="mt-3 space-y-2 text-sm text-white/80">
-                  <li className="inline-flex items-center gap-2">
-                    <Shield className="h-3.5 w-3.5 text-primary" />
-                    Keep rain rig to one controlled location.
-                  </li>
-                  <li className="inline-flex items-center gap-2">
-                    <Shield className="h-3.5 w-3.5 text-primary" />
-                    Lock audio wild lines before wrap.
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }

@@ -566,40 +566,6 @@ button:focus-visible {
   outline: none;
 }
 
-.glass-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  padding: 1.5rem;
-  display: grid;
-  place-items: center;
-  background:
-    radial-gradient(
-      120% 90% at 50% -4%,
-      rgba(34, 22, 15, 0.28),
-      rgba(9, 5, 3, 0.66)
-    );
-  backdrop-filter: blur(12px) saturate(118%);
-  -webkit-backdrop-filter: blur(12px) saturate(118%);
-}
-
-.glass-modal-panel {
-  width: min(860px, 100%);
-  border: 1px solid rgba(252, 221, 191, 0.36);
-  background:
-    linear-gradient(
-      155deg,
-      rgba(126, 82, 56, 0.34),
-      rgba(70, 44, 31, 0.3) 56%,
-      rgba(51, 32, 23, 0.34)
-    );
-  box-shadow:
-    0 28px 72px rgba(7, 4, 2, 0.58),
-    inset 0 0 0 1px rgba(255, 243, 228, 0.1);
-  backdrop-filter: blur(28px) saturate(150%) brightness(1.05);
-  -webkit-backdrop-filter: blur(28px) saturate(150%) brightness(1.05);
-}
-
 @keyframes borderSpin {
   to {
     transform: rotate(1turn);
@@ -610,17 +576,6 @@ button:focus-visible {
   from {
     opacity: 0;
     transform: translate3d(0, 16px, 0) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-@keyframes glassPop {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 18px, 0) scale(0.985);
   }
   to {
     opacity: 1;
@@ -642,10 +597,6 @@ button:focus-visible {
 
 .animate-glass-in {
   animation: glassIn 760ms var(--motion-ease-smooth) both;
-}
-
-.animate-glass-pop {
-  animation: glassPop 340ms var(--motion-ease-smooth) both;
 }
 
 .loading-dots {
@@ -858,15 +809,6 @@ button:focus-visible {
   --glass-blur-secondary: 0px;
   --glass-blur-ambient: 0px;
   --glass-blur-input: 0px;
-}
-
-:root[data-performance="performance"] .glass-modal-overlay {
-  backdrop-filter: none;
-}
-
-:root[data-performance="performance"] .glass-modal-panel {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 :root[data-performance="reduced"] .cinematic-bg-grain {
