@@ -13,6 +13,8 @@ export function GlobalBackground({ children, className }: GlobalBackgroundProps)
       {/* Single global background stack keeps visual tone consistent across routes. */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <CinematicWebglBackground />
+        <div className="cinematic-bg-colorwash absolute inset-0" />
+        <div className="cinematic-bg-bloom absolute inset-0" />
         <div className="cinematic-bg-base absolute inset-0" />
         <div className="cinematic-bg-atmosphere absolute inset-0" />
         <div className="cinematic-bg-rim-light absolute inset-0" />

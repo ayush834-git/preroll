@@ -1,15 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   Camera,
   ChevronDown,
   DollarSign,
+  LayoutPanelTop,
   ListChecks,
   Mic,
+  Play,
   Shield,
+  Sparkles,
   Star,
   Timer,
+  X,
 } from "lucide-react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import { Reveal } from "@/components/ui/reveal";
@@ -63,30 +68,33 @@ const workflow = [
 const spotlightStats = [
   {
     label: "Generation Modes",
-    value: "Scene / Sound / Budget",
+    value: "Scene / Sound / Budget / Notes",
     glow: "caramel",
   },
   {
     label: "Production Reports",
-    value: "Structured, shareable docs",
+    value: "Polished, shareable outputs",
     glow: "copper",
   },
   {
     label: "Constraint-driven generation",
-    value: "Structured inputs -> structured outputs",
+    value: "Craft-first cinematic planning",
     glow: "olive",
   },
 ] as const;
 
 export default function LandingPage() {
+  const [previewOpen, setPreviewOpen] = useState(false);
+
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
-        <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 glass-ambient">
+      <nav className="relative z-10 mx-4 mt-4 md:mx-8 md:mt-6 rounded-2xl border border-white/10 px-4 py-4 md:px-6 glass-nav animate-glass-in">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-bg font-bold shadow-glow">
+            <div className="h-9 w-9 rounded-lg bg-primary/95 flex items-center justify-center text-bg font-bold shadow-glow">
               P
             </div>
-            <span className="font-semibold tracking-wide text-white">
+            <span className="font-semibold tracking-[0.18em] text-white/90">
               PREROLL
             </span>
           </div>
@@ -106,72 +114,104 @@ export default function LandingPage() {
           <div className="flex gap-3">
             <Link
               href="/auth"
-              className="text-white/80 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors btn-animated btn-sky btn-ghost"
+              className="glass-button text-white/90 px-4 py-2 rounded-lg transition-colors btn-animated btn-sky btn-ghost"
             >
               Log In
             </Link>
             <Link
               href="/dashboard"
-              className="glass-interactive text-white px-5 py-2.5 rounded-lg transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
+              className="glass-button glass-button-primary text-white px-5 py-2.5 rounded-lg transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
             >
               Get Started
             </Link>
           </div>
-        </nav>
+        </div>
+      </nav>
 
-        <Reveal>
-          <section className="relative z-10 px-6 md:px-10 pt-24 pb-16">
-          <div className="mx-auto max-w-5xl">
-            <div>
-              <p className="text-xs tracking-[0.35em] text-primary mb-5">
+      <Reveal>
+        <section className="relative z-10 px-6 md:px-10 pt-16 md:pt-20 pb-14">
+          <div className="mx-auto max-w-6xl">
+            {/* Keep one dominant hero shell so the interface reads as handcrafted glass, not scattered cards. */}
+            <div className="glass-hero rounded-[32px] p-7 md:p-12">
+              <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+                <div>
+                  <p className="text-xs tracking-[0.35em] text-primary mb-5">
                 PRE-PRODUCTION PLATFORM
               </p>
 
-              <h1 className="font-hero-italic text-5xl md:text-6xl leading-tight">
-                Where Films Begin <br />
-                <span className="text-primary">
-                  Before the Camera Rolls
-                </span>
-              </h1>
+                  <h1 className="font-hero-italic text-4xl md:text-6xl leading-tight text-[color:var(--text-primary)]">
+                    Where Films Begin <br />
+                    <span className="text-primary">Before the Camera Rolls</span>
+                  </h1>
 
-              <p className="mt-6 text-white/70 max-w-xl text-lg">
-                A cinematic workspace for directors, writers, and production
-                teams to shape scripts, plan shots, and align vision before the
-                first frame is captured.
-              </p>
+                  <p className="mt-6 text-[color:var(--text-secondary)] max-w-xl text-lg">
+                    A cinematic workspace for directors, writers, and production
+                    teams to shape scripts, plan shots, and align vision before
+                    the first frame is captured.
+                  </p>
 
-              <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-                href="/dashboard"
-                className="glass-interactive text-white px-6 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
-              >
-                Get Started
-              </Link>
-              </div>
+                  <div className="mt-10 flex flex-wrap gap-4">
+                    <Link
+                      href="/dashboard"
+                      className="glass-button glass-button-primary text-white px-6 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
+                    >
+                      Get Started
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewOpen(true)}
+                      className="glass-button glass-button-secondary text-white/90 px-6 py-3.5 rounded-xl transition-all btn-animated btn-sky btn-ghost inline-flex items-center gap-2"
+                    >
+                      <LayoutPanelTop className="h-4 w-4" />
+                      Preview Overlay
+                    </button>
+                  </div>
 
-              <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-white/60">
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Live previews
-                </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  AI workflows
-                </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Team ready
-                </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Secure by design
-                </span>
-              </div>
+                  <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-white/60">
+                    <span className="glass-pill px-3 py-1 rounded-full">
+                      Live previews
+                    </span>
+                    <span className="glass-pill px-3 py-1 rounded-full">
+                      AI workflows
+                    </span>
+                    <span className="glass-pill px-3 py-1 rounded-full">
+                      Team ready
+                    </span>
+                    <span className="glass-pill px-3 py-1 rounded-full">
+                      Secure by design
+                    </span>
+                  </div>
 
-              <div className="mt-12 flex items-center gap-5 text-sm text-white/50">
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-primary" />
-                  <span>Trusted by indie studios</span>
+                  <div className="mt-12 flex flex-wrap items-center gap-5 text-sm text-white/50">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-primary" />
+                      <span>Trusted by indie studios</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Timer className="h-4 w-4 text-primary" />
+                      <span>Cut prep time by 40%</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Timer className="h-4 w-4 text-primary" />
-                  <span>Cut prep time by 40%</span>
+                <div className="glass-panel rounded-2xl p-6 md:p-7">
+                  <p className="text-xs uppercase tracking-[0.3em] text-primary">
+                    LIVE GLASS WORKSPACE
+                  </p>
+                  <h3 className="mt-4 text-2xl font-display text-[color:var(--text-primary)]">
+                    Build a production pack in minutes
+                  </h3>
+                  <p className="mt-3 text-sm text-[color:var(--text-secondary)]">
+                    Scene intent, camera notes, sound cues, and budget strategy
+                    all generated into clean sections your crew can use.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewOpen(true)}
+                    className="mt-6 glass-button glass-button-primary px-4 py-2.5 rounded-xl inline-flex items-center gap-2 text-sm btn-animated btn-amber"
+                  >
+                    <Play className="h-4 w-4" />
+                    Open Review Overlay
+                  </button>
                 </div>
               </div>
             </div>
@@ -183,11 +223,11 @@ export default function LandingPage() {
                 key={item.label}
                 customSize
                 glowColor={item.glow}
-                className="w-full min-h-[160px] p-6"
+                className="w-full min-h-[160px] p-6 glass-card-rich"
               >
                 <div className="flex h-full flex-col justify-between">
-                  <p className="text-white/60 text-sm">{item.label}</p>
-                  <p className="font-display text-3xl text-primary">
+                  <p className="text-white/65 text-sm">{item.label}</p>
+                  <p className="font-display text-3xl text-primary leading-tight">
                     {item.value}
                   </p>
                 </div>
@@ -199,14 +239,14 @@ export default function LandingPage() {
             <ChevronDown className="h-4 w-4" />
             <span className="text-xs uppercase tracking-[0.25em]">Scroll</span>
           </div>
-          </section>
-        </Reveal>
+        </section>
+      </Reveal>
 
-        <Reveal>
-          <section
-            id="features"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
+      <Reveal>
+        <section
+          id="features"
+          className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
+        >
           <div className="text-center mb-12">
             <p className="text-xs tracking-[0.3em] text-primary mb-3">
               FEATURES
@@ -222,11 +262,11 @@ export default function LandingPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {features.map((item) => (
-                <GlowCard
+              <GlowCard
                 key={item.title}
                 customSize
                 glowColor="copper"
-                className="w-full p-6"
+                className="w-full p-6 glass-card-rich"
               >
                 <div className="h-12 w-12 rounded-xl glass-outline flex items-center justify-center mb-4">
                   {item.icon}
@@ -236,20 +276,19 @@ export default function LandingPage() {
               </GlowCard>
             ))}
           </div>
-          </section>
-        </Reveal>
+        </section>
+      </Reveal>
 
-
-        <Reveal>
-          <section
-            id="workflow"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
+      <Reveal>
+        <section
+          id="workflow"
+          className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
+        >
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
             <div>
-            <p className="text-xs tracking-[0.3em] text-primary mb-3">
-              WORKFLOW
-            </p>
+              <p className="text-xs tracking-[0.3em] text-primary mb-3">
+                WORKFLOW
+              </p>
               <h2 className="font-hero-italic text-4xl md:text-5xl">
                 Plan Every Shot
               </h2>
@@ -262,11 +301,11 @@ export default function LandingPage() {
 
           <div className="grid gap-6">
             {workflow.map((item) => (
-                <GlowCard
+              <GlowCard
                 key={item.step}
                 customSize
                 glowColor="olive"
-                className="w-full p-6"
+                className="w-full p-6 glass-card-rich"
               >
                 <div className="flex flex-col md:flex-row md:items-center gap-6">
                   <div className="flex items-center gap-4">
@@ -288,14 +327,14 @@ export default function LandingPage() {
               </GlowCard>
             ))}
           </div>
-          </section>
-        </Reveal>
+        </section>
+      </Reveal>
 
-        <Reveal>
-          <section
-            id="pricing"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
+      <Reveal>
+        <section
+          id="pricing"
+          className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
+        >
           <div className="glass-panel rounded-3xl p-10 md:p-12 text-center">
             <p className="text-xs tracking-[0.3em] text-primary mb-3">
               START CREATING
@@ -308,22 +347,93 @@ export default function LandingPage() {
               cameras roll.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/dashboard"
-              className="glass-interactive text-white px-7 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
-            >
-              Get Started
-            </Link>
-            <Link
-              href="/auth"
-              className="glass-outline text-white/90 px-7 py-3.5 rounded-xl hover:bg-white/10 transition-all btn-animated btn-sky btn-ghost"
-            >
-              Request Demo
-            </Link>
+              <Link
+                href="/dashboard"
+                className="glass-button glass-button-primary text-white px-7 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
+              >
+                Get Started
+              </Link>
+              <Link
+                href="/auth"
+                className="glass-button glass-button-secondary text-white/90 px-7 py-3.5 rounded-xl hover:bg-white/10 transition-all btn-animated btn-sky btn-ghost"
+              >
+                Request Demo
+              </Link>
             </div>
           </div>
-          </section>
-        </Reveal>
+        </section>
+      </Reveal>
+
+      {previewOpen && (
+        <div
+          className="glass-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Preview Review Overlay"
+          onClick={() => setPreviewOpen(false)}
+        >
+          <div
+            className="glass-modal-panel animate-glass-pop rounded-3xl p-6 md:p-8"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs tracking-[0.3em] text-primary">
+                  REVIEW OVERLAY
+                </p>
+                <h3 className="font-display text-3xl mt-2 text-[color:var(--text-primary)]">
+                  Producer Notes Layer
+                </h3>
+                <p className="mt-3 text-sm text-[color:var(--text-secondary)] max-w-xl">
+                  Floating glass overlays keep discussion contextual while the
+                  generated production pack remains visible underneath.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="glass-button glass-button-secondary rounded-lg p-2 text-white/80 hover:text-white btn-animated btn-sky"
+                onClick={() => setPreviewOpen(false)}
+                aria-label="Close overlay"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div className="glass-panel rounded-2xl p-4 md:p-5">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-white/50">
+                  Script Focus
+                </p>
+                <ul className="mt-3 space-y-2 text-sm text-white/80">
+                  <li className="inline-flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    Sharpen scene objective before exterior reveal.
+                  </li>
+                  <li className="inline-flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    Add one emotional beat for lead performance.
+                  </li>
+                </ul>
+              </div>
+              <div className="glass-panel rounded-2xl p-4 md:p-5">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-white/50">
+                  Production Focus
+                </p>
+                <ul className="mt-3 space-y-2 text-sm text-white/80">
+                  <li className="inline-flex items-center gap-2">
+                    <Shield className="h-3.5 w-3.5 text-primary" />
+                    Keep rain rig to one controlled location.
+                  </li>
+                  <li className="inline-flex items-center gap-2">
+                    <Shield className="h-3.5 w-3.5 text-primary" />
+                    Lock audio wild lines before wrap.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
