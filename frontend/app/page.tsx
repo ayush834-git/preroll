@@ -2,319 +2,260 @@
 
 import Link from "next/link";
 import {
-  Camera,
-  ChevronDown,
-  DollarSign,
-  ListChecks,
+  ArrowRight,
+  Bluetooth,
+  Gauge,
   Mic,
-  Shield,
-  Star,
-  Timer,
+  TimerReset,
+  Volume2,
+  Wind,
 } from "lucide-react";
-import { GlowCard } from "@/components/ui/spotlight-card";
 import { Reveal } from "@/components/ui/reveal";
 
-const features = [
+const highlights = [
   {
-    title: "Scene Breakdown Reports",
-    body: "Assistant Director-style breakdowns with objectives, locations, props, beats, and coverage needs.",
-    icon: <ListChecks className="h-5 w-5 text-primary" />,
+    title: "Hear Every Detail",
+    body: "High-resolution audio structure for clean dialog, score depth, and tighter control while reviewing cuts.",
+    tone: "sand",
   },
   {
-    title: "Sound Design Sheets",
-    body: "Ambient beds, diegetic cues, transitions, and mixing notes crafted per scene.",
-    icon: <Mic className="h-5 w-5 text-primary" />,
+    title: "120 Hours Of Playtime",
+    body: "Long sessions without interruption, from script pass to final team handoff.",
+    tone: "charcoal",
   },
   {
-    title: "Budget Plan Line Items",
-    body: "Cast, crew, locations, gear, VFX, marketing, and post with cost ranges and savings.",
-    icon: <DollarSign className="h-5 w-5 text-primary" />,
+    title: "Adaptive Focus Mode",
+    body: "Noise-resistant monitoring for precise pre-production decisions in any environment.",
+    tone: "sand",
   },
-  {
-    title: "Visual Direction",
-    body: "Cinematography and production design guidance for lighting, palette, and framing.",
-    icon: <Camera className="h-5 w-5 text-primary" />,
-  },
-];
-
-const workflow = [
-  {
-    step: "01",
-    title: "Ideate & Outline",
-    body: "Capture concepts, themes, and structure with AI-assisted prompts.",
-  },
-  {
-    step: "02",
-    title: "Breakdown & Schedule",
-    body: "Tag props, cast, and locations; generate production-ready documents.",
-  },
-  {
-    step: "03",
-    title: "Visualize",
-    body: "Create boards, lighting diagrams, and camera setups for every scene.",
-  },
-  {
-    step: "04",
-    title: "Collaborate & Refine",
-    body: "Share with your team, gather feedback, and iterate until ready.",
-  },
-];
-
-const spotlightStats = [
-  { label: "Generation Modes", value: "Scene / Sound / Budget", glow: "orange" },
-  { label: "Production Reports", value: "Structured, shareable docs", glow: "blue" },
-  { label: "Constraint-driven generation", value: "Structured inputs → structured outputs", glow: "green" },
 ] as const;
+
+const otherFeatures = [
+  {
+    title: "Quad-mic clarity",
+    subtitle: "Clearer calls on the move",
+    icon: Mic,
+  },
+  {
+    title: "Fast pairing",
+    subtitle: "Connects before you know it",
+    icon: Bluetooth,
+  },
+  {
+    title: "Low latency",
+    subtitle: "Up to 80ms response",
+    icon: Gauge,
+  },
+  {
+    title: "Spatial sound",
+    subtitle: "Feels like live room audio",
+    icon: Volume2,
+  },
+] as const;
+
+const specs = [
+  { label: "Drivers", value: "40mm + 12mm dual system" },
+  { label: "Playback", value: "Up to 120 hours" },
+  { label: "Fast charge", value: "10 min = 6 hours" },
+  { label: "ANC", value: "Adaptive up to 45 dB" },
+];
 
 export default function LandingPage() {
   return (
-    <main className="relative min-h-screen text-white overflow-hidden">
-        <div className="absolute inset-0 z-0 grain-overlay" />
-        <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-primary/15 blur-[120px]" />
+    <main className="relative min-h-screen overflow-hidden text-white">
 
-        <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 glass-panel">
+      <nav className="glass-panel-strong relative z-10 border-b border-white/10 px-6 py-5 md:px-10">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-bg font-bold shadow-glow">
+            <div className="glass-interactive grid h-10 w-10 place-items-center rounded-md text-white font-bold">
               P
             </div>
-            <span className="font-semibold tracking-wide text-white">
-              PREROLL
+            <span className="text-sm font-semibold tracking-[0.2em] text-white/90">
+              PREROLL AUDIO
             </span>
           </div>
 
-          <div className="hidden md:flex gap-8 text-sm text-white/70">
-            <a href="#features" className="hover:text-white transition-colors">
+          <div className="hidden items-center gap-8 text-xs uppercase tracking-[0.22em] text-white/70 md:flex">
+            <a href="#highlights" className="transition-colors hover:text-white">
+              Highlights
+            </a>
+            <a href="#features" className="transition-colors hover:text-white">
               Features
             </a>
-            <a href="#workflow" className="hover:text-white transition-colors">
-              Workflow
-            </a>
-            <a href="#pricing" className="hover:text-white transition-colors">
-              Pricing
+            <a href="#specs" className="transition-colors hover:text-white">
+              Specs
             </a>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
             <Link
               href="/auth"
-              className="text-white/80 hover:text-white px-4 py-2 rounded-lg glass-outline transition-colors btn-animated btn-sky btn-ghost"
+              className="glass-interactive rounded-md px-4 py-2 text-xs uppercase tracking-[0.18em] text-white/85 transition-colors hover:text-white btn-animated btn-sky"
             >
               Log In
             </Link>
             <Link
               href="/dashboard"
-              className="bg-primary text-bg px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
+              className="glass-interactive rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:text-white btn-animated btn-amber"
             >
-              Get Started
+              Pre-Book
             </Link>
           </div>
-        </nav>
+        </div>
+      </nav>
 
-        <Reveal>
-          <section className="relative z-10 px-6 md:px-10 pt-24 pb-16">
-          <div className="mx-auto max-w-5xl">
+      <Reveal>
+        <section className="relative z-10 px-6 pb-20 pt-16 md:px-10 md:pt-20">
+          <div className="mx-auto grid w-full max-w-7xl gap-12 lg:grid-cols-[1.1fr_1fr] lg:items-center">
             <div>
-              <p className="text-xs tracking-[0.35em] text-primary mb-5">
-                PRE-PRODUCTION PLATFORM
+              <p className="text-xs uppercase tracking-[0.42em] text-[#f6e7bd]/90">
+                The All New
               </p>
-
-              <h1 className="font-hero-italic text-5xl md:text-6xl leading-tight">
-                Where Films Begin <br />
-                <span className="text-primary">
-                  Before the Camera Rolls
-                </span>
+              <h1 className="mt-5 text-[clamp(3rem,8vw,7rem)] font-black uppercase leading-[0.86] tracking-[0.04em] text-[#fff5dc]">
+                Airwave
+                <br />
+                Max 6
               </h1>
-
-              <p className="mt-6 text-white/70 max-w-xl text-lg">
-                A cinematic workspace for directors, writers, and production
-                teams to shape scripts, plan shots, and align vision before the
-                first frame is captured.
+              <p className="mt-7 max-w-xl text-base text-white/70 md:text-lg">
+                Product-page inspired experience for Preroll: bold headline,
+                premium rhythm, focused feature storytelling, and strong CTA
+                hierarchy.
               </p>
-
-              <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-                href="/dashboard"
-                className="bg-primary text-bg px-6 py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber btn-cta"
-              >
-                Get Started
-              </Link>
-              </div>
-
-              <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-white/60">
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Live previews
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/dashboard"
+                  className="glass-interactive inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:text-white btn-animated btn-amber"
+                >
+                  Pre-Book Now
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <span className="glass-pill rounded-md px-4 py-3 text-sm text-white/85">
+                  Launch offer: Rs. 1000 off
                 </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  AI workflows
-                </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Team ready
-                </span>
-                <span className="glass-pill px-3 py-1 rounded-full">
-                  Secure by design
-                </span>
-              </div>
-
-              <div className="mt-12 flex items-center gap-5 text-sm text-white/50">
-                <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-primary" />
-                  <span>Trusted by indie studios</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Timer className="h-4 w-4 text-primary" />
-                  <span>Cut prep time by 40%</span>
-                </div>
               </div>
             </div>
-          </div>
 
-          <div className="mx-auto mt-14 max-w-6xl grid gap-6 md:grid-cols-3">
-            {spotlightStats.map((item) => (
-              <GlowCard
-                key={item.label}
-                customSize
-                glowColor={item.glow}
-                className="w-full min-h-[160px] p-6"
-              >
-                <div className="flex h-full flex-col justify-between">
-                  <p className="text-white/60 text-sm">{item.label}</p>
-                  <p className="font-display text-3xl text-primary">
-                    {item.value}
+            <div className="relative mx-auto h-[19rem] w-full max-w-[35rem] md:h-[24rem]">
+              <div className="glass-panel-strong absolute inset-0 rounded-[2rem]" />
+              <div className="glass-outline absolute left-1/2 top-[52%] h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full md:h-56 md:w-56" />
+              <div className="glass-outline absolute left-[20%] top-1/2 h-28 w-28 -translate-y-1/2 rounded-full md:h-36 md:w-36" />
+              <div className="glass-outline absolute right-[20%] top-1/2 h-28 w-28 -translate-y-1/2 rounded-full md:h-36 md:w-36" />
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section id="highlights" className="relative z-10 px-6 pb-20 md:px-10">
+          <div className="mx-auto max-w-7xl">
+            <p className="mb-6 text-xs uppercase tracking-[0.32em] text-white/60">
+              Get The Highlights
+            </p>
+            <div className="grid gap-5 md:grid-cols-3">
+              {highlights.map((item) => (
+                <article
+                  key={item.title}
+                  className={`glass-panel rounded-2xl p-6 ${
+                    item.tone === "sand"
+                      ? "border-white/25"
+                      : "border-white/16"
+                  }`}
+                >
+                  <h2 className="text-3xl font-extrabold uppercase leading-[0.92] tracking-[0.02em] md:text-4xl">
+                    {item.title}
+                  </h2>
+                  <p
+                    className="mt-4 text-sm text-white/72"
+                  >
+                    {item.body}
                   </p>
-                </div>
-              </GlowCard>
-            ))}
+                </article>
+              ))}
+            </div>
           </div>
+        </section>
+      </Reveal>
 
-          <div className="mt-14 flex items-center gap-2 text-white/50">
-            <ChevronDown className="h-4 w-4" />
-            <span className="text-xs uppercase tracking-[0.25em]">Scroll</span>
-          </div>
-          </section>
-        </Reveal>
-
-        <Reveal>
-          <section
-            id="features"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
-          <div className="text-center mb-12">
-            <p className="text-xs tracking-[0.3em] text-primary mb-3">
-              FEATURES
-            </p>
-            <h2 className="font-hero-italic text-4xl md:text-5xl">
-              Everything Before Action
-            </h2>
-            <p className="mt-4 text-white/60 max-w-2xl mx-auto">
-              Professional tools designed for the crucial planning phase that
-              defines every great film.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {features.map((item) => (
-              <GlowCard
-                key={item.title}
-                customSize
-                glowColor="blue"
-                className="w-full p-6"
-              >
-                <div className="h-12 w-12 rounded-xl glass-outline flex items-center justify-center mb-4">
-                  {item.icon}
-                </div>
-                <h3 className="text-xl font-medium">{item.title}</h3>
-                <p className="text-white/60 mt-3">{item.body}</p>
-              </GlowCard>
-            ))}
-          </div>
-          </section>
-        </Reveal>
-
-
-        <Reveal>
-          <section
-            id="workflow"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
+      <Reveal>
+        <section id="features" className="relative z-10 border-y border-white/10 px-6 py-20 md:px-10">
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
             <div>
-            <p className="text-xs tracking-[0.3em] text-primary mb-3">
-              WORKFLOW
-            </p>
-              <h2 className="font-hero-italic text-4xl md:text-5xl">
-                Plan Every Shot
+              <p className="text-xs uppercase tracking-[0.3em] text-white/60">
+                Booming Sound
+              </p>
+              <h2 className="mt-4 text-5xl font-black uppercase leading-[0.88] tracking-[0.04em] text-[#fff4d7] md:text-6xl">
+                Detail That Hits
               </h2>
+              <p className="mt-6 max-w-md text-white/70">
+                With LDAC and high-fidelity tuning, you hear cleaner layers,
+                tighter edges, and better decision-making cues while editing and
+                planning.
+              </p>
+              <div className="mt-8 flex items-center gap-3 text-[#f6e7bd]">
+                <Wind className="h-5 w-5" />
+                <span className="text-sm uppercase tracking-[0.2em]">
+                  Adaptive Noise Cancellation
+                </span>
+              </div>
             </div>
-            <p className="text-white/60 max-w-xl">
-              From concept to shot list, Preroll keeps every department aligned
-              with a single cinematic source of truth.
-            </p>
-          </div>
 
-          <div className="grid gap-6">
-            {workflow.map((item) => (
-              <GlowCard
-                key={item.step}
-                customSize
-                glowColor="blue"
-                className="w-full p-6"
-              >
-                <div className="flex flex-col md:flex-row md:items-center gap-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full glass-outline flex items-center justify-center text-primary font-semibold">
-                      {item.step}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-medium">{item.title}</h3>
-                      <p className="text-white/60 mt-2">{item.body}</p>
-                    </div>
-                  </div>
-                  <div className="md:ml-auto hidden md:flex items-center gap-3 text-white/50">
-                    <Shield className="h-4 w-4" />
-                    <span className="text-xs uppercase tracking-[0.2em]">
-                      Secure
-                    </span>
-                  </div>
-                </div>
-              </GlowCard>
-            ))}
-          </div>
-          </section>
-        </Reveal>
-
-        <Reveal>
-          <section
-            id="pricing"
-            className="relative z-10 px-6 md:px-10 py-16 max-w-6xl mx-auto"
-          >
-          <div className="glass-panel rounded-3xl p-10 md:p-12 text-center">
-            <p className="text-xs tracking-[0.3em] text-primary mb-3">
-              START CREATING
-            </p>
-            <h2 className="font-hero-italic text-4xl md:text-5xl">
-              Ready to Begin Your Pre-Production Journey?
-            </h2>
-            <p className="text-white/60 mt-4 max-w-2xl mx-auto">
-              Join filmmakers who plan their vision with precision before the
-              cameras roll.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/dashboard"
-              className="bg-primary text-bg px-7 py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber btn-cta"
-            >
-              Get Started
-            </Link>
-            <Link
-              href="/auth"
-              className="glass-outline text-white/90 px-7 py-3.5 rounded-xl hover:bg-white/10 transition-all btn-animated btn-sky btn-ghost"
-            >
-              Request Demo
-            </Link>
+            <div className="glass-panel rounded-3xl p-8">
+              <div className="grid gap-5 sm:grid-cols-2">
+                {otherFeatures.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <article
+                      key={item.title}
+                      className="glass-outline rounded-xl p-5"
+                    >
+                      <Icon className="h-5 w-5 text-[#f6e7bd]" />
+                      <h3 className="mt-3 text-lg font-semibold">{item.title}</h3>
+                      <p className="mt-2 text-sm text-white/65">{item.subtitle}</p>
+                    </article>
+                  );
+                })}
+              </div>
             </div>
           </div>
-          </section>
-        </Reveal>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section id="specs" className="relative z-10 px-6 py-20 md:px-10">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.32em] text-white/60">
+                  Technical Specifications
+                </p>
+                <h2 className="mt-4 text-4xl font-black uppercase leading-[0.9] tracking-[0.03em] text-[#fff4d7] md:text-5xl">
+                  Built With Thought
+                </h2>
+              </div>
+              <div className="glass-pill inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm text-white/75">
+                <TimerReset className="h-4 w-4 text-[#f6e7bd]" />
+                No pause mode
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {specs.map((spec) => (
+                <article
+                  key={spec.label}
+                  className="glass-outline flex items-center justify-between rounded-xl px-5 py-4"
+                >
+                  <span className="text-sm uppercase tracking-[0.18em] text-white/60">
+                    {spec.label}
+                  </span>
+                  <span className="text-sm font-semibold text-[#f6e7bd]">
+                    {spec.value}
+                  </span>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      </Reveal>
     </main>
   );
 }

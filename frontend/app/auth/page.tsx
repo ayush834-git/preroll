@@ -7,11 +7,7 @@ export default function AuthPage() {
   const router = useRouter();
 
   return (
-    <main className="relative min-h-screen bg-bg text-white flex items-center justify-center px-6 overflow-hidden">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-bg via-bg to-surface z-0" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(230,162,60,0.12),transparent)] z-0" />
-
+    <main className="relative min-h-screen text-white flex items-center justify-center px-6 overflow-hidden">
       <div className="relative z-10 w-full max-w-md">
         <Link
           href="/"
@@ -37,7 +33,7 @@ export default function AuthPage() {
 
             <button
               onClick={() => router.push("/dashboard")}
-              className="w-full mt-4 bg-primary text-bg py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-glow btn-animated btn-amber btn-cta"
+              className="w-full mt-4 glass-interactive py-3.5 rounded-xl transition-colors text-white btn-animated btn-amber btn-cta"
             >
               Continue
             </button>
