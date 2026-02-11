@@ -328,7 +328,7 @@ export default function LandingPage() {
                 href="/auth"
                 className="glass-button glass-button-secondary text-white/90 px-7 py-3.5 rounded-xl hover:bg-white/10 transition-all btn-animated btn-sky btn-ghost"
               >
-                Request Demo
+                Log In
               </Link>
             </div>
           </div>

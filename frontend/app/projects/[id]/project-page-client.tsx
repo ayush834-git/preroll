@@ -53,8 +53,76 @@ type AIResult = LegacyAIResult & {
   sections?: SectionBlock[];
 };
 
+type StoredProjectContent = {
+  prompt?: string;
+  params?: Partial<GenerationParams>;
+  result?: AIResult | null;
+  generatedAt?: string | null;
+  version?: number;
+  lastPrompt?: string;
+};
+
 type LegacySectionKey = keyof Omit<LegacyAIResult, "raw">;
 type SectionKey = string;
+
+const DEFAULT_GENERATION_PARAMS: GenerationParams = {
+  genre: "",
+  budgetTier: "Medium",
+  runtimeEstimate: "",
+  locationCount: "",
+  sceneComplexity: "Medium",
+  generationType: "Scene Breakdown",
+};
+
+const hydrateGenerationParams = (value?: Partial<GenerationParams>): GenerationParams => ({
+  genre: typeof value?.genre === "string" ? value.genre : "",
+  budgetTier:
+    value?.budgetTier === "Low" ||
+    value?.budgetTier === "Medium" ||
+    value?.budgetTier === "High"
+      ? value.budgetTier
+      : "Medium",
+  runtimeEstimate:
+    typeof value?.runtimeEstimate === "string" ? value.runtimeEstimate : "",
+  locationCount:
+    typeof value?.locationCount === "string" ? value.locationCount : "",
+  sceneComplexity:
+    value?.sceneComplexity === "Low" ||
+    value?.sceneComplexity === "Medium" ||
+    value?.sceneComplexity === "High"
+      ? value.sceneComplexity
+      : "Medium",
+  generationType:
+    typeof value?.generationType === "string" && value.generationType.trim()
+      ? value.generationType
+      : DEFAULT_GENERATION_PARAMS.generationType,
+});
+
+const parseStoredProjectContent = (value: unknown): StoredProjectContent => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+  const record = value as Record<string, unknown>;
+  return {
+    prompt: typeof record.prompt === "string" ? record.prompt : "",
+    params:
+      record.params && typeof record.params === "object"
+        ? (record.params as Partial<GenerationParams>)
+        : undefined,
+    result:
+      record.result && typeof record.result === "object"
+        ? (record.result as AIResult)
+        : null,
+    generatedAt:
+      typeof record.generatedAt === "string" ? record.generatedAt : null,
+    version:
+      typeof record.version === "number" && Number.isFinite(record.version)
+        ? record.version
+        : 0,
+    lastPrompt:
+      typeof record.lastPrompt === "string" ? record.lastPrompt : "",
+  };
+};
 
 const SECTION_LABELS: Record<LegacySectionKey, string> = {
   executiveSummary: "Executive Summary",
@@ -405,29 +473,45 @@ const iconForTitle = (title: string): ReactNode => {
   return <ListChecks className="h-4 w-4" />;
 };
 
-export default function ProjectPageClient({ id }: { id: string }) {
-  const [prompt, setPrompt] = useState("");
+export default function ProjectPageClient({
+  id,
+  title,
+  initialContent,
+}: {
+  id: string;
+  title: string;
+  initialContent: unknown;
+}) {
+  const hydratedContent = parseStoredProjectContent(initialContent);
+  const hydratedParams = hydrateGenerationParams(hydratedContent.params);
+  const hydratedResult = hydratedContent.result ?? null;
+  const parsedGeneratedAt = hydratedContent.generatedAt
+    ? new Date(hydratedContent.generatedAt)
+    : null;
+  const hydratedGeneratedAt =
+    parsedGeneratedAt && !Number.isNaN(parsedGeneratedAt.getTime())
+      ? parsedGeneratedAt
+      : null;
+  const hydratedVersion =
+    typeof hydratedContent.version === "number" && hydratedContent.version > 0
+      ? hydratedContent.version
+      : 0;
+  const hydratedLastPrompt = hydratedContent.lastPrompt ?? "";
+  const [prompt, setPrompt] = useState(hydratedContent.prompt ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [saveNotice, setSaveNotice] = useState("");
   const [copied, setCopied] = useState(false);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState("");
-  const [result, setResult] = useState<AIResult | null>(null);
-  const [generatedAt, setGeneratedAt] = useState<Date | null>(null);
-  const [version, setVersion] = useState(0);
-  const [lastPrompt, setLastPrompt] = useState("");
+  const [result, setResult] = useState<AIResult | null>(hydratedResult);
+  const [generatedAt, setGeneratedAt] = useState<Date | null>(hydratedGeneratedAt);
+  const [version, setVersion] = useState(hydratedVersion);
+  const [lastPrompt, setLastPrompt] = useState(hydratedLastPrompt);
   const [lastParams, setLastParams] = useState<GenerationParams | null>(null);
   const [selectedSection, setSelectedSection] =
-    useState<SectionKey>("executiveSummary");
-  const [params, setParams] = useState<GenerationParams>({
-    genre: "",
-    budgetTier: "Medium",
-    runtimeEstimate: "",
-    locationCount: "",
-    sceneComplexity: "Medium",
-    generationType: "Scene Breakdown",
-  });
+    useState<SectionKey>(hydratedResult?.sections?.[0]?.id ?? "executiveSummary");
+  const [params, setParams] = useState<GenerationParams>(hydratedParams);
 
   const navSections: Array<{ key: SectionKey; label: string }> = useMemo(() => {
     if (result?.sections?.length) {
@@ -990,6 +1074,21 @@ export default function ProjectPageClient({ id }: { id: string }) {
     }
   };
 
+  const persistProjectContent = async (content: StoredProjectContent) => {
+    // Persist generated content to DB so projects rehydrate across sessions.
+    const response = await fetch(`/api/projects/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save project.");
+    }
+  };
+
   const runGeneration = async (requestPrompt: string, sourcePrompt?: string) => {
     const trimmedRequest = requestPrompt.trim();
     if (!trimmedRequest) return;
@@ -1003,13 +1102,32 @@ export default function ProjectPageClient({ id }: { id: string }) {
     try {
       const data = await generateScript(trimmedRequest, params);
       const parsed = parseAIResult(data.output || "");
+      const generatedAtDate = new Date();
+      const nextVersion = (version || 0) + 1;
+      const persistedLastPrompt = (sourcePrompt ?? trimmedRequest).trim();
+      const persistedPrompt = prompt.trim() || persistedLastPrompt;
+
       setResult(parsed);
       setCopied(false);
-      setGeneratedAt(new Date());
-      setVersion((prev) => prev + 1);
-      setLastPrompt((sourcePrompt ?? trimmedRequest).trim());
-      setLastParams({ ...params });
+      setGeneratedAt(generatedAtDate);
+      setVersion(nextVersion);
+      setLastPrompt(persistedLastPrompt);
+      const paramsSnapshot = { ...params };
+      setLastParams(paramsSnapshot);
       setSelectedSection(parsed.sections?.[0]?.id ?? "executiveSummary");
+
+      try {
+        await persistProjectContent({
+          prompt: persistedPrompt,
+          params: paramsSnapshot,
+          result: parsed,
+          generatedAt: generatedAtDate.toISOString(),
+          version: nextVersion,
+          lastPrompt: persistedLastPrompt,
+        });
+      } catch {
+        setSaveNotice("Generated, but auto-save failed.");
+      }
     } catch (err) {
       const message =
         err instanceof Error
@@ -1035,27 +1153,24 @@ export default function ProjectPageClient({ id }: { id: string }) {
 
   const saveCurrentVersion = () => {
     if (!result) return;
-    try {
-      const storageKey = `preroll:saved-versions:${id}`;
-      const existingRaw = window.localStorage.getItem(storageKey);
-      const existing = existingRaw
-        ? (JSON.parse(existingRaw) as Array<Record<string, unknown>>)
-        : [];
-      const entry = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        savedAt: new Date().toISOString(),
-        version: version || 1,
-        prompt: (lastPrompt || prompt).trim(),
-        params: lastParams ?? params,
-        result,
-      };
-      const next = [entry, ...existing].slice(0, 20);
-      window.localStorage.setItem(storageKey, JSON.stringify(next));
-      setSaveNotice("Version saved locally.");
-      setTimeout(() => setSaveNotice(""), 1800);
-    } catch {
-      setSaveNotice("Save failed. Please try again.");
-    }
+    const persist = async () => {
+      try {
+        await persistProjectContent({
+          prompt: prompt.trim(),
+          params: lastParams ?? params,
+          result,
+          generatedAt: generatedAt?.toISOString() ?? null,
+          version: version || 1,
+          lastPrompt: (lastPrompt || prompt).trim(),
+        });
+        setSaveNotice("Version saved.");
+        setTimeout(() => setSaveNotice(""), 1800);
+      } catch {
+        setSaveNotice("Save failed. Please try again.");
+      }
+    };
+
+    void persist();
   };
 
   return (
@@ -1084,7 +1199,8 @@ export default function ProjectPageClient({ id }: { id: string }) {
                 <p className="text-xs text-white/50 uppercase tracking-widest mb-2">
                   Project
                 </p>
-                <p className="text-lg font-light text-white">{id}</p>
+                <p className="text-lg font-light text-white">{title}</p>
+                <p className="text-xs text-white/45 mt-1">ID: {id}</p>
               </div>
 
               {result && (
@@ -1112,7 +1228,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
             <div>
               <header className="mb-8">
                 <h1 className="text-3xl font-light text-white">
-                  Project <span className="text-primary">{id}</span>
+                  Project <span className="text-primary">{title}</span>
                 </h1>
                 <p className="text-white/60 mt-2">
                   Describe your scene, script, or idea and generate with AI.
@@ -1296,7 +1412,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
                         Results Report
                       </p>
                       <h2 className="text-2xl font-light text-white mt-2">
-                        Project <span className="text-primary">{id}</span>
+                        Project <span className="text-primary">{title}</span>
                       </h2>
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-white/60">
