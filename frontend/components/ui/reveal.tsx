@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, type Transition } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { usePerformanceMode } from "@/lib/usePerformanceMode";
 
@@ -25,9 +25,9 @@ export function Reveal({
       ? { opacity: 0, y: 18, scale: 0.992 }
       : { opacity: 0, y: 8, scale: 0.996 };
   const whileInView = { opacity: 1, y: 0, scale: 1 };
-  const transition = isCinematic
+  const transition: Transition = isCinematic
     ? {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 140,
         damping: 22,
         mass: 0.8,
@@ -35,7 +35,7 @@ export function Reveal({
       }
     : isReduced
     ? {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 200,
         damping: 26,
         mass: 0.65,

@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { usePerformanceMode } from "@/lib/usePerformanceMode";
@@ -23,12 +23,12 @@ export function PageTransition({ children }: { children: ReactNode }) {
     : isCinematic
     ? { opacity: 0, y: -12, scale: 1.002 }
     : { opacity: 0, y: -6, scale: 1.001 };
-  const transition = isPerformance
+  const transition: Transition = isPerformance
     ? { duration: 0 }
     : isCinematic
-    ? { type: "spring", stiffness: 170, damping: 24, mass: 0.85 }
+    ? { type: "spring" as const, stiffness: 170, damping: 24, mass: 0.85 }
     : isReduced
-    ? { type: "spring", stiffness: 220, damping: 28, mass: 0.7 }
+    ? { type: "spring" as const, stiffness: 220, damping: 28, mass: 0.7 }
     : { duration: 0.2 };
 
   return (
