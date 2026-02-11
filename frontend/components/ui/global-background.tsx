@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { CinematicWebglBackground } from "@/components/ui/cinematic-webgl-background";
 
 type GlobalBackgroundProps = {
   children: ReactNode;
@@ -11,6 +12,7 @@ export function GlobalBackground({ children, className }: GlobalBackgroundProps)
     <div className={cn("relative isolate min-h-screen text-white", className)}>
       {/* Single global background stack keeps visual tone consistent across routes. */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <CinematicWebglBackground />
         <div className="cinematic-bg-base absolute inset-0" />
         <div className="cinematic-bg-atmosphere absolute inset-0" />
         <div className="cinematic-bg-rim-light absolute inset-0" />

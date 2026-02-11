@@ -3,7 +3,7 @@ import { GlowCard } from "@/components/ui/spotlight-card";
 export function SpotlightCardDemo() {
   return (
     <div className="w-screen h-screen flex flex-row items-center justify-center gap-10 custom-cursor">
-      <GlowCard glowColor="orange">
+      <GlowCard glowColor="caramel">
         <div className="flex flex-col gap-2 text-white">
           <p className="text-xs uppercase tracking-[0.2em] text-white/60">
             Spotlight
@@ -14,7 +14,7 @@ export function SpotlightCardDemo() {
           </p>
         </div>
       </GlowCard>
-      <GlowCard glowColor="purple">
+      <GlowCard glowColor="copper">
         <div className="flex flex-col gap-2 text-white">
           <p className="text-xs uppercase tracking-[0.2em] text-white/60">
             Spotlight
@@ -25,7 +25,7 @@ export function SpotlightCardDemo() {
           </p>
         </div>
       </GlowCard>
-      <GlowCard glowColor="green">
+      <GlowCard glowColor="olive">
         <div className="flex flex-col gap-2 text-white">
           <p className="text-xs uppercase tracking-[0.2em] text-white/60">
             Spotlight

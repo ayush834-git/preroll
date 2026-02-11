@@ -222,7 +222,7 @@ export default function DashboardPage() {
                 <GlowCard
                   key={member.id}
                   customSize
-                  glowColor={index % 2 === 0 ? "purple" : "blue"}
+                  glowColor={index % 2 === 0 ? "copper" : "olive"}
                   className="w-full p-4"
                 >
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">

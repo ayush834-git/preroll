@@ -98,7 +98,7 @@ export function BeamsBackground({
   }, []);
 
   const shouldRenderBeams = mode === "cinematic" && isLaptop;
-  const shouldAnimate = shouldRenderBeams;
+  const shouldAnimate = shouldRenderBeams && canAnimateContinuously;
 
   const opacityMap = useMemo(
     () => ({

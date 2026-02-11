@@ -61,15 +61,27 @@ const workflow = [
 ];
 
 const spotlightStats = [
-  { label: "Generation Modes", value: "Scene / Sound / Budget", glow: "orange" },
-  { label: "Production Reports", value: "Structured, shareable docs", glow: "blue" },
-  { label: "Constraint-driven generation", value: "Structured inputs -> structured outputs", glow: "green" },
+  {
+    label: "Generation Modes",
+    value: "Scene / Sound / Budget",
+    glow: "caramel",
+  },
+  {
+    label: "Production Reports",
+    value: "Structured, shareable docs",
+    glow: "copper",
+  },
+  {
+    label: "Constraint-driven generation",
+    value: "Structured inputs -> structured outputs",
+    glow: "olive",
+  },
 ] as const;
 
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
-        <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 glass-panel">
+        <nav className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 glass-ambient">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-bg font-bold shadow-glow">
               P
@@ -210,10 +222,10 @@ export default function LandingPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {features.map((item) => (
-              <GlowCard
+                <GlowCard
                 key={item.title}
                 customSize
-                glowColor="blue"
+                glowColor="copper"
                 className="w-full p-6"
               >
                 <div className="h-12 w-12 rounded-xl glass-outline flex items-center justify-center mb-4">
@@ -250,10 +262,10 @@ export default function LandingPage() {
 
           <div className="grid gap-6">
             {workflow.map((item) => (
-              <GlowCard
+                <GlowCard
                 key={item.step}
                 customSize
-                glowColor="blue"
+                glowColor="olive"
                 className="w-full p-6"
               >
                 <div className="flex flex-col md:flex-row md:items-center gap-6">

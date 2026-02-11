@@ -6,7 +6,7 @@ import { usePerformanceMode } from "@/lib/usePerformanceMode";
 interface GlowCardProps {
   children: ReactNode;
   className?: string;
-  glowColor?: "blue" | "purple" | "green" | "red" | "orange";
+  glowColor?: "amber" | "copper" | "olive" | "red" | "caramel";
   size?: "sm" | "md" | "lg";
   width?: string | number;
   height?: string | number;
@@ -14,11 +14,11 @@ interface GlowCardProps {
 }
 
 const glowColorMap = {
-  blue: { base: 238, spread: 40 },
-  purple: { base: 238, spread: 40 },
-  green: { base: 238, spread: 40 },
-  red: { base: 238, spread: 40 },
-  orange: { base: 238, spread: 40 },
+  amber: { base: 34, spread: 10 },
+  copper: { base: 22, spread: 8 },
+  olive: { base: 84, spread: 8 },
+  red: { base: 14, spread: 9 },
+  caramel: { base: 30, spread: 11 },
 };
 
 const sizeMap = {
@@ -30,7 +30,7 @@ const sizeMap = {
 const GlowCard: React.FC<GlowCardProps> = ({
   children,
   className = "",
-  glowColor = "blue",
+  glowColor = "copper",
   size = "md",
   width,
   height,
@@ -55,12 +55,14 @@ const GlowCard: React.FC<GlowCardProps> = ({
       "--spread": spread,
       "--radius": "14",
       "--border": isCinematic ? "3" : "2",
-      "--backdrop": "hsl(240 12% 16% / 0.6)",
+      "--backdrop": "hsl(26 28% 14% / 0.58)",
       "--backup-border": "var(--backdrop)",
       "--size": "200",
       "--outer": isCinematic ? "1" : isReduced ? "0.75" : "0",
-      "--bg-spot-opacity": isCinematic ? "0.1" : isReduced ? "0.06" : "0",
+      "--bg-spot-opacity": isCinematic ? "0.08" : isReduced ? "0.05" : "0",
       "--border-spot-opacity": isCinematic ? "1" : isReduced ? "0.6" : "0",
+      "--saturation": isCinematic ? "58" : "46",
+      "--lightness": isCinematic ? "62" : "56",
       "--border-size": "calc(var(--border, 2) * 1px)",
       "--spotlight-size": "calc(var(--size, 150) * 1px)",
       "--hue":
@@ -69,7 +71,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
         var(--spotlight-size) var(--spotlight-size) at
         calc(var(--pointer-x-smooth, 0) * 1px)
         calc(var(--pointer-y-smooth, 0) * 1px),
-        hsl(var(--hue, 210) calc(var(--saturation, 100) * 1%) calc(var(--lightness, 70) * 1%) / var(--bg-spot-opacity, 0.1)), transparent
+        hsl(var(--hue, 26) calc(var(--saturation, 58) * 1%) calc(var(--lightness, 62) * 1%) / var(--bg-spot-opacity, 0.08)), transparent
       )`,
       backgroundColor: "var(--backdrop, transparent)",
       backgroundSize:

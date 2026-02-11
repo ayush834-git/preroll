@@ -87,19 +87,10 @@ export function useAnimationBudget(): {
   canAnimateContinuously: boolean;
 } {
   const mode = usePerformanceMode();
-  const [canAnimateContinuously, setCanAnimateContinuously] = useState(
-    mode === "cinematic"
-  );
+  const [canAnimateContinuously, setCanAnimateContinuously] = useState(true);
 
   useEffect(() => {
-    if (mode !== "cinematic") {
-      setCanAnimateContinuously((current) =>
-        current ? false : current
-      );
-      return;
-    }
-
-    setCanAnimateContinuously(true);
+    if (mode !== "cinematic") return;
 
     let rafId = 0;
     let last = performance.now();
@@ -152,5 +143,5 @@ export function useAnimationBudget(): {
     };
   }, [mode]);
 
-  return { mode, canAnimateContinuously };
+  return { mode, canAnimateContinuously: mode === "cinematic" ? canAnimateContinuously : false };
 }

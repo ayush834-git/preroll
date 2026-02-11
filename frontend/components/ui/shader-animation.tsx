@@ -4,13 +4,18 @@ import { useEffect, useRef } from "react"
 import * as THREE from "three"
 import { useAnimationBudget } from "@/lib/usePerformanceMode"
 
+type ShaderUniforms = {
+  time: { type: "f"; value: number }
+  resolution: { type: "v2"; value: THREE.Vector2 }
+}
+
 export function ShaderAnimation() {
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<{
     camera: THREE.Camera
     scene: THREE.Scene
     renderer: THREE.WebGLRenderer
-    uniforms: any
+    uniforms: ShaderUniforms
     animationId: number
   } | null>(null)
   const { mode, canAnimateContinuously } = useAnimationBudget()
@@ -60,7 +65,7 @@ export function ShaderAnimation() {
     const scene = new THREE.Scene()
     const geometry = new THREE.PlaneGeometry(2, 2)
 
-    const uniforms = {
+    const uniforms: ShaderUniforms = {
       time: { type: "f", value: 1.0 },
       resolution: { type: "v2", value: new THREE.Vector2() },
     }
@@ -150,7 +155,7 @@ export function ShaderAnimation() {
       className="w-full h-screen"
       style={{
         background: isPerformance
-          ? "radial-gradient(120% 120% at 50% 20%, rgba(96,128,255,0.3), transparent 60%), radial-gradient(120% 120% at 50% 85%, rgba(80,150,255,0.2), transparent 60%)"
+          ? "radial-gradient(120% 120% at 50% 20%, rgba(183, 128, 84, 0.24), transparent 60%), radial-gradient(120% 120% at 50% 85%, rgba(120, 86, 58, 0.22), transparent 60%)"
           : "var(--background)",
         overflow: "hidden",
       }}

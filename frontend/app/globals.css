@@ -58,25 +58,42 @@ html {
 }
 
 /* Global background stays abstract and low-contrast so glass surfaces remain legible. */
+.cinematic-bg-webgl {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.94;
+  filter: saturate(104%) contrast(104%);
+}
+
+.cinematic-webgl-canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  transform: translate3d(0, 0, 0);
+}
+
 .cinematic-bg-base {
   background:
     radial-gradient(
       1200px 640px at 16% 4%,
-      rgba(184, 124, 74, 0.18),
-      transparent 62%
+      rgba(184, 124, 74, 0.12),
+      transparent 64%
     ),
     radial-gradient(
       980px 560px at 84% 78%,
-      rgba(102, 70, 52, 0.22),
-      transparent 68%
+      rgba(102, 70, 52, 0.18),
+      transparent 70%
     ),
     radial-gradient(
       820px 460px at 50% 34%,
-      rgba(244, 204, 160, 0.08),
-      transparent 72%
+      rgba(244, 204, 160, 0.05),
+      transparent 74%
     ),
     linear-gradient(158deg, #110b08 0%, #1a120d 44%, #120c08 100%);
-  transform: translate3d(0, calc(var(--scroll-progress-smooth) * -6px), 0);
+  opacity: 0.42;
+  mix-blend-mode: screen;
+  transform: translate3d(0, calc(var(--scroll-progress-smooth) * -4px), 0);
 }
 
 .cinematic-bg-atmosphere {
@@ -137,7 +154,7 @@ html {
 }
 
 .cinematic-bg-grain {
-  opacity: 0.04;
+  opacity: 0.018;
   background-image:
     radial-gradient(rgba(255, 245, 230, 0.75) 0.55px, transparent 0.55px),
     radial-gradient(rgba(255, 236, 210, 0.4) 0.55px, transparent 0.55px);
@@ -235,6 +252,10 @@ html {
   transform: translate3d(0, -2px, 0);
 }
 
+.glass-interactive:hover {
+  transform: translate3d(0, -1px, 0);
+}
+
 .glass-panel,
 .glass-panel-strong,
 .glass-ambient,
@@ -260,11 +281,14 @@ html {
     135deg,
     rgba(255, 244, 228, 0.26),
     rgba(255, 232, 206, 0.08) 28%,
-    rgba(140, 179, 198, 0.07) 52%,
-    rgba(168, 146, 196, 0.08) 76%,
+    rgba(140, 166, 150, 0.07) 52%,
+    rgba(122, 142, 128, 0.08) 76%,
     rgba(232, 180, 129, 0.1)
   );
   opacity: 0.58;
+  transition:
+    opacity 220ms var(--motion-ease-smooth),
+    transform 220ms var(--motion-ease-smooth);
 }
 
 .glass-panel::after,
@@ -290,6 +314,37 @@ html {
       transparent 70%
     );
   opacity: 0.55;
+  transition:
+    opacity 220ms var(--motion-ease-smooth),
+    transform 220ms var(--motion-ease-smooth);
+}
+
+.glass-interactive:hover::before,
+.glass-outline:hover::before,
+.glass-panel:hover::before,
+.glass-panel-strong:hover::before {
+  opacity: 0.72;
+  transform: translate3d(
+    calc((var(--pointer-xp-smooth, 0.5) - 0.5) * 1.6px + 0.6px),
+    calc((var(--pointer-yp-smooth, 0.5) - 0.5) * -1.1px - 0.4px),
+    0
+  );
+}
+
+.glass-interactive:hover::after,
+.glass-outline:hover::after {
+  opacity: 0.66;
+  transform: translate3d(
+    calc((var(--pointer-xp-smooth, 0.5) - 0.5) * -1.3px - 0.5px),
+    calc((var(--pointer-yp-smooth, 0.5) - 0.5) * 0.9px + 0.4px),
+    0
+  );
+}
+
+.glass-panel :is(h1, h2, h3, h4, h5, p, span, li, label),
+.glass-panel-strong :is(h1, h2, h3, h4, h5, p, span, li, label),
+.glass-ambient :is(h1, h2, h3, h4, h5, p, span, li, label) {
+  text-shadow: 0 0 16px rgba(255, 240, 221, 0.08);
 }
 
 .glass-input {
@@ -340,13 +395,13 @@ select option {
 }
 
 .glass-emerald {
-  background: rgba(121, 184, 177, 0.22);
-  border-color: rgba(184, 230, 223, 0.44);
+  background: rgba(126, 148, 92, 0.2);
+  border-color: rgba(192, 212, 154, 0.4);
 }
 
 .glass-sky {
-  background: rgba(130, 168, 206, 0.22);
-  border-color: rgba(184, 216, 244, 0.48);
+  background: rgba(98, 136, 126, 0.2);
+  border-color: rgba(162, 198, 186, 0.4);
 }
 
 .glass-rose {
@@ -355,8 +410,8 @@ select option {
 }
 
 .glass-violet {
-  background: rgba(149, 128, 184, 0.22);
-  border-color: rgba(203, 180, 236, 0.44);
+  background: rgba(92, 118, 108, 0.22);
+  border-color: rgba(161, 188, 177, 0.4);
 }
 
 input:focus,
@@ -494,27 +549,27 @@ button:focus-visible {
 }
 
 .btn-sky {
-  --btn-accent: #9ac6df;
-  --btn-accent-2: #d3ebf8;
-  --btn-accent-glow: rgba(154, 198, 223, 0.28);
+  --btn-accent: #b08a6a;
+  --btn-accent-2: #dec0a8;
+  --btn-accent-glow: rgba(176, 138, 106, 0.28);
 }
 
 .btn-emerald {
-  --btn-accent: #8ac0b5;
-  --btn-accent-2: #c8e7e0;
-  --btn-accent-glow: rgba(138, 192, 181, 0.3);
+  --btn-accent: #939d73;
+  --btn-accent-2: #c3cc9f;
+  --btn-accent-glow: rgba(147, 157, 115, 0.26);
 }
 
 .btn-rose {
-  --btn-accent: #d3a38e;
-  --btn-accent-2: #f2d0c2;
-  --btn-accent-glow: rgba(211, 163, 142, 0.3);
+  --btn-accent: #ba7f62;
+  --btn-accent-2: #dfb39d;
+  --btn-accent-glow: rgba(186, 127, 98, 0.3);
 }
 
 .btn-violet {
-  --btn-accent: #bba7dd;
-  --btn-accent-2: #ddd3f2;
-  --btn-accent-glow: rgba(187, 167, 221, 0.28);
+  --btn-accent: #7d9386;
+  --btn-accent-2: #b2c3b8;
+  --btn-accent-glow: rgba(125, 147, 134, 0.24);
 }
 
 .glow-card::before,
@@ -550,7 +605,7 @@ button:focus-visible {
     ),
     transparent 100%
   );
-  filter: brightness(2);
+  filter: brightness(1.35) saturate(0.8);
 }
 
 .glow-card::after {
@@ -558,7 +613,7 @@ button:focus-visible {
     calc(var(--spotlight-size) * 0.5) calc(var(--spotlight-size) * 0.5) at
       calc(var(--pointer-x-smooth, 0) * 1px)
       calc(var(--pointer-y-smooth, 0) * 1px),
-    hsl(0 100% 100% / var(--border-light-opacity, 1)),
+    hsl(36 44% 90% / var(--border-light-opacity, 1)),
     transparent 100%
   );
 }
@@ -596,11 +651,19 @@ button:focus-visible {
 }
 
 :root[data-performance="reduced"] .cinematic-bg-grain {
-  opacity: 0.028;
+  opacity: 0.012;
 }
 
 :root[data-performance="performance"] .cinematic-bg-grain {
   opacity: 0;
+}
+
+:root[data-performance="reduced"] .cinematic-bg-webgl {
+  opacity: 0.82;
+}
+
+:root[data-performance="performance"] .cinematic-bg-webgl {
+  display: none;
 }
 
 :root[data-performance="reduced"] .btn-animated {

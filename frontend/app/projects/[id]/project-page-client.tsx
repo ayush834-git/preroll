@@ -409,6 +409,7 @@ export default function ProjectPageClient({ id }: { id: string }) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [saveNotice, setSaveNotice] = useState("");
   const [copied, setCopied] = useState(false);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState("");
@@ -477,56 +478,59 @@ export default function ProjectPageClient({ id }: { id: string }) {
     label: string;
     icon: ReactNode;
     hint: string;
-  }> = [
-    {
-      key: "sceneOverview",
-      label: SECTION_LABELS.sceneOverview,
-      icon: <Film className="h-4 w-4" />,
-      hint: "Purpose, narrative function, and scene intent.",
-    },
-    {
-      key: "keyActions",
-      label: SECTION_LABELS.keyActions,
-      icon: <ListChecks className="h-4 w-4" />,
-      hint: "Major beats and actions in bullet form.",
-    },
-    {
-      key: "charactersRoles",
-      label: SECTION_LABELS.charactersRoles,
-      icon: <Users className="h-4 w-4" />,
-      hint: "Who is on screen and why they matter.",
-    },
-    {
-      key: "visualStyle",
-      label: SECTION_LABELS.visualStyle,
-      icon: <Camera className="h-4 w-4" />,
-      hint: "Lighting, lensing, and composition notes.",
-    },
-    {
-      key: "soundDesign",
-      label: SECTION_LABELS.soundDesign,
-      icon: <Mic className="h-4 w-4" />,
-      hint: "Ambience, music cues, and silence beats.",
-    },
-    {
-      key: "budgetConsiderations",
-      label: SECTION_LABELS.budgetConsiderations,
-      icon: <DollarSign className="h-4 w-4" />,
-      hint: "Cost drivers and practical constraints.",
-    },
-    {
-      key: "directorNotes",
-      label: SECTION_LABELS.directorNotes,
-      icon: <FileText className="h-4 w-4" />,
-      hint: "Blocking, pacing, and continuity notes.",
-    },
-    {
-      key: "assumptionsMade",
-      label: SECTION_LABELS.assumptionsMade,
-      icon: <Info className="h-4 w-4" />,
-      hint: "Explicit assumptions used for generation.",
-    },
-  ];
+  }> = useMemo(
+    () => [
+      {
+        key: "sceneOverview",
+        label: SECTION_LABELS.sceneOverview,
+        icon: <Film className="h-4 w-4" />,
+        hint: "Purpose, narrative function, and scene intent.",
+      },
+      {
+        key: "keyActions",
+        label: SECTION_LABELS.keyActions,
+        icon: <ListChecks className="h-4 w-4" />,
+        hint: "Major beats and actions in bullet form.",
+      },
+      {
+        key: "charactersRoles",
+        label: SECTION_LABELS.charactersRoles,
+        icon: <Users className="h-4 w-4" />,
+        hint: "Who is on screen and why they matter.",
+      },
+      {
+        key: "visualStyle",
+        label: SECTION_LABELS.visualStyle,
+        icon: <Camera className="h-4 w-4" />,
+        hint: "Lighting, lensing, and composition notes.",
+      },
+      {
+        key: "soundDesign",
+        label: SECTION_LABELS.soundDesign,
+        icon: <Mic className="h-4 w-4" />,
+        hint: "Ambience, music cues, and silence beats.",
+      },
+      {
+        key: "budgetConsiderations",
+        label: SECTION_LABELS.budgetConsiderations,
+        icon: <DollarSign className="h-4 w-4" />,
+        hint: "Cost drivers and practical constraints.",
+      },
+      {
+        key: "directorNotes",
+        label: SECTION_LABELS.directorNotes,
+        icon: <FileText className="h-4 w-4" />,
+        hint: "Blocking, pacing, and continuity notes.",
+      },
+      {
+        key: "assumptionsMade",
+        label: SECTION_LABELS.assumptionsMade,
+        icon: <Info className="h-4 w-4" />,
+        hint: "Explicit assumptions used for generation.",
+      },
+    ],
+    []
+  );
 
   const activeSectionsConfig: Array<{
     key: SectionKey;
@@ -702,17 +706,6 @@ export default function ProjectPageClient({ id }: { id: string }) {
           <li key={`${item.slice(0, 12)}-${index}`}>{item}</li>
         ))}
       </ul>
-    );
-  };
-
-  const renderParagraph = (text: string, emptyText: string) => {
-    if (!text.trim()) {
-      return <p className="text-sm text-white/50">{emptyText}</p>;
-    }
-    return (
-      <p className="text-sm text-white/75 leading-relaxed whitespace-pre-line">
-        {text.trim()}
-      </p>
     );
   };
 
@@ -997,23 +990,24 @@ export default function ProjectPageClient({ id }: { id: string }) {
     }
   };
 
-  const generate = async () => {
-    if (!prompt.trim()) return;
-
+  const runGeneration = async (requestPrompt: string, sourcePrompt?: string) => {
+    const trimmedRequest = requestPrompt.trim();
+    if (!trimmedRequest) return;
     setLoading(true);
     setError("");
     setResult(null);
     setDownloadError("");
+    setSaveNotice("");
     setCopiedSection(null);
 
     try {
-      const data = await generateScript(prompt, params);
+      const data = await generateScript(trimmedRequest, params);
       const parsed = parseAIResult(data.output || "");
       setResult(parsed);
       setCopied(false);
       setGeneratedAt(new Date());
       setVersion((prev) => prev + 1);
-      setLastPrompt(prompt.trim());
+      setLastPrompt((sourcePrompt ?? trimmedRequest).trim());
       setLastParams({ ...params });
       setSelectedSection(parsed.sections?.[0]?.id ?? "executiveSummary");
     } catch (err) {
@@ -1024,6 +1018,43 @@ export default function ProjectPageClient({ id }: { id: string }) {
       setError(message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generate = async () => {
+    if (!prompt.trim()) return;
+    await runGeneration(prompt);
+  };
+
+  const regenerateSelectedSection = async () => {
+    if (!prompt.trim() || !result) return;
+    const sectionTitle = sectionLabelMap.get(selectedSection) || selectedSection;
+    const scopedPrompt = `${prompt.trim()}\n\nRevision request: Regenerate and strengthen the "${sectionTitle}" section. Keep the full output coherent and production-ready.`;
+    await runGeneration(scopedPrompt, prompt);
+  };
+
+  const saveCurrentVersion = () => {
+    if (!result) return;
+    try {
+      const storageKey = `preroll:saved-versions:${id}`;
+      const existingRaw = window.localStorage.getItem(storageKey);
+      const existing = existingRaw
+        ? (JSON.parse(existingRaw) as Array<Record<string, unknown>>)
+        : [];
+      const entry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        savedAt: new Date().toISOString(),
+        version: version || 1,
+        prompt: (lastPrompt || prompt).trim(),
+        params: lastParams ?? params,
+        result,
+      };
+      const next = [entry, ...existing].slice(0, 20);
+      window.localStorage.setItem(storageKey, JSON.stringify(next));
+      setSaveNotice("Version saved locally.");
+      setTimeout(() => setSaveNotice(""), 1800);
+    } catch {
+      setSaveNotice("Save failed. Please try again.");
     }
   };
 
@@ -1363,6 +1394,11 @@ export default function ProjectPageClient({ id }: { id: string }) {
                   {downloadError}
                 </div>
               )}
+              {saveNotice && (
+                <div className="mb-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4 backdrop-blur-sm text-emerald-300/90 text-sm">
+                  {saveNotice}
+                </div>
+              )}
 
               {result && (
                 <>
@@ -1523,17 +1559,17 @@ export default function ProjectPageClient({ id }: { id: string }) {
                             Download
                           </button>
                           <button
-                            disabled
-                            className="text-xs text-white/50 px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-amber disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
-                            title="Coming soon"
+                            onClick={() => void regenerateSelectedSection()}
+                            disabled={loading || !result || !prompt.trim()}
+                            className="text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-amber disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
                           >
                             <RotateCcw className="h-3.5 w-3.5" />
                             Regenerate section
                           </button>
                           <button
-                            disabled
-                            className="text-xs text-white/50 px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-amber disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
-                            title="Coming soon"
+                            onClick={saveCurrentVersion}
+                            disabled={!result}
+                            className="text-xs text-white/70 hover:text-white px-3 py-2 rounded-lg glass-outline transition-colors btn-animated btn-amber disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
                           >
                             <Save className="h-3.5 w-3.5" />
                             Save version
