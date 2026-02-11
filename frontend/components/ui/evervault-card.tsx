@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useMotionTemplate,
   useMotionValue,
@@ -22,10 +22,13 @@ export const EvervaultCard = ({
   const mode = usePerformanceMode();
   const isCinematic = mode === "cinematic";
   const isReduced = mode === "reduced";
-  // Keep random texture stable per mode to avoid React re-renders on pointer move.
-  const randomString = useMemo(() => {
+
+  const [randomString, setRandomString] = useState("");
+
+  useEffect(() => {
     const length = isCinematic ? 1500 : isReduced ? 500 : 0;
-    return length > 0 ? generateRandomString(length) : "";
+    const str = length > 0 ? generateRandomString(length) : "";
+    setRandomString(str);
   }, [isCinematic, isReduced]);
 
   function onMouseMove({
@@ -37,6 +40,10 @@ export const EvervaultCard = ({
     const { left, top } = currentTarget.getBoundingClientRect();
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
+
+    const length = 1500;
+    const str = generateRandomString(length);
+    setRandomString(str);
   }
 
   return (

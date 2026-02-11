@@ -21,7 +21,6 @@ interface Beam {
   hue: number;
   pulse: number;
   pulseSpeed: number;
-  gradient: CanvasGradient | null;
 }
 
 const MINIMUM_BEAMS = 18;
@@ -48,7 +47,6 @@ function createBeam(
     hue: 235 + Math.random() * 12,
     pulse: Math.random() * Math.PI * 2,
     pulseSpeed: (0.02 + Math.random() * 0.03) * settings.pulseScale,
-    gradient: null,
   };
 }
 
@@ -100,7 +98,7 @@ export function BeamsBackground({
   }, []);
 
   const shouldRenderBeams = mode === "cinematic" && isLaptop;
-  const shouldAnimate = shouldRenderBeams && canAnimateContinuously;
+  const shouldAnimate = shouldRenderBeams;
 
   const opacityMap = useMemo(
     () => ({
@@ -148,9 +146,6 @@ export function BeamsBackground({
       beamsRef.current = Array.from({ length: totalBeams }, () =>
         createBeam(viewportWidth, viewportHeight, settings)
       );
-      beamsRef.current.forEach((beam) => {
-        beam.gradient = createBeamGradient(context, beam);
-      });
 
       if (!shouldAnimate) {
         drawStatic();
@@ -159,21 +154,6 @@ export function BeamsBackground({
 
     updateCanvasSize();
     window.addEventListener("resize", updateCanvasSize);
-
-    function createBeamGradient(
-      context: CanvasRenderingContext2D,
-      beam: Beam
-    ): CanvasGradient {
-      // Cache static beam gradient; per-frame motion uses globalAlpha instead of rebuilding gradients.
-      const gradient = context.createLinearGradient(0, 0, 0, beam.length);
-      gradient.addColorStop(0, `hsla(${beam.hue}, 70%, 65%, 0)`);
-      gradient.addColorStop(0.1, `hsla(${beam.hue}, 70%, 65%, 0.5)`);
-      gradient.addColorStop(0.4, `hsla(${beam.hue}, 70%, 65%, 1)`);
-      gradient.addColorStop(0.6, `hsla(${beam.hue}, 70%, 65%, 1)`);
-      gradient.addColorStop(0.9, `hsla(${beam.hue}, 70%, 65%, 0.5)`);
-      gradient.addColorStop(1, `hsla(${beam.hue}, 70%, 65%, 0)`);
-      return gradient;
-    }
 
     function resetBeam(beam: Beam, index: number, totalBeams: number) {
       const column = index % 3;
@@ -188,7 +168,6 @@ export function BeamsBackground({
       beam.speed = (0.5 + Math.random() * 0.4) * settings.speedScale;
       beam.hue = 235 + (index * 12) / totalBeams;
       beam.opacity = (0.34 + Math.random() * 0.16) * settings.opacityScale;
-      beam.gradient = createBeamGradient(context, beam);
       return beam;
     }
 
@@ -201,8 +180,28 @@ export function BeamsBackground({
         beam.opacity *
         (0.8 + Math.sin(beam.pulse) * 0.2) *
         opacityMap[intensity];
-      context.globalAlpha = pulsingOpacity;
-      context.fillStyle = beam.gradient ?? createBeamGradient(context, beam);
+
+      const gradient = context.createLinearGradient(0, 0, 0, beam.length);
+      gradient.addColorStop(0, `hsla(${beam.hue}, 70%, 65%, 0)`);
+      gradient.addColorStop(
+        0.1,
+        `hsla(${beam.hue}, 70%, 65%, ${pulsingOpacity * 0.5})`
+      );
+      gradient.addColorStop(
+        0.4,
+        `hsla(${beam.hue}, 70%, 65%, ${pulsingOpacity})`
+      );
+      gradient.addColorStop(
+        0.6,
+        `hsla(${beam.hue}, 70%, 65%, ${pulsingOpacity})`
+      );
+      gradient.addColorStop(
+        0.9,
+        `hsla(${beam.hue}, 70%, 65%, ${pulsingOpacity * 0.5})`
+      );
+      gradient.addColorStop(1, `hsla(${beam.hue}, 70%, 65%, 0)`);
+
+      context.fillStyle = gradient;
       context.fillRect(-beam.width / 2, 0, beam.width, beam.length);
       context.restore();
     }
@@ -213,26 +212,14 @@ export function BeamsBackground({
       beamsRef.current.forEach((beam) => drawBeam(context, beam));
     }
 
-    let lastTime = performance.now();
-    const TARGET_FRAME_MS = 1000 / 60;
-
-    function animate(now: number) {
-      const delta = now - lastTime;
-      if (delta < TARGET_FRAME_MS * 0.75) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-        return;
-      }
-      // Delta-based stepping keeps motion speed stable when frames fluctuate.
-      const dt = Math.min(2, delta / TARGET_FRAME_MS);
-      lastTime = now;
-
+    function animate() {
       context.clearRect(0, 0, viewportWidth, viewportHeight);
       context.filter = settings.blur ? `blur(${settings.blur}px)` : "none";
 
       const totalBeams = beamsRef.current.length;
       beamsRef.current.forEach((beam, index) => {
-        beam.y -= beam.speed * dt;
-        beam.pulse += beam.pulseSpeed * dt;
+        beam.y -= beam.speed;
+        beam.pulse += beam.pulseSpeed;
 
         if (beam.y + beam.length < -100) {
           resetBeam(beam, index, totalBeams);
@@ -245,7 +232,7 @@ export function BeamsBackground({
     }
 
     if (shouldAnimate) {
-      animationFrameRef.current = requestAnimationFrame(animate);
+      animate();
     } else {
       drawStatic();
     }

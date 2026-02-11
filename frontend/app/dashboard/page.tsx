@@ -206,7 +206,7 @@ export default function DashboardPage() {
             <button
               onClick={addMember}
               disabled={!canAddMember}
-              className="glass-interactive text-white px-5 py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed btn-animated btn-amber btn-cta"
+              className="bg-primary text-bg px-5 py-3 rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-glow btn-animated btn-amber btn-cta"
             >
               Add
             </button>
@@ -251,7 +251,7 @@ export default function DashboardPage() {
             <button
               onClick={proceedToGenerate}
               disabled={!name.trim()}
-              className="glass-interactive text-white px-6 py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed btn-animated btn-amber btn-cta"
+              className="bg-primary text-bg px-6 py-3 rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-glow btn-animated btn-amber btn-cta"
             >
               Continue to Generate
             </button>
