@@ -1,10 +1,21 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import type { Session } from "next-auth";
+import { authOptions, getAuthEnvStatus } from "@/lib/auth";
 
 export default async function DashboardPreviewPage() {
-  const session = await getServerSession(authOptions);
+  const authEnvStatus = getAuthEnvStatus();
+  let session: Session | null = null;
+
+  if (authEnvStatus.hasSecret) {
+    try {
+      session = await getServerSession(authOptions);
+    } catch {
+      // Keep preview page public even if server auth is misconfigured.
+      session = null;
+    }
+  }
 
   if (session?.user?.id) {
     redirect("/app/dashboard");
