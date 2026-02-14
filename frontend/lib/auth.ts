@@ -13,6 +13,35 @@ function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
+function getRequiredEnv(name: string) {
+  const value = process.env[name];
+  if (!value || !value.trim()) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value.trim();
+}
+
+function getSmtpConfig() {
+  const host = getRequiredEnv("EMAIL_SERVER_HOST");
+  const port = Number(getRequiredEnv("EMAIL_SERVER_PORT"));
+  const user = getRequiredEnv("EMAIL_SERVER_USER");
+  const pass = getRequiredEnv("EMAIL_SERVER_PASSWORD");
+
+  if (!Number.isFinite(port) || port <= 0) {
+    throw new Error("EMAIL_SERVER_PORT must be a positive number.");
+  }
+
+  return {
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user,
+      pass,
+    },
+  };
+}
+
 function getAuthSecret() {
   const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
   if (!secret) {
@@ -42,6 +71,7 @@ export const authOptions: NextAuthOptions = {
       server: {
         host: process.env.EMAIL_SERVER_HOST,
         port: Number(process.env.EMAIL_SERVER_PORT || 587),
+        secure: Number(process.env.EMAIL_SERVER_PORT || 587) === 465,
         auth: {
           user: process.env.EMAIL_SERVER_USER,
           pass: process.env.EMAIL_SERVER_PASSWORD,
@@ -52,8 +82,9 @@ export const authOptions: NextAuthOptions = {
       // Generate six-digit numeric OTP instead of a long magic-link token.
       generateVerificationToken: async () =>
         randomInt(100000, 1000000).toString(),
-      async sendVerificationRequest({ identifier, token, provider }) {
-        const transport = nodemailer.createTransport(provider.server);
+      async sendVerificationRequest({ identifier, token }) {
+        const transport = nodemailer.createTransport(getSmtpConfig());
+        const from = getRequiredEnv("EMAIL_FROM");
         const appName = "Preroll";
         const subject = `${appName} login code: ${token}`;
         const text = [
@@ -76,7 +107,7 @@ export const authOptions: NextAuthOptions = {
 
         await transport.sendMail({
           to: identifier,
-          from: provider.from,
+          from,
           subject,
           text,
           html,
@@ -149,6 +180,20 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      try {
+        const parsed = new URL(url);
+        if (parsed.origin === baseUrl) {
+          return url;
+        }
+      } catch {
+        // Fall through to default target.
+      }
+      return `${baseUrl}/app/dashboard`;
     },
   },
 };

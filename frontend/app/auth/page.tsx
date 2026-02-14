@@ -7,7 +7,7 @@ export default async function AuthPage() {
   const session = await getServerSession(authOptions);
 
   if (session?.user?.id) {
-    redirect("/dashboard");
+    redirect("/app/dashboard");
   }
 
   return <AuthClient />;

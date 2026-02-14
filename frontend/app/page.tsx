@@ -79,6 +79,11 @@ const spotlightStats = [
 ] as const;
 
 export default function LandingPage() {
+  const getStartedHref =
+    process.env.NEXT_PUBLIC_GET_STARTED_MODE === "protected"
+      ? "/app/dashboard"
+      : "/dashboard";
+
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
       <nav className="relative z-10 mx-4 mt-4 md:mx-8 md:mt-6 rounded-2xl border border-white/10 px-4 py-4 md:px-6 glass-nav animate-glass-in">
@@ -112,7 +117,7 @@ export default function LandingPage() {
               Log In
             </Link>
             <Link
-              href="/dashboard"
+              href={getStartedHref}
               className="glass-button glass-button-primary text-white px-5 py-2.5 rounded-lg transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
             >
               Get Started
@@ -145,7 +150,7 @@ export default function LandingPage() {
 
                   <div className="mt-10 flex flex-wrap gap-4">
                     <Link
-                      href="/dashboard"
+                      href={getStartedHref}
                       className="glass-button glass-button-primary text-white px-6 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
                     >
                       Get Started
@@ -319,7 +324,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
-                href="/dashboard"
+                href={getStartedHref}
                 className="glass-button glass-button-primary text-white px-7 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
               >
                 Get Started

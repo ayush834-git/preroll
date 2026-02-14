@@ -34,7 +34,7 @@ export default function AuthClient() {
       const result = await signIn("email", {
         email: normalizedEmail,
         redirect: false,
-        callbackUrl: "/dashboard",
+        callbackUrl: "/app/dashboard",
       });
 
       if (result?.error) {
@@ -68,7 +68,7 @@ export default function AuthClient() {
         email: normalizedEmail,
         otp: code,
         redirect: false,
-        callbackUrl: "/dashboard",
+        callbackUrl: "/app/dashboard",
       });
 
       if (result?.error) {
@@ -76,7 +76,7 @@ export default function AuthClient() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/app/dashboard");
       router.refresh();
     } catch {
       setError("Verification failed. Please try again.");
