@@ -39,11 +39,6 @@ export default function DashboardClient({
   }, [projects]);
 
   const createProject = async () => {
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
-
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setError("Enter a project title.");
@@ -54,7 +49,7 @@ export default function DashboardClient({
     setError("");
 
     try {
-      // Server creates the project with authenticated userId ownership.
+      // Server creates a user-owned project (authenticated or guest identity).
       const response = await fetch("/api/projects", {
         method: "POST",
         headers: {
@@ -149,7 +144,7 @@ export default function DashboardClient({
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="e.g. Midnight Signal"
                 className="w-full rounded-xl glass-input px-4 py-3 text-sm text-white placeholder:text-white/40"
-                disabled={!isAuthenticated || creating}
+                disabled={creating}
               />
               <button
                 type="button"
@@ -158,18 +153,12 @@ export default function DashboardClient({
                 className="glass-interactive text-white px-5 py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-glow btn-animated btn-amber btn-cta inline-flex items-center gap-2"
               >
                 <PlusCircle className="h-4 w-4" />
-                {isAuthenticated
-                  ? creating
-                    ? "Creating..."
-                    : "Start Project"
-                  : "Log In To Start"}
+                {creating ? "Creating..." : "Start Project"}
               </button>
             </div>
-
             {!isAuthenticated && (
               <p className="mt-3 text-xs text-white/60">
-                Browse the dashboard preview. Log in to create and save
-                projects.
+                Guest mode is active. You can use everything without login.
               </p>
             )}
 

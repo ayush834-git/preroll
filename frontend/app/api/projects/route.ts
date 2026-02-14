@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { Prisma } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  getOrCreateViewerIdentity,
+  getViewerIdentity,
+  GUEST_USER_COOKIE,
+  GUEST_USER_COOKIE_OPTIONS,
+} from "@/lib/viewer";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
-
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const viewer = await getViewerIdentity();
+  if (!viewer.userId) {
+    return NextResponse.json({ projects: [] });
   }
 
-  // Server-side scoping: return only projects owned by this authenticated user.
   const projects = await prisma.project.findMany({
-    where: { userId },
+    where: { userId: viewer.userId },
     select: {
       id: true,
       title: true,
@@ -29,12 +30,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
-
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const viewer = await getOrCreateViewerIdentity();
 
   let body: { title?: string; content?: unknown };
   try {
@@ -50,7 +46,7 @@ export async function POST(request: Request) {
 
   const project = await prisma.project.create({
     data: {
-      userId,
+      userId: viewer.userId!,
       title,
       content:
         body.content === undefined
@@ -64,5 +60,15 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json({ project }, { status: 201 });
+  const response = NextResponse.json({ project }, { status: 201 });
+
+  if (viewer.shouldSetGuestCookie) {
+    response.cookies.set(
+      GUEST_USER_COOKIE,
+      viewer.userId!,
+      GUEST_USER_COOKIE_OPTIONS
+    );
+  }
+
+  return response;
 }

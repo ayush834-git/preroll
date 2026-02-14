@@ -1,23 +1,10 @@
-import { getServerSession } from "next-auth";
-import type { Session } from "next-auth";
-import { authOptions, getAuthEnvStatus } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getViewerIdentity } from "@/lib/viewer";
 import DashboardClient from "./dashboard-client";
 
 export default async function DashboardPage() {
-  const authEnvStatus = getAuthEnvStatus();
-  let session: Session | null = null;
-
-  if (authEnvStatus.hasSecret && authEnvStatus.hasUsableDatabaseUrl) {
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      session = null;
-    }
-  }
-
-  const userId = session?.user?.id;
-  const isAuthenticated = Boolean(userId);
+  const viewer = await getViewerIdentity();
+  const userId = viewer.userId;
   let projects: { id: string; title: string; updatedAt: Date }[] = [];
 
   if (userId) {
@@ -40,8 +27,8 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
-      isAuthenticated={isAuthenticated}
-      userEmail={session?.user?.email ?? ""}
+      isAuthenticated={viewer.isAuthenticated}
+      userEmail={viewer.email}
       projects={projects}
     />
   );
