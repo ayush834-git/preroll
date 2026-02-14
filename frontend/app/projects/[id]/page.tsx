@@ -12,7 +12,7 @@ export default async function ProjectPage({ params }: Props) {
 
   // Server-side protection: users must be authenticated before viewing any project.
   if (!userId) {
-    redirect("/auth");
+    redirect("/auth/login");
   }
 
   const { id } = await params;

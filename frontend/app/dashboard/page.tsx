@@ -1,77 +1,50 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import { authOptions, getAuthEnvStatus } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import DashboardClient from "./dashboard-client";
 
-export default async function DashboardPreviewPage() {
+export default async function DashboardPage() {
   const authEnvStatus = getAuthEnvStatus();
-  let session: Session | null = null;
-
-  if (authEnvStatus.hasSecret) {
-    try {
-      session = await getServerSession(authOptions);
-    } catch {
-      // Keep preview page public even if server auth is misconfigured.
-      session = null;
-    }
+  if (!authEnvStatus.hasSecret || !authEnvStatus.hasDatabaseUrl) {
+    redirect("/auth/login");
   }
 
-  if (session?.user?.id) {
-    redirect("/app/dashboard");
+  let session: Session | null = null;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    redirect("/auth/login");
+  }
+
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    redirect("/auth/login");
+  }
+
+  let projects: { id: string; title: string; updatedAt: Date }[] = [];
+  try {
+    projects = await prisma.project.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        title: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+  } catch {
+    projects = [];
   }
 
   return (
-    <main className="relative min-h-screen text-white px-6 md:px-10 py-12 overflow-hidden">
-      <div className="relative z-10 max-w-4xl mx-auto">
-        <div className="glass-panel-strong rounded-3xl p-8 md:p-12">
-          <p className="text-xs tracking-[0.3em] text-primary mb-3">
-            PUBLIC PREVIEW
-          </p>
-          <h1 className="text-3xl md:text-5xl font-light text-white">
-            Dashboard Preview
-          </h1>
-          <p className="mt-5 text-white/70 max-w-2xl">
-            This route is public so visitors can preview the dashboard
-            experience. Real user projects are available after email OTP login.
-          </p>
-
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <div className="glass-outline rounded-2xl p-5">
-              <p className="text-xs uppercase tracking-[0.2em] text-white/50">
-                After Login
-              </p>
-              <p className="mt-2 text-sm text-white/80">
-                Access your protected workspace at <code>/app/dashboard</code>.
-              </p>
-            </div>
-            <div className="glass-outline rounded-2xl p-5">
-              <p className="text-xs uppercase tracking-[0.2em] text-white/50">
-                Auth Model
-              </p>
-              <p className="mt-2 text-sm text-white/80">
-                OTP verification creates first-time users and restores existing
-                accounts by email.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Link
-              href="/auth"
-              className="glass-button glass-button-primary text-white px-6 py-3 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
-            >
-              Continue with Email OTP
-            </Link>
-            <Link
-              href="/"
-              className="glass-button glass-button-secondary text-white/85 px-6 py-3 rounded-xl transition-all btn-animated btn-sky btn-ghost"
-            >
-              Back Home
-            </Link>
-          </div>
-        </div>
-      </div>
-    </main>
+    <DashboardClient
+      userEmail={session?.user?.email ?? ""}
+      projects={projects}
+    />
   );
 }

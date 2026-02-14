@@ -94,7 +94,7 @@ export default function DashboardClient({
             </span>
             <button
               type="button"
-              onClick={() => void signOut({ callbackUrl: "/auth" })}
+              onClick={() => void signOut({ callbackUrl: "/auth/login" })}
               className="glass-outline text-white/80 hover:text-white px-4 py-2 rounded-lg transition-colors btn-animated btn-sky btn-ghost"
             >
               Logout
