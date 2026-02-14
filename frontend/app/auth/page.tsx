@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import type { Session } from "next-auth";
 import { authOptions, getAuthEnvStatus } from "@/lib/auth";
 import AuthClient from "./auth-client";
 
@@ -15,7 +16,7 @@ export default async function AuthPage() {
       "Database is not configured. Set DATABASE_URL in Vercel env.";
   }
 
-  let session: Awaited<ReturnType<typeof getServerSession>> = null;
+  let session: Session | null = null;
 
   if (!configError) {
     try {
