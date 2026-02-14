@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import EmailProvider from "next-auth/providers/email";
+import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
 
 function hasValue(value: string | undefined) {
@@ -65,6 +66,7 @@ function getSmtpConfig() {
 }
 
 const authEnvStatus = getAuthEnvStatus();
+const APP_NAME = "Preroll";
 
 export const authOptions: NextAuthOptions = {
   adapter: authEnvStatus.hasUsableDatabaseUrl ? PrismaAdapter(prisma) : undefined,
@@ -84,6 +86,37 @@ export const authOptions: NextAuthOptions = {
             // Auth.js email provider sends a one-click magic link to the inbox.
             server: getSmtpConfig(),
             from: process.env.EMAIL_FROM,
+            async sendVerificationRequest({ identifier, url }) {
+              const transport = nodemailer.createTransport(getSmtpConfig());
+              const from = getRequiredEnv("EMAIL_FROM");
+              const subject = `Sign in to ${APP_NAME}`;
+              const text = [
+                `Sign in to ${APP_NAME}:`,
+                url,
+                "",
+                "If you did not request this email, you can safely ignore it.",
+              ].join("\n");
+
+              const html = `
+                <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
+                  <h2 style="margin: 0 0 12px;">Sign in to ${APP_NAME}</h2>
+                  <p style="margin: 0 0 16px;">Click the button below to log in:</p>
+                  <p style="margin: 0 0 16px;">
+                    <a href="${url}" style="display: inline-block; background: #111827; color: #ffffff; padding: 10px 16px; border-radius: 8px; text-decoration: none;">Log in to ${APP_NAME}</a>
+                  </p>
+                  <p style="margin: 0 0 8px;">If the button does not work, copy and paste this URL:</p>
+                  <p style="margin: 0; word-break: break-all;"><a href="${url}">${url}</a></p>
+                </div>
+              `;
+
+              await transport.sendMail({
+                to: identifier,
+                from,
+                subject,
+                text,
+                html,
+              });
+            },
           }),
         ]
       : []),
