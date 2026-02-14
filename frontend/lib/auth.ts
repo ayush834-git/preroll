@@ -152,7 +152,7 @@ export const authOptions: NextAuthOptions = {
         otp: { label: "OTP", type: "text" },
       },
       async authorize(credentials) {
-        if (!authEnvStatus.hasDatabaseUrl) {
+        if (!authEnvStatus.hasDatabaseUrl || !authEnvStatus.hasSecret) {
           return null;
         }
 
