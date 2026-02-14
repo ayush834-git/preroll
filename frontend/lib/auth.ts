@@ -13,6 +13,29 @@ function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
+function hasValue(value: string | undefined) {
+  return Boolean(value && value.trim());
+}
+
+export function getAuthEnvStatus() {
+  const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+  const hasSecret = hasValue(secret);
+  const hasDatabaseUrl = hasValue(process.env.DATABASE_URL);
+  const hasSmtpConfig =
+    hasValue(process.env.EMAIL_SERVER_HOST) &&
+    hasValue(process.env.EMAIL_SERVER_PORT) &&
+    hasValue(process.env.EMAIL_SERVER_USER) &&
+    hasValue(process.env.EMAIL_SERVER_PASSWORD) &&
+    hasValue(process.env.EMAIL_FROM);
+
+  return {
+    hasSecret,
+    hasDatabaseUrl,
+    hasSmtpConfig,
+    hasEmailProvider: hasDatabaseUrl && hasSmtpConfig,
+  };
+}
+
 function getRequiredEnv(name: string) {
   const value = process.env[name];
   if (!value || !value.trim()) {
@@ -56,8 +79,11 @@ function hashVerificationToken(token: string) {
     .digest("hex");
 }
 
+const authEnvStatus = getAuthEnvStatus();
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: authEnvStatus.hasDatabaseUrl ? PrismaAdapter(prisma) : undefined,
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   session: {
     // JWT session keeps auth stateless on Vercel while user/project data remains in DB.
     strategy: "jwt",
@@ -66,54 +92,58 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth",
   },
   providers: [
-    EmailProvider({
-      // SMTP config works with Gmail app password or any SMTP free tier.
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: Number(process.env.EMAIL_SERVER_PORT || 587),
-        secure: Number(process.env.EMAIL_SERVER_PORT || 587) === 465,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
-      },
-      from: process.env.EMAIL_FROM,
-      maxAge: OTP_TTL_SECONDS,
-      // Generate six-digit numeric OTP instead of a long magic-link token.
-      generateVerificationToken: async () =>
-        randomInt(100000, 1000000).toString(),
-      async sendVerificationRequest({ identifier, token }) {
-        const transport = nodemailer.createTransport(getSmtpConfig());
-        const from = getRequiredEnv("EMAIL_FROM");
-        const appName = "Preroll";
-        const subject = `${appName} login code: ${token}`;
-        const text = [
-          `Your ${appName} one-time passcode is: ${token}`,
-          "",
-          `This code expires in ${Math.floor(OTP_TTL_SECONDS / 60)} minutes.`,
-          "If you did not request this, you can ignore this email.",
-        ].join("\n");
+    ...(authEnvStatus.hasEmailProvider
+      ? [
+          EmailProvider({
+            // SMTP config works with Gmail app password or any SMTP free tier.
+            server: {
+              host: process.env.EMAIL_SERVER_HOST,
+              port: Number(process.env.EMAIL_SERVER_PORT || 587),
+              secure: Number(process.env.EMAIL_SERVER_PORT || 587) === 465,
+              auth: {
+                user: process.env.EMAIL_SERVER_USER,
+                pass: process.env.EMAIL_SERVER_PASSWORD,
+              },
+            },
+            from: process.env.EMAIL_FROM,
+            maxAge: OTP_TTL_SECONDS,
+            // Generate six-digit numeric OTP instead of a long magic-link token.
+            generateVerificationToken: async () =>
+              randomInt(100000, 1000000).toString(),
+            async sendVerificationRequest({ identifier, token }) {
+              const transport = nodemailer.createTransport(getSmtpConfig());
+              const from = getRequiredEnv("EMAIL_FROM");
+              const appName = "Preroll";
+              const subject = `${appName} login code: ${token}`;
+              const text = [
+                `Your ${appName} one-time passcode is: ${token}`,
+                "",
+                `This code expires in ${Math.floor(OTP_TTL_SECONDS / 60)} minutes.`,
+                "If you did not request this, you can ignore this email.",
+              ].join("\n");
 
-        const html = `
-          <div style="font-family: Inter, Arial, sans-serif; color: #1f130d;">
-            <p style="font-size: 16px; margin-bottom: 8px;">Your <strong>${appName}</strong> one-time passcode:</p>
-            <p style="font-size: 32px; letter-spacing: 8px; margin: 12px 0; font-weight: 700;">${token}</p>
-            <p style="font-size: 14px; margin-top: 8px;">This code expires in ${Math.floor(
-              OTP_TTL_SECONDS / 60
-            )} minutes.</p>
-            <p style="font-size: 12px; color: #6b5a4f;">If you did not request this, ignore this email.</p>
-          </div>
-        `;
+              const html = `
+                <div style="font-family: Inter, Arial, sans-serif; color: #1f130d;">
+                  <p style="font-size: 16px; margin-bottom: 8px;">Your <strong>${appName}</strong> one-time passcode:</p>
+                  <p style="font-size: 32px; letter-spacing: 8px; margin: 12px 0; font-weight: 700;">${token}</p>
+                  <p style="font-size: 14px; margin-top: 8px;">This code expires in ${Math.floor(
+                    OTP_TTL_SECONDS / 60
+                  )} minutes.</p>
+                  <p style="font-size: 12px; color: #6b5a4f;">If you did not request this, ignore this email.</p>
+                </div>
+              `;
 
-        await transport.sendMail({
-          to: identifier,
-          from,
-          subject,
-          text,
-          html,
-        });
-      },
-    }),
+              await transport.sendMail({
+                to: identifier,
+                from,
+                subject,
+                text,
+                html,
+              });
+            },
+          }),
+        ]
+      : []),
     CredentialsProvider({
       id: "otp",
       name: "Email OTP",
@@ -122,6 +152,10 @@ export const authOptions: NextAuthOptions = {
         otp: { label: "OTP", type: "text" },
       },
       async authorize(credentials) {
+        if (!authEnvStatus.hasDatabaseUrl) {
+          return null;
+        }
+
         const email = normalizeEmail(String(credentials?.email || ""));
         const otp = String(credentials?.otp || "").trim();
 

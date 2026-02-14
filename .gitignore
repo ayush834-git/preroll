@@ -10,3 +10,13 @@ frontend/*.log
 
 # General
 .env
+.env.local
+.env.*
+
+# Local editor settings
+.vscode/
+
+# Local PostgreSQL artifacts
+frontend/.pgdata/
+frontend/.local-postgres.zip
+frontend/.pgpass_init.txt

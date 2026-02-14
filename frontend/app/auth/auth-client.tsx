@@ -8,7 +8,15 @@ import { signIn } from "next-auth/react";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_REGEX = /^\d{6}$/;
 
-export default function AuthClient() {
+type AuthClientProps = {
+  configError?: string;
+  emailProviderReady?: boolean;
+};
+
+export default function AuthClient({
+  configError = "",
+  emailProviderReady = true,
+}: AuthClientProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -18,8 +26,19 @@ export default function AuthClient() {
   const [notice, setNotice] = useState("");
 
   const normalizedEmail = email.trim().toLowerCase();
+  const setupIssue =
+    configError ||
+    (emailProviderReady
+      ? ""
+      : "Email OTP is not configured on the server. Set EMAIL_SERVER_HOST, EMAIL_SERVER_PORT, EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD, EMAIL_FROM, and redeploy.");
+  const flowDisabled = Boolean(setupIssue);
 
   const sendOtp = async () => {
+    if (setupIssue) {
+      setError(setupIssue);
+      return;
+    }
+
     if (!EMAIL_REGEX.test(normalizedEmail)) {
       setError("Enter a valid email address.");
       return;
@@ -52,6 +71,11 @@ export default function AuthClient() {
   };
 
   const verifyOtp = async () => {
+    if (setupIssue) {
+      setError(setupIssue);
+      return;
+    }
+
     const code = otp.trim();
     if (!OTP_REGEX.test(code)) {
       setError("Enter the 6-digit OTP.");
@@ -105,6 +129,10 @@ export default function AuthClient() {
               : "Enter the 6-digit OTP sent to your email."}
           </p>
 
+          {setupIssue && (
+            <p className="mb-4 text-xs text-amber-300/90">{setupIssue}</p>
+          )}
+
           {step === "email" ? (
             <div className="space-y-4">
               <input
@@ -114,12 +142,13 @@ export default function AuthClient() {
                 placeholder="you@example.com"
                 className="w-full rounded-xl glass-input px-4 py-3.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
                 autoComplete="email"
+                disabled={flowDisabled || loading}
               />
 
               <button
                 type="button"
                 onClick={() => void sendOtp()}
-                disabled={loading}
+                disabled={loading || flowDisabled}
                 className="w-full mt-4 glass-interactive text-white py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Sending OTP..." : "Send OTP"}
@@ -143,12 +172,13 @@ export default function AuthClient() {
                 }
                 placeholder="Enter 6-digit OTP"
                 className="w-full rounded-xl glass-input px-4 py-3.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors tracking-[0.3em]"
+                disabled={flowDisabled || loading}
               />
 
               <button
                 type="button"
                 onClick={() => void verifyOtp()}
-                disabled={loading}
+                disabled={loading || flowDisabled}
                 className="w-full mt-4 glass-interactive text-white py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Verifying..." : "Verify"}
@@ -157,7 +187,7 @@ export default function AuthClient() {
               <button
                 type="button"
                 onClick={() => void sendOtp()}
-                disabled={loading}
+                disabled={loading || flowDisabled}
                 className="w-full glass-outline text-white/80 py-3 rounded-xl transition-all btn-animated btn-sky btn-ghost disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Resend OTP
