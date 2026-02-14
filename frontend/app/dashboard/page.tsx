@@ -7,7 +7,7 @@ import DashboardClient from "./dashboard-client";
 
 export default async function DashboardPage() {
   const authEnvStatus = getAuthEnvStatus();
-  if (!authEnvStatus.hasSecret || !authEnvStatus.hasDatabaseUrl) {
+  if (!authEnvStatus.hasSecret || !authEnvStatus.hasUsableDatabaseUrl) {
     redirect("/auth/login");
   }
 

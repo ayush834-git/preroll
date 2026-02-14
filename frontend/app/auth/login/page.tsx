@@ -37,6 +37,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   } else if (!authEnvStatus.hasDatabaseUrl) {
     configError =
       "Database is not configured. Set DATABASE_URL in Vercel env.";
+  } else if (!authEnvStatus.hasUsableDatabaseUrl) {
+    configError =
+      "DATABASE_URL points to localhost. Vercel cannot reach local Postgres. Use a hosted Postgres URL (Neon/Supabase/Vercel Postgres).";
   }
 
   let session: Session | null = null;

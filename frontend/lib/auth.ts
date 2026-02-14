@@ -8,9 +8,15 @@ function hasValue(value: string | undefined) {
 }
 
 export function getAuthEnvStatus() {
+  const isVercel = hasValue(process.env.VERCEL);
+  const databaseUrl = process.env.DATABASE_URL?.trim() ?? "";
   const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
   const hasSecret = hasValue(secret);
-  const hasDatabaseUrl = hasValue(process.env.DATABASE_URL);
+  const hasDatabaseUrl = hasValue(databaseUrl);
+  const usesLocalDatabase =
+    /(?:^|[@/])localhost(?::\d+)?(?:[/?]|$)/i.test(databaseUrl) ||
+    /(?:^|[@/])127\.0\.0\.1(?::\d+)?(?:[/?]|$)/.test(databaseUrl);
+  const hasUsableDatabaseUrl = hasDatabaseUrl && !(isVercel && usesLocalDatabase);
   const hasSmtpConfig =
     hasValue(process.env.EMAIL_SERVER_HOST) &&
     hasValue(process.env.EMAIL_SERVER_PORT) &&
@@ -19,10 +25,13 @@ export function getAuthEnvStatus() {
     hasValue(process.env.EMAIL_FROM);
 
   return {
+    isVercel,
     hasSecret,
     hasDatabaseUrl,
+    hasUsableDatabaseUrl,
+    usesLocalDatabase,
     hasSmtpConfig,
-    hasEmailProvider: hasDatabaseUrl && hasSmtpConfig,
+    hasEmailProvider: hasUsableDatabaseUrl && hasSmtpConfig,
   };
 }
 
@@ -58,7 +67,7 @@ function getSmtpConfig() {
 const authEnvStatus = getAuthEnvStatus();
 
 export const authOptions: NextAuthOptions = {
-  adapter: authEnvStatus.hasDatabaseUrl ? PrismaAdapter(prisma) : undefined,
+  adapter: authEnvStatus.hasUsableDatabaseUrl ? PrismaAdapter(prisma) : undefined,
   secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   session: {
     // JWT session keeps auth stateless on Vercel while user/project data remains in DB.
