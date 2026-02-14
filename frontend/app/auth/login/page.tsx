@@ -12,8 +12,12 @@ function mapAuthError(errorCode: string | undefined) {
       return "Authentication server configuration is invalid. Check server environment variables.";
     case "AccessDenied":
       return "Access denied for this sign-in request.";
+    case "Unknown":
+      return "Sign-in failed. Request a new magic link and try again.";
     default:
-      return "";
+      return errorCode
+        ? `Sign-in failed (${errorCode}). Request a new magic link and try again.`
+        : "";
   }
 }
 
