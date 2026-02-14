@@ -4,9 +4,28 @@ import type { Session } from "next-auth";
 import { authOptions, getAuthEnvStatus } from "@/lib/auth";
 import LoginClient from "./login-client";
 
-export default async function LoginPage() {
+function mapAuthError(errorCode: string | undefined) {
+  switch (errorCode) {
+    case "Verification":
+      return "This magic link is invalid or expired. Request a new login link.";
+    case "Configuration":
+      return "Authentication server configuration is invalid. Check server environment variables.";
+    case "AccessDenied":
+      return "Access denied for this sign-in request.";
+    default:
+      return "";
+  }
+}
+
+type LoginPageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const authEnvStatus = getAuthEnvStatus();
+  const { error } = await searchParams;
   let configError = "";
+  const authError = mapAuthError(error);
 
   if (!authEnvStatus.hasSecret) {
     configError =
@@ -35,6 +54,7 @@ export default async function LoginPage() {
     <LoginClient
       configError={configError}
       emailProviderReady={authEnvStatus.hasEmailProvider}
+      authError={authError}
     />
   );
 }

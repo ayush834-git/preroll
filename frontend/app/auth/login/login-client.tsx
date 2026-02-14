@@ -9,11 +9,13 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type LoginClientProps = {
   configError?: string;
   emailProviderReady?: boolean;
+  authError?: string;
 };
 
 export default function LoginClient({
   configError = "",
   emailProviderReady = true,
+  authError = "",
 }: LoginClientProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -83,6 +85,9 @@ export default function LoginClient({
 
           {setupIssue && (
             <p className="mb-4 text-xs text-amber-300/90">{setupIssue}</p>
+          )}
+          {authError && (
+            <p className="mb-4 text-xs text-red-300/90">{authError}</p>
           )}
 
           <div className="space-y-4">
