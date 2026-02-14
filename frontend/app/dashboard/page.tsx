@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import { authOptions, getAuthEnvStatus } from "@/lib/auth";
@@ -7,42 +6,41 @@ import DashboardClient from "./dashboard-client";
 
 export default async function DashboardPage() {
   const authEnvStatus = getAuthEnvStatus();
-  if (!authEnvStatus.hasSecret || !authEnvStatus.hasUsableDatabaseUrl) {
-    redirect("/auth/login");
-  }
-
   let session: Session | null = null;
-  try {
-    session = await getServerSession(authOptions);
-  } catch {
-    redirect("/auth/login");
+
+  if (authEnvStatus.hasSecret && authEnvStatus.hasUsableDatabaseUrl) {
+    try {
+      session = await getServerSession(authOptions);
+    } catch {
+      session = null;
+    }
   }
 
   const userId = session?.user?.id;
-
-  if (!userId) {
-    redirect("/auth/login");
-  }
-
+  const isAuthenticated = Boolean(userId);
   let projects: { id: string; title: string; updatedAt: Date }[] = [];
-  try {
-    projects = await prisma.project.findMany({
-      where: { userId },
-      select: {
-        id: true,
-        title: true,
-        updatedAt: true,
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    });
-  } catch {
-    projects = [];
+
+  if (userId) {
+    try {
+      projects = await prisma.project.findMany({
+        where: { userId },
+        select: {
+          id: true,
+          title: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          updatedAt: "desc",
+        },
+      });
+    } catch {
+      projects = [];
+    }
   }
 
   return (
     <DashboardClient
+      isAuthenticated={isAuthenticated}
       userEmail={session?.user?.email ?? ""}
       projects={projects}
     />

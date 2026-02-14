@@ -14,11 +14,13 @@ type DashboardProject = {
 };
 
 type DashboardClientProps = {
+  isAuthenticated: boolean;
   userEmail: string;
   projects: DashboardProject[];
 };
 
 export default function DashboardClient({
+  isAuthenticated,
   userEmail,
   projects,
 }: DashboardClientProps) {
@@ -37,6 +39,11 @@ export default function DashboardClient({
   }, [projects]);
 
   const createProject = async () => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setError("Enter a project title.");
@@ -89,16 +96,27 @@ export default function DashboardClient({
           </Link>
 
           <div className="flex flex-wrap items-center gap-3">
-            <span className="glass-pill px-3 py-1 text-xs text-white/70 rounded-full">
-              {userEmail}
-            </span>
-            <button
-              type="button"
-              onClick={() => void signOut({ callbackUrl: "/auth/login" })}
-              className="glass-outline text-white/80 hover:text-white px-4 py-2 rounded-lg transition-colors btn-animated btn-sky btn-ghost"
-            >
-              Logout
-            </button>
+            {isAuthenticated ? (
+              <>
+                <span className="glass-pill px-3 py-1 text-xs text-white/70 rounded-full">
+                  {userEmail}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void signOut({ callbackUrl: "/auth/login" })}
+                  className="glass-outline text-white/80 hover:text-white px-4 py-2 rounded-lg transition-colors btn-animated btn-sky btn-ghost"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="glass-outline text-white/80 hover:text-white px-4 py-2 rounded-lg transition-colors btn-animated btn-sky btn-ghost"
+              >
+                Log In
+              </Link>
+            )}
           </div>
         </div>
 
@@ -131,6 +149,7 @@ export default function DashboardClient({
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="e.g. Midnight Signal"
                 className="w-full rounded-xl glass-input px-4 py-3 text-sm text-white placeholder:text-white/40"
+                disabled={!isAuthenticated || creating}
               />
               <button
                 type="button"
@@ -139,9 +158,20 @@ export default function DashboardClient({
                 className="glass-interactive text-white px-5 py-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-glow btn-animated btn-amber btn-cta inline-flex items-center gap-2"
               >
                 <PlusCircle className="h-4 w-4" />
-                {creating ? "Creating..." : "Start Project"}
+                {isAuthenticated
+                  ? creating
+                    ? "Creating..."
+                    : "Start Project"
+                  : "Log In To Start"}
               </button>
             </div>
+
+            {!isAuthenticated && (
+              <p className="mt-3 text-xs text-white/60">
+                Browse the dashboard preview. Log in to create and save
+                projects.
+              </p>
+            )}
 
             {error && (
               <p className="mt-3 text-xs text-red-300/80">{error}</p>
