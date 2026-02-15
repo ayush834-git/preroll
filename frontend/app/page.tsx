@@ -106,7 +106,7 @@ export default function LandingPage() {
 
           <div className="flex gap-3">
             <Link
-              href="/auth/login"
+              href="/auth/login?force=1"
               className="glass-button text-white/90 px-4 py-2 rounded-lg transition-colors btn-animated btn-sky btn-ghost"
             >
               Log In
@@ -151,7 +151,7 @@ export default function LandingPage() {
                       Get Started
                     </Link>
                     <Link
-                      href="/auth/login"
+                      href="/auth/login?force=1"
                       className="glass-button glass-button-secondary text-white/90 px-6 py-3.5 rounded-xl transition-all btn-animated btn-sky btn-ghost inline-flex items-center gap-2"
                     >
                       Log In
@@ -315,7 +315,7 @@ export default function LandingPage() {
                 Get Started
               </Link>
               <Link
-                href="/auth/login"
+                href="/auth/login?force=1"
                 className="glass-button glass-button-secondary text-white/90 px-7 py-3.5 rounded-xl hover:bg-white/10 transition-all btn-animated btn-sky btn-ghost"
               >
                 Log In

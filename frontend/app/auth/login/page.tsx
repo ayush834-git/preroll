@@ -22,12 +22,13 @@ function mapAuthError(errorCode: string | undefined) {
 }
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; force?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const authEnvStatus = getAuthEnvStatus();
-  const { error } = await searchParams;
+  const { error, force } = await searchParams;
+  const forceAuthPage = force === "1" || force === "true";
   let configError = "";
   const authError = mapAuthError(error);
 
@@ -53,7 +54,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     }
   }
 
-  if (session?.user?.id) {
+  if (session?.user?.id && !forceAuthPage) {
     redirect("/dashboard");
   }
 

@@ -106,7 +106,7 @@ export default function DashboardClient({
               </>
             ) : (
               <Link
-                href="/auth/login"
+                href="/auth/login?force=1"
                 className="glass-outline text-white/80 hover:text-white px-4 py-2 rounded-lg transition-colors btn-animated btn-sky btn-ghost"
               >
                 Log In
