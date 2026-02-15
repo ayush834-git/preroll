@@ -552,11 +552,54 @@ select option {
 }
 
 .glass-pill {
-  background: rgba(116, 77, 53, 0.26);
-  border: 1px solid rgba(246, 215, 182, 0.26);
+  background: linear-gradient(
+    155deg,
+    rgba(111, 158, 168, 0.24),
+    rgba(72, 106, 115, 0.16)
+  );
+  border: 1px solid rgba(141, 180, 190, 0.42);
   backdrop-filter: blur(var(--glass-blur-secondary)) saturate(138%) brightness(1.03);
   -webkit-backdrop-filter: blur(var(--glass-blur-secondary)) saturate(138%)
     brightness(1.03);
+}
+
+/* Global hierarchy remap so all existing pages inherit the refined palette. */
+.text-white\/90 {
+  color: rgba(247, 239, 228, 0.92);
+}
+
+.text-white\/80 {
+  color: rgba(235, 225, 211, 0.86);
+}
+
+.text-white\/70 {
+  color: rgba(227, 217, 203, 0.82);
+}
+
+.text-white\/60 {
+  color: var(--text-secondary);
+}
+
+.text-white\/50 {
+  color: var(--text-muted);
+}
+
+.text-white\/40 {
+  color: rgba(182, 171, 155, 0.68);
+}
+
+a.hover\:text-white:hover,
+a.hover\:text-white\/80:hover,
+a.hover\:text-white\/90:hover {
+  color: var(--accent-cool-hover);
+}
+
+.focus\:border-primary:focus {
+  border-color: var(--accent-cool) !important;
+}
+
+.focus\:ring-primary\/30:focus {
+  --tw-ring-color: rgba(var(--accent-cool-rgb), 0.35) !important;
 }
 
 .glass-amber {
