@@ -1,145 +1,148 @@
-> **Note**
-> Preroll is my **first end-to-end project** and an evolving prototype.
-> It was built while learning modern web development and GenAI workflows, with extensive use of AI-assisted tools for design, debugging, and iteration.
->
-> The focus of this project is not perfection, but understanding **product flow, UX trade-offs, performance constraints, and AI-assisted system design** through hands-on building.
+Good instinct.
+We don’t throw away the reflective tone of version 1.
+We don’t hide the engineering of version 2.
 
-# 🎬 Preroll
+We merge them intelligently.
 
-**Preroll** is an AI-assisted film pre-production workspace designed to generate *exactly what the user asks for* — no more, no less.
+You keep the honesty about it being your first end-to-end build — but you don’t downplay authentication, persistence, and deployment.
 
-Instead of being a “generate everything” AI tool, Preroll follows an **intent-driven approach**, allowing users to selectively generate scene breakdowns, visual direction, sound design, budget considerations, and production notes based on their needs.
-
-The project began as a campus hackathon submission and has been actively developed since, with a focus on usability, performance, and real-world workflows.
+Here is the integrated version:
 
 ---
 
-## 🔗 Live & Code
+# 🎬 Preroll
 
-- **Live Demo:** https://preroll-zciu.vercel.app/
-- **Repository:** https://github.com/ayush834-git/preroll
+> **Note**
+> Preroll is my first end-to-end product build and an evolving system.
+> It was developed while learning modern web development and GenAI workflows, with extensive use of AI-assisted tools for iteration and debugging.
+>
+> The focus of this project is building a working product — understanding product flow, UX trade-offs, performance constraints, authentication, and persistent system design through hands-on implementation.
+
+---
+
+## 🔎 Overview
+
+**Preroll** is an AI-assisted film pre-production workspace built around an intent-driven generation model.
+
+Users authenticate via magic link, create projects, generate selective production reports, and revisit saved work through a persistent dashboard.
+
+This is not a static demo — it is a deployed, multi-user system with working authentication and database-backed storage.
+
+Live: [https://preroll-zciu.vercel.app](https://preroll-zciu.vercel.app)
+Repository: [https://github.com/ayush834-git/preroll](https://github.com/ayush834-git/preroll)
+
+---
+
+## 🔐 Authentication & Persistence
+
+Preroll includes full end-to-end authentication and user-bound data storage:
+
+* Email magic-link authentication (NextAuth)
+* JWT-based session management
+* Protected routes
+* PostgreSQL database (Supabase)
+* Projects tied to authenticated users
+* Resume saved projects from dashboard
+
+Generated outputs persist across sessions and are stored per user.
 
 ---
 
 ## 🧠 Product Philosophy
 
-Preroll is built around three core principles:
+Preroll follows three principles:
 
 ### 1. Intent-Driven AI
-Users explicitly choose **what** they want generated.
-The system avoids unnecessary output and focuses only on the selected generation type.
 
-### 2. Workspace → Report Flow
+Users explicitly choose what they want generated.
+The system avoids unnecessary output.
+
+### 2. Workspace → Structured Report
+
 Input happens in a focused workspace.
-Output is delivered as a structured, professional report — not a chat conversation.
+Output is delivered as a structured report, not a chat interface.
 
-### 3. Performance-Aware Design
-The UI adapts to device capability:
-- rich and cinematic where possible
-- simple, smooth, and respectful where necessary
+### 3. Performance-Aware Rendering
+
+The UI adapts to device capability while preserving workflow integrity.
+
+---
+
+## 🧭 Core Workflow
+
+1. Log in via magic link
+2. Create a project
+3. Define production parameters
+4. Select generation type
+5. Enter creative prompt
+6. Generate structured report
+7. Save, revisit, or export results
+
+Projects remain accessible whenever the user logs back in.
 
 ---
 
 ## ✨ Key Features
 
-- AI-generated **pre-production reports**
-- Selective generation types:
-  - Scene Breakdown
-  - Visual Direction
-  - Sound & Mood Design
-  - Budget Considerations
-  - Director / Production Notes
-- Structured, expandable result sections
-- Versioned outputs with metadata
-- **PDF export** for generated results
-- Adaptive UI across devices
-
----
-
-## ⚙️ Adaptive Performance Modes
-
-Preroll uses an **intentional performance system** to balance visuals and usability:
-
-### 🎥 Cinematic Mode
-- Enabled on capable desktops and laptops
-- Animated beam backgrounds
-- Hover effects and subtle motion
-- Cinematic visual polish
-
-### ⚖️ Reduced Mode
-- Used on mid-range devices
-- Limited motion and effects
-- Same layout and content
-- Improved stability and smoothness
-
-### ⚡ Performance Mode
-- Default on phones, touch devices, and low-end hardware
-- No heavy animations or background effects
-- Static but cinematic visuals
-- Smooth scrolling and fast interaction
-
-The content and workflow remain identical across all modes — only rendering intensity changes.
-
----
-
-## 🧭 Core User Flow
-
-1. Create a project
-2. Define production parameters (genre, budget tier, complexity, etc.)
-3. Select the generation type
-4. Enter a creative prompt
-5. Generate a structured results report
-6. Copy sections, regenerate, or **download results as PDF**
+* Magic-link authentication
+* Persistent PostgreSQL storage
+* Auth-protected dashboard
+* Selective AI report generation
+* Expandable structured sections
+* PDF export
+* Cinematic dark UI theme
+* Responsive design
 
 ---
 
 ## 🛠 Tech Stack
 
-### Frontend
-- Next.js (App Router)
-- React
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- Framer Motion
+Frontend
 
-### AI
-- Groq API
-- LLaMA 3.1 8B (instant)
-- Token-optimized, structured prompting
+* Next.js (App Router)
+* React
+* TypeScript
+* Tailwind CSS
+* Framer Motion
 
-### Deployment
-- Vercel
+Backend
 
----
+* NextAuth (Email provider)
+* Prisma ORM
+* PostgreSQL (Supabase)
+* JWT session strategy
 
-## 🧪 Project Status
+AI
 
-- No authentication (demo workspace)
-- No persistent backend storage yet
-- Focused on:
-  - UX clarity
-  - performance correctness
-  - AI output structure
-  - iterative improvement
+* Groq API
+* LLaMA 3.1 8B
+* Structured prompting
 
-This is an **early but intentional stage**, not a finished product.
+Deployment
+
+* Vercel (Serverless)
 
 ---
 
-## 🏆 Origins
+## 🏗 Architecture Snapshot
 
-Built during a **campus hackathon (NASSCOM × IBM – Introduction to GenAI)**  
-Placed in the **Top 30** among ~150–200 teams (1st–4th year students).
+User → Magic Link → VerificationToken (DB)
+Session (JWT) → Protected Routes
+Project → Stored via Prisma → PostgreSQL
+Dashboard → Fetches user-bound projects
 
-The college permitted continued development and reuse for future hackathons, and the project has been iterated beyond the event.
+Authentication, session management, AI generation, and persistence are intentionally separated.
 
 ---
 
-## 📌 Closing Note
+## 🎯 Closing
 
-Preroll is not a “do-everything” AI tool.
+Preroll is not a general-purpose AI assistant.
 
-It is a **selective, performance-aware system** designed to support creative pre-production workflows without overwhelming the user or the device.
+It is a structured, authenticated workspace designed to support creative pre-production planning with persistence and clarity.
 
 🎬 *Where films begin — before the camera rolls.*
+
+---
+
+
