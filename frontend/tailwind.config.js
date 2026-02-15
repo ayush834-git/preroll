@@ -35,6 +35,12 @@ module.exports = {
           600: "#a5884f",
         },
       },
+      backgroundImage: {
+        "black-layered":
+          "radial-gradient(1200px 720px at 50% -12%, rgba(26,26,31,0.56), rgba(10,10,13,0.96) 58%), linear-gradient(180deg, #0a0a0d 0%, #0f0f13 56%, #0a0a0d 100%)",
+        "black-vignette":
+          "radial-gradient(circle at center, rgba(0,0,0,0) 36%, rgba(0,0,0,0.5) 100%)",
+      },
       boxShadow: {
         panel: "0 10px 30px rgba(0,0,0,0.35)",
         elevated: "0 16px 44px rgba(0,0,0,0.42)",
