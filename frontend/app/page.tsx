@@ -82,7 +82,7 @@ export default function LandingPage() {
   const getStartedHref = "/dashboard";
 
   return (
-    <main className="relative min-h-screen text-white overflow-hidden">
+    <main className="relative min-h-screen bg-cinematic-main text-readable overflow-hidden">
       <nav className="relative z-10 mx-4 mt-4 md:mx-8 md:mt-6 rounded-2xl border border-white/10 px-4 py-4 md:px-6 glass-nav animate-glass-in">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -94,14 +94,14 @@ export default function LandingPage() {
             </span>
           </div>
 
-          <div className="hidden md:flex gap-8 text-sm text-white/70">
-            <a href="#features" className="hover:text-white transition-colors">
+          <div className="hidden md:flex gap-8 text-sm">
+            <a href="#features" className="link-cool">
               Features
             </a>
-            <a href="#workflow" className="hover:text-white transition-colors">
+            <a href="#workflow" className="link-cool">
               Workflow
             </a>
-            <a href="#pricing" className="hover:text-white transition-colors">
+            <a href="#pricing" className="link-cool">
               Pricing
             </a>
           </div>
@@ -115,7 +115,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href={getStartedHref}
-              className="glass-button glass-button-primary text-white px-5 py-2.5 rounded-lg transition-colors shadow-glow glow-amber btn-animated btn-amber btn-cta"
+              className="glass-button glass-button-primary btn-bronze text-white px-5 py-2.5 rounded-lg transition-colors shadow-glow glow-amber btn-animated btn-cta"
             >
               Get Started
             </Link>
@@ -139,7 +139,7 @@ export default function LandingPage() {
                     <span className="text-primary">Before the Camera Rolls</span>
                   </h1>
 
-                  <p className="mt-6 text-[color:var(--text-secondary)] max-w-xl text-lg">
+                  <p className="mt-6 text-soft max-w-xl text-lg">
                     A cinematic workspace for directors, writers, and production
                     teams to shape scripts, plan shots, and align vision before
                     the first frame is captured.
@@ -148,7 +148,7 @@ export default function LandingPage() {
                   <div className="mt-10 flex flex-wrap gap-4">
                     <Link
                       href={getStartedHref}
-                      className="glass-button glass-button-primary text-white px-6 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
+                      className="glass-button glass-button-primary btn-bronze text-white px-6 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-cta"
                     >
                       Get Started
                     </Link>
@@ -160,22 +160,22 @@ export default function LandingPage() {
                     </Link>
                   </div>
 
-                  <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-white/60">
-                    <span className="glass-pill px-3 py-1 rounded-full">
+                  <div className="mt-10 flex flex-wrap items-center gap-3 text-sm">
+                    <span className="badge-cool">
                       Live previews
                     </span>
-                    <span className="glass-pill px-3 py-1 rounded-full">
+                    <span className="badge-cool">
                       AI workflows
                     </span>
-                    <span className="glass-pill px-3 py-1 rounded-full">
+                    <span className="badge-cool">
                       Team ready
                     </span>
-                    <span className="glass-pill px-3 py-1 rounded-full">
+                    <span className="badge-cool">
                       Secure by design
                     </span>
                   </div>
 
-                  <div className="mt-12 flex flex-wrap items-center gap-5 text-sm text-white/50">
+                  <div className="mt-12 flex flex-wrap items-center gap-5 text-sm text-muted-strong">
                     <div className="flex items-center gap-2">
                       <Star className="h-4 w-4 text-primary" />
                       <span>Trusted by indie studios</span>
@@ -227,7 +227,7 @@ export default function LandingPage() {
             <h2 className="font-hero-italic text-4xl md:text-5xl">
               Everything Before Action
             </h2>
-            <p className="mt-4 text-white/60 max-w-2xl mx-auto">
+            <p className="mt-4 text-soft max-w-2xl mx-auto">
               Professional tools designed for the crucial planning phase that
               defines every great film.
             </p>
@@ -245,7 +245,7 @@ export default function LandingPage() {
                   {item.icon}
                 </div>
                 <h3 className="text-xl font-medium">{item.title}</h3>
-                <p className="text-white/60 mt-3">{item.body}</p>
+                <p className="text-soft mt-3">{item.body}</p>
               </GlowCard>
             ))}
           </div>
@@ -266,7 +266,7 @@ export default function LandingPage() {
                 Plan Every Shot
               </h2>
             </div>
-            <p className="text-white/60 max-w-xl">
+            <p className="text-soft max-w-xl">
               From concept to shot list, Preroll keeps every department aligned
               with a single cinematic source of truth.
             </p>
@@ -287,10 +287,10 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <h3 className="text-xl font-medium">{item.title}</h3>
-                      <p className="text-white/60 mt-2">{item.body}</p>
+                      <p className="text-soft mt-2">{item.body}</p>
                     </div>
                   </div>
-                  <div className="md:ml-auto hidden md:flex items-center gap-3 text-white/50">
+                  <div className="md:ml-auto hidden md:flex items-center gap-3 text-muted-strong">
                     <Shield className="h-4 w-4" />
                     <span className="text-xs uppercase tracking-[0.2em]">
                       Secure
@@ -315,14 +315,14 @@ export default function LandingPage() {
             <h2 className="font-hero-italic text-4xl md:text-5xl">
               Ready to Begin Your Pre-Production Journey?
             </h2>
-            <p className="text-white/60 mt-4 max-w-2xl mx-auto">
+            <p className="text-soft mt-4 max-w-2xl mx-auto">
               Join filmmakers who plan their vision with precision before the
               cameras roll.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href={getStartedHref}
-                className="glass-button glass-button-primary text-white px-7 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-amber btn-cta"
+                className="glass-button glass-button-primary btn-bronze text-white px-7 py-3.5 rounded-xl transition-all shadow-glow btn-animated btn-cta"
               >
                 Get Started
               </Link>

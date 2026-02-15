@@ -1,30 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: #120c08;
-  --foreground: #f8f2e9;
-  --accent: #e0b07d;
-  --accent-hover: #efc79a;
-  --accent-secondary: #c98f61;
-  --ink: #120c08;
-  --surface: #24180f;
+  --background: #0f1216;
+  --foreground: #f7efe4;
+  --accent: #c58f5c;
+  --accent-hover: #e2b07c;
+  --accent-secondary: #a86d3f;
+  --accent-cool: #6f9ea8;
+  --accent-cool-hover: #8db4be;
+  --accent-cool-rgb: 111, 158, 168;
+  --ink: #17120d;
+  --surface: #1a2028;
 
-  --text-primary: #f8f2e9;
-  --text-secondary: rgba(246, 231, 213, 0.78);
-  --text-muted: rgba(223, 196, 167, 0.62);
+  --text-primary: #f7efe4;
+  --text-secondary: rgba(227, 217, 203, 0.85);
+  --text-muted: rgba(182, 171, 155, 0.8);
+  --text-on-light: #2d2720;
 
   --glass-shadow-soft: 0 18px 42px rgba(10, 5, 2, 0.42);
   --glass-shadow-strong: 0 28px 76px rgba(6, 3, 1, 0.54);
-  --glass-primary-bg: rgba(106, 68, 46, 0.38);
-  --glass-primary-border: rgba(250, 224, 194, 0.4);
-  --glass-secondary-bg: rgba(74, 47, 33, 0.34);
-  --glass-secondary-border: rgba(240, 201, 162, 0.24);
-  --glass-ambient-bg: rgba(56, 37, 26, 0.3);
-  --glass-ambient-border: rgba(232, 188, 144, 0.16);
-  --glass-interactive-bg: rgba(102, 66, 45, 0.34);
-  --glass-interactive-border: rgba(252, 229, 203, 0.32);
-  --glass-input-bg: rgba(39, 25, 17, 0.52);
-  --glass-input-border: rgba(230, 191, 153, 0.28);
+  --glass-primary-bg: rgba(96, 66, 47, 0.34);
+  --glass-primary-border: rgba(246, 218, 185, 0.36);
+  --glass-secondary-bg: rgba(38, 46, 58, 0.34);
+  --glass-secondary-border: rgba(141, 180, 190, 0.24);
+  --glass-ambient-bg: rgba(25, 31, 41, 0.32);
+  --glass-ambient-border: rgba(131, 166, 174, 0.16);
+  --glass-interactive-bg: rgba(44, 54, 68, 0.34);
+  --glass-interactive-border: rgba(154, 188, 196, 0.34);
+  --glass-input-bg: rgba(26, 33, 43, 0.58);
+  --glass-input-border: rgba(150, 185, 194, 0.28);
   --glass-blur-primary: 30px;
   --glass-blur-secondary: 22px;
   --glass-blur-ambient: 34px;
@@ -57,6 +61,26 @@ html {
   scroll-behavior: smooth;
 }
 
+.bg-cinematic-main {
+  background:
+    radial-gradient(
+      1200px 640px at 14% 6%,
+      rgba(186, 124, 72, 0.14),
+      transparent 66%
+    ),
+    radial-gradient(
+      980px 560px at 86% 78%,
+      rgba(111, 158, 168, 0.12),
+      transparent 70%
+    ),
+    radial-gradient(
+      820px 460px at 50% 34%,
+      rgba(242, 205, 163, 0.05),
+      transparent 74%
+    ),
+    linear-gradient(160deg, #0d1014 0%, #141921 45%, #0b0e12 100%);
+}
+
 /* Global background stays abstract and low-contrast so glass surfaces remain legible. */
 .cinematic-bg-webgl {
   position: absolute;
@@ -77,12 +101,12 @@ html {
   background:
     radial-gradient(
       1200px 640px at 16% 4%,
-      rgba(184, 124, 74, 0.12),
+      rgba(184, 124, 74, 0.1),
       transparent 64%
     ),
     radial-gradient(
       980px 560px at 84% 78%,
-      rgba(102, 70, 52, 0.18),
+      rgba(111, 158, 168, 0.16),
       transparent 70%
     ),
     radial-gradient(
@@ -90,7 +114,7 @@ html {
       rgba(244, 204, 160, 0.05),
       transparent 74%
     ),
-    linear-gradient(158deg, #110b08 0%, #1a120d 44%, #120c08 100%);
+    linear-gradient(158deg, #0d1014 0%, #151b22 44%, #0b0f13 100%);
   opacity: 0.42;
   mix-blend-mode: screen;
   transform: translate3d(0, calc(var(--scroll-progress-smooth) * -4px), 0);
@@ -380,7 +404,7 @@ html {
 .glass-panel:hover,
 .glass-panel-strong:hover,
 .glass-interactive:hover {
-  border-color: rgba(255, 236, 214, 0.42);
+  border-color: rgba(var(--accent-cool-rgb), 0.48);
 }
 
 .glass-panel:hover,
@@ -484,7 +508,7 @@ html {
 
 .glass-button:hover {
   transform: translate3d(0, -1px, 0);
-  border-color: rgba(255, 232, 204, 0.5);
+  border-color: rgba(var(--accent-cool-rgb), 0.52);
 }
 
 .glass-panel :is(h1, h2, h3, h4, h5, p, span, li, label),
@@ -704,15 +728,15 @@ button:focus-visible {
 }
 
 .btn-amber {
-  --btn-accent: #efbe8d;
-  --btn-accent-2: #ffe6c7;
-  --btn-accent-glow: rgba(239, 190, 141, 0.36);
+  --btn-accent: #d59a67;
+  --btn-accent-2: #f2c798;
+  --btn-accent-glow: rgba(213, 154, 103, 0.4);
 }
 
 .btn-sky {
-  --btn-accent: #b08a6a;
-  --btn-accent-2: #dec0a8;
-  --btn-accent-glow: rgba(176, 138, 106, 0.28);
+  --btn-accent: #7eaab4;
+  --btn-accent-2: #b7d0d6;
+  --btn-accent-glow: rgba(126, 170, 180, 0.32);
 }
 
 .btn-emerald {
@@ -731,6 +755,76 @@ button:focus-visible {
   --btn-accent: #7d9386;
   --btn-accent-2: #b2c3b8;
   --btn-accent-glow: rgba(125, 147, 134, 0.24);
+}
+
+.btn-bronze {
+  color: #fff8ee;
+  background: linear-gradient(160deg, #c89260 0%, #ab7043 68%, #905733 100%);
+  border: 1px solid rgba(244, 214, 179, 0.54);
+  box-shadow:
+    0 0 0 1px rgba(219, 169, 117, 0.42),
+    0 14px 30px rgba(25, 14, 8, 0.45),
+    0 0 24px rgba(206, 142, 84, 0.32);
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.btn-bronze:hover,
+.btn-bronze:focus-visible {
+  color: #fffdf9;
+  background: linear-gradient(160deg, #e4b682 0%, #cd8148 62%, #a75c34 100%);
+  border-color: rgba(255, 235, 208, 0.72);
+  box-shadow:
+    0 0 0 1px rgba(244, 198, 150, 0.62),
+    0 18px 36px rgba(24, 13, 7, 0.54),
+    0 0 34px rgba(228, 166, 103, 0.44);
+}
+
+.link-cool {
+  color: var(--text-secondary);
+  transition: color 160ms ease;
+}
+
+.link-cool:hover,
+.link-cool:focus-visible {
+  color: var(--accent-cool-hover);
+}
+
+.badge-cool {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #d9edf2;
+  background: linear-gradient(
+    155deg,
+    rgba(111, 158, 168, 0.28),
+    rgba(72, 106, 115, 0.18)
+  );
+  border: 1px solid rgba(141, 180, 190, 0.52);
+  box-shadow: 0 0 18px rgba(111, 158, 168, 0.22);
+}
+
+.text-readable {
+  color: var(--text-primary);
+}
+
+.text-soft {
+  color: var(--text-secondary);
+}
+
+.text-muted-strong {
+  color: var(--text-muted);
+}
+
+.text-on-light {
+  color: var(--text-on-light);
 }
 
 .glow-card::before,
