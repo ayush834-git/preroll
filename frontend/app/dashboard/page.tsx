@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Clock, Film } from "lucide-react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import { Reveal } from "@/components/ui/reveal";
 
@@ -35,6 +36,12 @@ type TeamMember = {
   role: string;
 };
 
+type SavedProject = {
+  id: string;
+  title: string;
+  updatedAt: string | Date;
+};
+
 export default function DashboardPage() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -43,6 +50,9 @@ export default function DashboardPage() {
   const [memberEmail, setMemberEmail] = useState("");
   const [memberRole, setMemberRole] = useState("Director");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [projects, setProjects] = useState<SavedProject[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [projectsError, setProjectsError] = useState("");
 
   const slug = useMemo(() => {
     const cleaned = name
@@ -86,6 +96,64 @@ export default function DashboardPage() {
     if (!name.trim()) return;
     router.push(`/projects/${slug}`);
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadProjects = async () => {
+      setLoadingProjects(true);
+      setProjectsError("");
+
+      try {
+        const response = await fetch("/api/projects", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const data = (await response.json()) as {
+          projects?: SavedProject[];
+          error?: string;
+        };
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to load projects.");
+        }
+
+        if (!cancelled) {
+          setProjects(Array.isArray(data.projects) ? data.projects : []);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setProjectsError(
+            error instanceof Error ? error.message : "Unable to load projects."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingProjects(false);
+        }
+      }
+    };
+
+    void loadProjects();
+
+    const onFocus = () => {
+      void loadProjects();
+    };
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", onFocus);
+    };
+  }, []);
+
+  const sortedProjects = useMemo(() => {
+    return [...projects].sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+  }, [projects]);
 
   return (
     <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
@@ -256,6 +324,63 @@ export default function DashboardPage() {
               Continue to Generate
             </button>
             </div>
+            </section>
+          </Reveal>
+
+          <Reveal>
+            <section className="glass-panel rounded-2xl p-6 md:p-8 mt-10">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xl text-white/90">Recent projects</h2>
+                <span className="glass-pill px-3 py-1 rounded-full text-xs text-white/60">
+                  {projects.length} total
+                </span>
+              </div>
+
+              {loadingProjects ? (
+                <div className="glass-outline rounded-2xl p-6 text-white/70">
+                  <p className="text-sm">Loading projects...</p>
+                </div>
+              ) : projectsError ? (
+                <div className="glass-outline rounded-2xl p-6 text-red-300/80">
+                  <p className="text-sm">{projectsError}</p>
+                </div>
+              ) : sortedProjects.length === 0 ? (
+                <div className="glass-outline rounded-2xl p-6 text-white/70">
+                  <p className="text-sm">
+                    No saved projects yet. Generate once and it will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sortedProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      className="glass-outline rounded-xl p-4 flex flex-wrap items-center justify-between gap-4"
+                    >
+                      <div>
+                        <p className="text-sm text-white/90 flex items-center gap-2">
+                          <Film className="h-4 w-4 text-primary" />
+                          {project.title}
+                        </p>
+                        <p className="text-xs text-white/50 mt-1 inline-flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          Updated{" "}
+                          {new Intl.DateTimeFormat("en-US", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(project.updatedAt))}
+                        </p>
+                      </div>
+                      <Link
+                        href={`/projects/${project.id}`}
+                        className="glass-interactive text-white px-4 py-2 rounded-lg transition-all shadow-glow btn-animated btn-amber btn-cta"
+                      >
+                        Continue
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           </Reveal>
       </div>
