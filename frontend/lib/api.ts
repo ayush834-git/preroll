@@ -34,11 +34,27 @@ export async function generateScript(
     signal,
   });
 
-  const data = (await response.json()) as GenerateResult & GenerateError;
+  const raw = await response.text();
+  let data: (GenerateResult & GenerateError) | null = null;
+  if (raw) {
+    try {
+      data = JSON.parse(raw) as GenerateResult & GenerateError;
+    } catch {
+      // Keep null and return a clearer upstream error below.
+    }
+  }
 
   if (!response.ok) {
-    const message = data.detail || "Something went wrong";
+    const message =
+      data?.detail ||
+      `Generate request failed (${response.status}). Check server logs.`;
     throw new Error(message);
+  }
+
+  if (!data) {
+    throw new Error(
+      "Generate endpoint returned an empty or invalid JSON response."
+    );
   }
 
   return { output: data.output || "" };
