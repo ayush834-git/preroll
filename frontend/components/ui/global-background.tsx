@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 type GlobalBackgroundProps = {
@@ -22,8 +23,11 @@ export function GlobalBackground({
     pathname === "/" || pathname === "/auth" || pathname.startsWith("/auth/");
 
   const activeImage = isLandingOrAuth ? landingAuthImage : appImage;
-  const layerStyle = {
-    "--route-bg-image": activeImage ? `url("${activeImage}")` : "none",
+  const imageStyle = {
+    zIndex: -2,
+  } as CSSProperties;
+  const overlayStyle = {
+    zIndex: -1,
   } as CSSProperties;
 
   return (
@@ -34,31 +38,34 @@ export function GlobalBackground({
         className
       )}
     >
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="cinematic-route-image" style={imageStyle}>
+          <Image
+            src={activeImage}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="h-full w-full object-cover"
+          />
+        </div>
         <div
           className={cn(
-            "background-image-layer absolute inset-0",
+            "cinematic-route-overlay fixed inset-0",
             isLandingOrAuth
-              ? "background-image-layer-landing"
-              : "background-image-layer-app"
+              ? "cinematic-route-overlay-landing"
+              : "cinematic-route-overlay-app"
           )}
-          style={layerStyle}
+          style={overlayStyle}
         />
         <div
           className={cn(
-            "dark-overlay-layer absolute inset-0",
+            "cinematic-route-spotlight fixed inset-0",
             isLandingOrAuth
-              ? "dark-overlay-layer-landing"
-              : "dark-overlay-layer-app"
+              ? "cinematic-route-spotlight-landing"
+              : "cinematic-route-spotlight-app"
           )}
-        />
-        <div
-          className={cn(
-            "radial-spotlight-layer absolute inset-0",
-            isLandingOrAuth
-              ? "radial-spotlight-layer-landing"
-              : "radial-spotlight-layer-app"
-          )}
+          style={overlayStyle}
         />
       </div>
       <div className="content-layer relative z-10 min-h-screen w-full">{children}</div>
