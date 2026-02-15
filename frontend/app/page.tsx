@@ -8,8 +8,6 @@ import {
   ListChecks,
   Mic,
   Shield,
-  Star,
-  Timer,
 } from "lucide-react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import { Reveal } from "@/components/ui/reveal";
@@ -175,16 +173,6 @@ export default function LandingPage() {
                     </span>
                   </div>
 
-                  <div className="mt-12 flex flex-wrap items-center gap-5 text-sm text-muted-strong">
-                    <div className="flex items-center gap-2">
-                      <Star className="h-4 w-4 text-primary" />
-                      <span>Trusted by indie studios</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Timer className="h-4 w-4 text-primary" />
-                      <span>Cut prep time by 40%</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
