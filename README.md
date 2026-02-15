@@ -1,14 +1,4 @@
-Good instinct.
-We don’t throw away the reflective tone of version 1.
-We don’t hide the engineering of version 2.
 
-We merge them intelligently.
-
-You keep the honesty about it being your first end-to-end build — but you don’t downplay authentication, persistence, and deployment.
-
-Here is the integrated version:
-
----
 
 # 🎬 Preroll
 
