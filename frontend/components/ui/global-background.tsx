@@ -10,6 +10,7 @@ type GlobalBackgroundProps = {
   className?: string;
   landingAuthImage?: string;
   appImage?: string;
+  dashboardResultsImage?: string;
 };
 
 export function GlobalBackground({
@@ -17,12 +18,22 @@ export function GlobalBackground({
   className,
   landingAuthImage = "",
   appImage = "",
+  dashboardResultsImage = "",
 }: GlobalBackgroundProps) {
   const pathname = usePathname();
   const isLandingOrAuth =
     pathname === "/" || pathname === "/auth" || pathname.startsWith("/auth/");
+  const isDashboardRoute =
+    pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+  const isResultsRoute =
+    /^\/projects\/[^/]+/.test(pathname);
+  const useDashboardResultsBackground = isDashboardRoute || isResultsRoute;
 
-  const activeImage = isLandingOrAuth ? landingAuthImage : appImage;
+  const activeImage = isLandingOrAuth
+    ? landingAuthImage
+    : useDashboardResultsBackground && dashboardResultsImage
+    ? dashboardResultsImage
+    : appImage;
   const shouldPrioritizeImage = isLandingOrAuth;
   const imageStyle = {
     zIndex: -2,
@@ -49,7 +60,7 @@ export function GlobalBackground({
             loading={shouldPrioritizeImage ? "eager" : "lazy"}
             decoding="async"
             sizes="100vw"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover object-center"
           />
         </div>
         <div

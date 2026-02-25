@@ -33,6 +33,8 @@ export const metadata: Metadata = {
 
 const LANDING_AUTH_IMAGE = "/cinematic-camera.png";
 const APP_IMAGE = "/cinematic-theater.png";
+const DASHBOARD_RESULTS_IMAGE =
+  "/Gemini_Generated_Image_61ccor61ccor61cc.png";
 
 export default function RootLayout({
   children,
@@ -49,6 +51,7 @@ export default function RootLayout({
           className="text-readable"
           landingAuthImage={LANDING_AUTH_IMAGE}
           appImage={APP_IMAGE}
+          dashboardResultsImage={DASHBOARD_RESULTS_IMAGE}
         >
           <PageTransition>{children}</PageTransition>
         </GlobalBackground>
