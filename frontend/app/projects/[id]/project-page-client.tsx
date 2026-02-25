@@ -1612,7 +1612,7 @@ Revise the plan while preserving coherence and production-ready structure.`;
               )}
             </aside>
 
-            <div>
+            <div className="w-full flex-1">
               <header className="mb-8">
                 <h1 className="text-3xl font-light text-white">
                   Project <span className="text-primary">{title}</span>
