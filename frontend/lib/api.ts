@@ -11,6 +11,7 @@ export type GenerationParams = {
   locationCount: string;
   sceneComplexity: "Low" | "Medium" | "High";
   generationType: string;
+  demoMode?: boolean;
 };
 
 export type GenerateError = {

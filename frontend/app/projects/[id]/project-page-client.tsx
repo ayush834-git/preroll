@@ -89,6 +89,7 @@ const DEFAULT_GENERATION_PARAMS: GenerationParams = {
   locationCount: "",
   sceneComplexity: "Medium",
   generationType: "Scene Breakdown",
+  demoMode: false,
 };
 
 const hydrateGenerationParams = (value?: Partial<GenerationParams>): GenerationParams => ({
@@ -113,6 +114,7 @@ const hydrateGenerationParams = (value?: Partial<GenerationParams>): GenerationP
     typeof value?.generationType === "string" && value.generationType.trim()
       ? value.generationType
       : DEFAULT_GENERATION_PARAMS.generationType,
+  demoMode: typeof value?.demoMode === "boolean" ? value.demoMode : false,
 });
 
 const parseVersionSnapshots = (value: unknown): ProjectVersionSnapshot[] => {
@@ -1653,6 +1655,9 @@ Revise the plan while preserving coherence and production-ready structure.`;
                         className="mt-2 w-full rounded-lg glass-input px-3 py-2 text-sm text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors disabled:opacity-60"
                         disabled={loading}
                       >
+                        <option value="Full Production Plan" style={optionStyle}>
+                          Full Production Plan
+                        </option>
                         <option value="Scene Breakdown" style={optionStyle}>
                           Scene Breakdown
                         </option>
@@ -1773,6 +1778,37 @@ Revise the plan while preserving coherence and production-ready structure.`;
                         </option>
                       </select>
                     </div>
+                  </div>
+                  
+                  <div className="mt-5 flex items-center">
+                    <label className="flex items-center gap-2.5 cursor-pointer group">
+                      <div className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={!!params.demoMode}
+                          onChange={(e) =>
+                            setParams((prev) => ({
+                              ...prev,
+                              demoMode: e.target.checked,
+                            }))
+                          }
+                          className="w-4 h-4 rounded border border-white/20 bg-white/5 text-primary focus:ring-primary/30 outline-none appearance-none transition-colors checked:bg-primary checked:border-primary peer"
+                          disabled={loading}
+                        />
+                        <svg
+                          className="absolute w-2.5 h-2.5 text-black pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <span className="text-[11px] uppercase tracking-[0.1em] text-white/50 group-hover:text-white/70 transition-colors">
+                        Demo Mode (Limit bullet points)
+                      </span>
+                    </label>
                   </div>
                 </div>
                 <button
