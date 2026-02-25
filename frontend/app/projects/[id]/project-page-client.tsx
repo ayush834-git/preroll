@@ -1562,7 +1562,7 @@ Revise the plan while preserving coherence and production-ready structure.`;
   ]);
 
   return (
-    <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
+    <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-clip">
       <div className="relative z-10 w-full flex-1">
           <Reveal>
             <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
