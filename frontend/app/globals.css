@@ -1127,18 +1127,18 @@ h6 {
 }
 
 .cinematic-route-overlay-landing {
-  background: rgba(0, 0, 0, 0.58);
+  background: rgba(0, 0, 0, 0.42);
 }
 
 .cinematic-route-overlay-app {
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .cinematic-route-spotlight-landing {
   background: radial-gradient(
     circle at center,
-    rgba(0, 0, 0, 0.35) 0%,
-    rgba(0, 0, 0, 0.85) 75%
+    rgba(0, 0, 0, 0.18) 0%,
+    rgba(0, 0, 0, 0.62) 80%
   );
 }
 
@@ -1147,13 +1147,13 @@ h6 {
 }
 
 .route-app .cinematic-route-image img {
-  filter: blur(2px);
-  transform: scale(1.02);
+  filter: blur(1px) brightness(1.08) contrast(1.05);
+  transform: scale(1.015);
 }
 
 @media (max-width: 768px) {
   .route-app .cinematic-route-image img {
-    transform: scale(1.04);
+    transform: scale(1.03);
   }
 }
 
