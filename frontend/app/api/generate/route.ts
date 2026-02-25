@@ -18,7 +18,7 @@ type GenerateRequest = {
 
 const MODEL_NAME = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 // Token cap intentionally limited for demo stability.
-const MAX_TOKENS = Number(process.env.GROQ_MAX_TOKENS || "1200");
+const MAX_TOKENS = Number(process.env.GROQ_MAX_TOKENS || "1800");
 const TEMPERATURE = Number(process.env.GROQ_TEMPERATURE || "0.4");
 const MAX_PROMPT_CHARS = Number(process.env.MAX_PROMPT_CHARS || "3000");
 
@@ -201,7 +201,7 @@ export async function POST(request: Request) {
         { role: "user", content: combinedPrompt },
       ],
       temperature: Number.isFinite(TEMPERATURE) ? TEMPERATURE : 0.4,
-      max_tokens: Number.isFinite(MAX_TOKENS) ? MAX_TOKENS : 1200,
+      max_tokens: Number.isFinite(MAX_TOKENS) ? MAX_TOKENS : 1800,
     });
 
     const output = completion.choices?.[0]?.message?.content?.trim() || "";
