@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import {
   Camera,
   Clock,
@@ -648,13 +655,19 @@ export default function ProjectPageClient({
     return map;
   }, [legacySectionsConfig, result]);
 
-  const formatTimestamp = (value: Date | null) =>
-    value
-      ? new Intl.DateTimeFormat("en-US", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }).format(value)
-      : "-";
+  const timestampFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }),
+    []
+  );
+
+  const formatTimestamp = useCallback(
+    (value: Date | null) => (value ? timestampFormatter.format(value) : "-"),
+    [timestampFormatter]
+  );
 
   const summarizePrompt = (text: string) => {
     const trimmed = text.trim();
@@ -694,7 +707,7 @@ export default function ProjectPageClient({
     }
   };
 
-  const downloadPdf = async (filename: string, text: string) => {
+  const downloadPdf = useCallback(async (filename: string, text: string) => {
     setDownloadError("");
     if (!text.trim()) {
       setDownloadError("Nothing to download yet.");
@@ -763,7 +776,7 @@ export default function ProjectPageClient({
     } catch {
       setDownloadError("Download failed. Please try again.");
     }
-  };
+  }, []);
 
   const formattedOutput = useMemo(
     () => (result ? formatResultForCopy(result) : ""),
@@ -779,6 +792,13 @@ export default function ProjectPageClient({
     : "sceneOverview";
   const generationType =
     result?.generationType || lastParams?.generationType || params.generationType;
+  const structuredSectionBullets = useMemo(() => {
+    const map = new Map<SectionKey, string[]>();
+    result?.sections?.forEach((section) => {
+      map.set(section.id, section.bullets);
+    });
+    return map;
+  }, [result]);
 
   const renderBullets = (items: string[], emptyText: string) => {
     if (!items.length) {
@@ -1028,7 +1048,7 @@ export default function ProjectPageClient({
     }
   };
 
-  const handleCopy = async (text: string, scope?: string) => {
+  const handleCopy = useCallback(async (text: string, scope?: string) => {
     try {
       await navigator.clipboard.writeText(text);
       if (scope) {
@@ -1045,7 +1065,7 @@ export default function ProjectPageClient({
         setCopied(false);
       }
     }
-  };
+  }, []);
 
   const selectedSectionText = useMemo(() => {
     if (!result) return "";
@@ -1058,7 +1078,7 @@ export default function ProjectPageClient({
     return getSectionText(selectedSection as LegacySectionKey, result);
   }, [result, selectedSection]);
 
-  const scrollToSection = (key: SectionKey) => {
+  const scrollToSection = useCallback((key: SectionKey) => {
     const target = sectionRefs.current.get(key);
     if (target) {
       const top = target.getBoundingClientRect().top + window.scrollY - 96;
@@ -1072,86 +1092,103 @@ export default function ProjectPageClient({
       const top = fallback.getBoundingClientRect().top + window.scrollY - 96;
       window.scrollTo({ top, behavior: "smooth" });
     }
-  };
+  }, []);
 
-  const persistProjectContent = async (content: StoredProjectContent) => {
-    // Persist generated content to DB so projects rehydrate across sessions.
-    const response = await fetch(`/api/projects/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ content }),
-    });
+  const handleJumpButtonClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const sectionKey = event.currentTarget.dataset.sectionKey as
+        | SectionKey
+        | undefined;
+      if (!sectionKey) return;
+      scrollToSection(sectionKey);
+    },
+    [scrollToSection]
+  );
 
-    if (!response.ok) {
-      throw new Error("Failed to save project.");
-    }
-  };
+  const persistProjectContent = useCallback(
+    async (content: StoredProjectContent) => {
+      // Persist generated content to DB so projects rehydrate across sessions.
+      const response = await fetch(`/api/projects/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content }),
+      });
 
-  const runGeneration = async (requestPrompt: string, sourcePrompt?: string) => {
-    const trimmedRequest = requestPrompt.trim();
-    if (!trimmedRequest) return;
-    setLoading(true);
-    setError("");
-    setResult(null);
-    setDownloadError("");
-    setSaveNotice("");
-    setCopiedSection(null);
+      if (!response.ok) {
+        throw new Error("Failed to save project.");
+      }
+    },
+    [id]
+  );
 
-    try {
-      const data = await generateScript(trimmedRequest, params);
-      const parsed = parseAIResult(data.output || "");
-      const generatedAtDate = new Date();
-      const nextVersion = (version || 0) + 1;
-      const persistedLastPrompt = (sourcePrompt ?? trimmedRequest).trim();
-      const persistedPrompt = prompt.trim() || persistedLastPrompt;
-
-      setResult(parsed);
-      setCopied(false);
-      setGeneratedAt(generatedAtDate);
-      setVersion(nextVersion);
-      setLastPrompt(persistedLastPrompt);
-      const paramsSnapshot = { ...params };
-      setLastParams(paramsSnapshot);
-      setSelectedSection(parsed.sections?.[0]?.id ?? "executiveSummary");
+  const runGeneration = useCallback(
+    async (requestPrompt: string, sourcePrompt?: string) => {
+      const trimmedRequest = requestPrompt.trim();
+      if (!trimmedRequest) return;
+      setLoading(true);
+      setError("");
+      setResult(null);
+      setDownloadError("");
+      setSaveNotice("");
+      setCopiedSection(null);
 
       try {
-        await persistProjectContent({
-          prompt: persistedPrompt,
-          params: paramsSnapshot,
-          result: parsed,
-          generatedAt: generatedAtDate.toISOString(),
-          version: nextVersion,
-          lastPrompt: persistedLastPrompt,
-        });
-      } catch {
-        setSaveNotice("Generated, but auto-save failed.");
-      }
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Failed to reach the server. Please try again.";
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const data = await generateScript(trimmedRequest, params);
+        const parsed = parseAIResult(data.output || "");
+        const generatedAtDate = new Date();
+        const nextVersion = (version || 0) + 1;
+        const persistedLastPrompt = (sourcePrompt ?? trimmedRequest).trim();
+        const persistedPrompt = prompt.trim() || persistedLastPrompt;
 
-  const generate = async () => {
+        setResult(parsed);
+        setCopied(false);
+        setGeneratedAt(generatedAtDate);
+        setVersion(nextVersion);
+        setLastPrompt(persistedLastPrompt);
+        const paramsSnapshot = { ...params };
+        setLastParams(paramsSnapshot);
+        setSelectedSection(parsed.sections?.[0]?.id ?? "executiveSummary");
+
+        try {
+          await persistProjectContent({
+            prompt: persistedPrompt,
+            params: paramsSnapshot,
+            result: parsed,
+            generatedAt: generatedAtDate.toISOString(),
+            version: nextVersion,
+            lastPrompt: persistedLastPrompt,
+          });
+        } catch {
+          setSaveNotice("Generated, but auto-save failed.");
+        }
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to reach the server. Please try again.";
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [params, persistProjectContent, prompt, version]
+  );
+
+  const generate = useCallback(async () => {
     if (!prompt.trim()) return;
     await runGeneration(prompt);
-  };
+  }, [prompt, runGeneration]);
 
-  const regenerateSelectedSection = async () => {
+  const regenerateSelectedSection = useCallback(async () => {
     if (!prompt.trim() || !result) return;
     const sectionTitle = sectionLabelMap.get(selectedSection) || selectedSection;
     const scopedPrompt = `${prompt.trim()}\n\nRevision request: Regenerate and strengthen the "${sectionTitle}" section. Keep the full output coherent and production-ready.`;
     await runGeneration(scopedPrompt, prompt);
-  };
+  }, [prompt, result, runGeneration, sectionLabelMap, selectedSection]);
 
-  const saveCurrentVersion = () => {
+  const saveCurrentVersion = useCallback(() => {
     if (!result) return;
     const persist = async () => {
       try {
@@ -1171,7 +1208,16 @@ export default function ProjectPageClient({
     };
 
     void persist();
-  };
+  }, [
+    generatedAt,
+    lastParams,
+    lastPrompt,
+    params,
+    persistProjectContent,
+    prompt,
+    result,
+    version,
+  ]);
 
   return (
     <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
@@ -1212,9 +1258,8 @@ export default function ProjectPageClient({
                     {navSections.map((section, index) => (
                       <button
                         key={section.key}
-                        onClick={() => {
-                          scrollToSection(section.key);
-                        }}
+                        data-section-key={section.key}
+                        onClick={handleJumpButtonClick}
                         className={`glass-pill ${navColors[index % navColors.length]} ${navGlowClasses[index % navGlowClasses.length]} text-[11px] text-white/90 px-3 py-1.5 rounded-full transition-colors hover:text-white btn-animated`}
                       >
                         {section.label}
@@ -1395,7 +1440,7 @@ export default function ProjectPageClient({
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin spin-optimized" />
                       Generating...
                     </span>
                   ) : (
@@ -1487,7 +1532,7 @@ export default function ProjectPageClient({
                         tiers. Hover the card to watch the cipher react.
                       </p>
                       <div className="mt-4 flex items-center gap-2 text-sm text-white/70">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        <Loader2 className="h-4 w-4 animate-spin spin-optimized text-primary" />
                         <span>Drafting sections</span>
                       </div>
                       <div className="mt-3 loading-dots" aria-hidden="true">
@@ -1603,9 +1648,8 @@ export default function ProjectPageClient({
                           <div className="mt-4 space-y-3">
                             {hasStructuredSections
                               ? renderBullets(
-                                  result.sections?.find(
-                                    (item) => item.id === section.key
-                                  )?.bullets ?? [],
+                                  structuredSectionBullets.get(section.key) ??
+                                    [],
                                   "No details were provided."
                                 )
                               : renderLegacySectionContent(

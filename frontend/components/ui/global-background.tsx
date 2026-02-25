@@ -23,6 +23,7 @@ export function GlobalBackground({
     pathname === "/" || pathname === "/auth" || pathname.startsWith("/auth/");
 
   const activeImage = isLandingOrAuth ? landingAuthImage : appImage;
+  const shouldPrioritizeImage = isLandingOrAuth;
   const imageStyle = {
     zIndex: -2,
   } as CSSProperties;
@@ -44,7 +45,9 @@ export function GlobalBackground({
             src={activeImage}
             alt=""
             fill
-            priority
+            priority={shouldPrioritizeImage}
+            loading={shouldPrioritizeImage ? "eager" : "lazy"}
+            decoding="async"
             sizes="100vw"
             className="h-full w-full object-cover"
           />

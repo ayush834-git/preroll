@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   useMotionTemplate,
   useMotionValue,
@@ -10,34 +10,82 @@ import {
 import { cn } from "@/lib/utils";
 import { usePerformanceMode } from "@/lib/usePerformanceMode";
 
-export const EvervaultCard = ({
+type CardBounds = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+export const EvervaultCard = memo(function EvervaultCard({
   text,
   className,
 }: {
   text?: string;
   className?: string;
-}) => {
+}) {
   const mouseX = useMotionValue<number>(0);
   const mouseY = useMotionValue<number>(0);
   const mode = usePerformanceMode();
   const isCinematic = mode === "cinematic";
   const isReduced = mode === "reduced";
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const boundsRef = useRef<CardBounds | null>(null);
+
+  const updateBounds = useCallback((target: HTMLDivElement | null) => {
+    if (!target) return;
+    const { left, top, width, height } = target.getBoundingClientRect();
+    boundsRef.current = { left, top, width, height };
+  }, []);
+
+  useEffect(() => {
+    if (!isCinematic) return;
+    const onResize = () => {
+      updateBounds(cardRef.current);
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", onResize);
+    };
+  }, [isCinematic, updateBounds]);
+
   // Keep texture stable per mode to prevent rerenders during hover movement.
   const randomString = useMemo(() => {
     const length = isCinematic ? 1500 : isReduced ? 500 : 0;
     return length > 0 ? generateRandomString(length) : "";
   }, [isCinematic, isReduced]);
 
-  function onMouseMove({
-    currentTarget,
-    clientX,
-    clientY,
-  }: React.MouseEvent<HTMLDivElement>) {
+  const onPointerEnter = useCallback(
+    ({ currentTarget }: React.PointerEvent<HTMLDivElement>) => {
+      if (!isCinematic) return;
+      updateBounds(currentTarget);
+    },
+    [isCinematic, updateBounds]
+  );
+
+  const onPointerMove = useCallback(
+    ({ currentTarget, clientX, clientY }: React.PointerEvent<HTMLDivElement>) => {
+      if (!isCinematic) return;
+      if (!boundsRef.current) {
+        updateBounds(currentTarget);
+      }
+      const bounds = boundsRef.current;
+      if (!bounds) return;
+      const x = Math.min(bounds.width, Math.max(0, clientX - bounds.left));
+      const y = Math.min(bounds.height, Math.max(0, clientY - bounds.top));
+      mouseX.set(x);
+      mouseY.set(y);
+    },
+    [isCinematic, mouseX, mouseY, updateBounds]
+  );
+
+  const onPointerLeave = useCallback(() => {
     if (!isCinematic) return;
-    const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
-  }
+    const bounds = boundsRef.current;
+    if (!bounds) return;
+    mouseX.set(bounds.width * 0.5);
+    mouseY.set(bounds.height * 0.5);
+  }, [isCinematic, mouseX, mouseY]);
 
   return (
     <div
@@ -47,7 +95,10 @@ export const EvervaultCard = ({
       )}
     >
       <div
-        onMouseMove={onMouseMove}
+        ref={cardRef}
+        onPointerEnter={onPointerEnter}
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
         className="group/card rounded-3xl w-full relative overflow-hidden bg-transparent flex items-center justify-center h-full"
       >
         <CardPattern
@@ -74,9 +125,9 @@ export const EvervaultCard = ({
       </div>
     </div>
   );
-};
+});
 
-export function CardPattern({
+export const CardPattern = memo(function CardPattern({
   mouseX,
   mouseY,
   randomString,
@@ -121,7 +172,10 @@ export function CardPattern({
       </motion.div>
     </div>
   );
-}
+});
+
+EvervaultCard.displayName = "EvervaultCard";
+CardPattern.displayName = "CardPattern";
 
 const characters =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

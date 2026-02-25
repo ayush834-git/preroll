@@ -634,8 +634,11 @@ button:focus-visible {
 }
 
 @keyframes borderSpin {
+  from {
+    transform: translateZ(0) rotate(0deg);
+  }
   to {
-    transform: rotate(1turn);
+    transform: translateZ(0) rotate(1turn);
   }
 }
 
@@ -677,6 +680,12 @@ button:focus-visible {
   border-radius: 999px;
   background: var(--accent);
   animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.spin-optimized {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .loading-dots span:nth-child(2) {

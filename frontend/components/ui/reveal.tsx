@@ -46,7 +46,6 @@ export function Reveal({
   return (
     <motion.div
       className={cn(className)}
-      style={{ willChange: isPerformance ? "auto" : "transform, opacity" }}
       initial={initial}
       whileInView={whileInView}
       viewport={{ once: true, amount: 0.18 }}

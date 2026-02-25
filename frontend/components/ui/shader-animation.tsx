@@ -99,7 +99,7 @@ export function ShaderAnimation() {
     }
 
     onWindowResize()
-    window.addEventListener("resize", onWindowResize, false)
+    window.addEventListener("resize", onWindowResize, { passive: true })
 
     const renderFrame = (timeValue: number) => {
       if (!renderer) return

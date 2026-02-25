@@ -72,11 +72,15 @@ export function BeamsBackground({
         (navigator.maxTouchPoints ?? 0) > 0 || "ontouchstart" in window;
       const width = window.innerWidth;
       const laptopWidth = width <= 1800;
-      setIsLaptop(!hasTouch && mediaHover.matches && mediaPointer.matches && laptopWidth);
+      const nextIsLaptop =
+        !hasTouch && mediaHover.matches && mediaPointer.matches && laptopWidth;
+      setIsLaptop((current) =>
+        current === nextIsLaptop ? current : nextIsLaptop
+      );
     };
 
     update();
-    window.addEventListener("resize", update);
+    window.addEventListener("resize", update, { passive: true });
     if (mediaHover.addEventListener) {
       mediaHover.addEventListener("change", update);
       mediaPointer.addEventListener("change", update);
@@ -153,7 +157,7 @@ export function BeamsBackground({
     };
 
     updateCanvasSize();
-    window.addEventListener("resize", updateCanvasSize);
+    window.addEventListener("resize", updateCanvasSize, { passive: true });
 
     function resetBeam(beam: Beam, index: number, totalBeams: number) {
       const column = index % 3;

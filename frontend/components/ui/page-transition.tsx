@@ -35,7 +35,6 @@ export function PageTransition({ children }: { children: ReactNode }) {
     <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
-        style={{ willChange: isPerformance ? "auto" : "transform, opacity" }}
         initial={initial}
         animate={animate}
         exit={exit}

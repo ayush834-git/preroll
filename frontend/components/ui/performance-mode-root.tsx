@@ -23,6 +23,7 @@ export function PerformanceModeRoot() {
     let rafId = 0;
     let viewportWidth = window.innerWidth;
     let viewportHeight = window.innerHeight;
+    let scrollMax = Math.max(1, root.scrollHeight - viewportHeight);
     let targetScrollY = window.scrollY;
     let smoothScrollY = targetScrollY;
     let targetX = viewportWidth * 0.5;
@@ -30,6 +31,7 @@ export function PerformanceModeRoot() {
     let smoothX = targetX;
     let smoothY = targetY;
     let previousSmoothScrollY = smoothScrollY;
+    const styleCache = new Map<string, string>();
     const scrollLerp =
       mode === "cinematic" ? 0.14 : mode === "reduced" ? 0.22 : 1;
     const pointerLerp =
@@ -39,12 +41,19 @@ export function PerformanceModeRoot() {
     const clamp = (value: number, min: number, max: number) =>
       Math.min(max, Math.max(min, value));
 
+    const updateScrollBounds = () => {
+      scrollMax = Math.max(1, root.scrollHeight - viewportHeight);
+      targetScrollY = clamp(window.scrollY, 0, scrollMax);
+    };
+
+    const setRootVar = (name: string, value: string) => {
+      if (styleCache.get(name) === value) return;
+      styleCache.set(name, value);
+      root.style.setProperty(name, value);
+    };
+
     const writeFrame = () => {
       // One batched write keeps scroll/pointer-driven motion consistent across the app.
-      const scrollMax = Math.max(
-        1,
-        document.documentElement.scrollHeight - viewportHeight
-      );
       const rawProgress = clamp(targetScrollY / scrollMax, 0, 1);
       const smoothProgress = clamp(smoothScrollY / scrollMax, 0, 1);
       const xp = targetX / Math.max(1, viewportWidth);
@@ -57,24 +66,26 @@ export function PerformanceModeRoot() {
         1
       );
 
-      root.style.setProperty("--scroll-progress", rawProgress.toFixed(4));
-      root.style.setProperty(
+      setRootVar("--scroll-progress", rawProgress.toFixed(4));
+      setRootVar(
         "--scroll-progress-smooth",
         smoothProgress.toFixed(4)
       );
-      root.style.setProperty("--scroll-velocity", velocity.toFixed(4));
-      root.style.setProperty("--pointer-x", targetX.toFixed(2));
-      root.style.setProperty("--pointer-y", targetY.toFixed(2));
-      root.style.setProperty("--pointer-xp", xp.toFixed(4));
-      root.style.setProperty("--pointer-yp", yp.toFixed(4));
-      root.style.setProperty("--pointer-x-smooth", smoothX.toFixed(2));
-      root.style.setProperty("--pointer-y-smooth", smoothY.toFixed(2));
-      root.style.setProperty("--pointer-xp-smooth", xpSmooth.toFixed(4));
-      root.style.setProperty("--pointer-yp-smooth", ypSmooth.toFixed(4));
+      setRootVar("--scroll-velocity", velocity.toFixed(4));
+      setRootVar("--pointer-x", targetX.toFixed(2));
+      setRootVar("--pointer-y", targetY.toFixed(2));
+      setRootVar("--pointer-xp", xp.toFixed(4));
+      setRootVar("--pointer-yp", yp.toFixed(4));
+      setRootVar("--pointer-x-smooth", smoothX.toFixed(2));
+      setRootVar("--pointer-y-smooth", smoothY.toFixed(2));
+      setRootVar("--pointer-xp-smooth", xpSmooth.toFixed(4));
+      setRootVar("--pointer-yp-smooth", ypSmooth.toFixed(4));
       previousSmoothScrollY = smoothScrollY;
     };
 
     const animate = () => {
+      targetScrollY = clamp(targetScrollY, 0, scrollMax);
+      smoothScrollY = clamp(smoothScrollY, 0, scrollMax);
       smoothScrollY += (targetScrollY - smoothScrollY) * scrollLerp;
       smoothX += (targetX - smoothX) * pointerLerp;
       smoothY += (targetY - smoothY) * pointerLerp;
@@ -122,7 +133,7 @@ export function PerformanceModeRoot() {
     const onResize = () => {
       viewportWidth = window.innerWidth;
       viewportHeight = window.innerHeight;
-      targetScrollY = window.scrollY;
+      updateScrollBounds();
       if (mode !== "cinematic") {
         centerPointer();
       } else {
@@ -135,18 +146,36 @@ export function PerformanceModeRoot() {
     if (mode !== "cinematic") {
       centerPointer();
     }
+    updateScrollBounds();
     scheduleFrame();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if ("ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(() => {
+        updateScrollBounds();
+        scheduleFrame();
+      });
+      resizeObserver.observe(root);
+      if (document.body) {
+        resizeObserver.observe(document.body);
+      }
+    }
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("pointerleave", onPointerLeave, { passive: true });
+    if (mode === "cinematic") {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("pointerleave", onPointerLeave, { passive: true });
+    }
 
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerleave", onPointerLeave);
+      if (mode === "cinematic") {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerleave", onPointerLeave);
+      }
+      resizeObserver?.disconnect();
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [mode]);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type ReactNode } from "react";
+import React, { memo, useMemo, type ReactNode } from "react";
 import { usePerformanceMode } from "@/lib/usePerformanceMode";
 
 interface GlowCardProps {
@@ -27,7 +27,7 @@ const sizeMap = {
   lg: "w-80 h-96",
 };
 
-const GlowCard: React.FC<GlowCardProps> = ({
+const GlowCard = memo(function GlowCard({
   children,
   className = "",
   glowColor = "copper",
@@ -35,21 +35,19 @@ const GlowCard: React.FC<GlowCardProps> = ({
   width,
   height,
   customSize = false,
-}) => {
+}: GlowCardProps) {
   const mode = usePerformanceMode();
   const isCinematic = mode === "cinematic";
   const isReduced = mode === "reduced";
 
   const { base, spread } = glowColorMap[glowColor];
 
-  const getSizeClasses = () => {
-    if (customSize) {
-      return "";
-    }
+  const sizeClasses = useMemo(() => {
+    if (customSize) return "";
     return sizeMap[size];
-  };
+  }, [customSize, size]);
 
-  const getInlineStyles = () => {
+  const inlineStyles = useMemo(() => {
     const baseStyles: React.CSSProperties & Record<string, string | number> = {
       "--base": base,
       "--spread": spread,
@@ -77,10 +75,10 @@ const GlowCard: React.FC<GlowCardProps> = ({
       backgroundSize:
         "calc(100% + (2 * var(--border-size))) calc(100% + (2 * var(--border-size)))",
       backgroundPosition: "50% 50%",
-      backgroundAttachment: "scroll",
       border: "var(--border-size) solid var(--backup-border)",
       position: "relative",
       touchAction: isCinematic ? "none" : "pan-y",
+      transform: "translateZ(0)",
     };
 
     if (width !== undefined) {
@@ -91,15 +89,12 @@ const GlowCard: React.FC<GlowCardProps> = ({
     }
 
     return baseStyles;
-  };
+  }, [base, spread, isCinematic, isReduced, width, height]);
 
-  return (
-    <div
-      data-glow
-      style={getInlineStyles()}
-      className={`
+  const cardClassName = useMemo(
+    () => `
           glow-card
-          ${getSizeClasses()}
+          ${sizeClasses}
           ${!customSize ? "aspect-[3/4]" : ""}
           rounded-2xl 
           relative 
@@ -110,12 +105,22 @@ const GlowCard: React.FC<GlowCardProps> = ({
           gap-4 
           ${isCinematic ? "backdrop-blur-[5px]" : isReduced ? "backdrop-blur-[2px]" : "backdrop-blur-0"}
           ${className}
-        `}
+        `,
+    [sizeClasses, customSize, isCinematic, isReduced, className]
+  );
+
+  return (
+    <div
+      data-glow
+      style={inlineStyles}
+      className={cardClassName}
     >
       <div data-glow className="glow-card-inner" />
       {children}
     </div>
   );
-};
+});
+
+GlowCard.displayName = "GlowCard";
 
 export { GlowCard };
