@@ -60,6 +60,15 @@ type AIResult = LegacyAIResult & {
   sections?: SectionBlock[];
 };
 
+type ProjectVersionSnapshot = {
+  version: number;
+  generatedAt: string | null;
+  prompt: string;
+  params: GenerationParams;
+  result: AIResult;
+  refinementInstruction?: string;
+};
+
 type StoredProjectContent = {
   prompt?: string;
   params?: Partial<GenerationParams>;
@@ -67,6 +76,7 @@ type StoredProjectContent = {
   generatedAt?: string | null;
   version?: number;
   lastPrompt?: string;
+  versions?: ProjectVersionSnapshot[];
 };
 
 type LegacySectionKey = keyof Omit<LegacyAIResult, "raw">;
@@ -105,6 +115,45 @@ const hydrateGenerationParams = (value?: Partial<GenerationParams>): GenerationP
       : DEFAULT_GENERATION_PARAMS.generationType,
 });
 
+const parseVersionSnapshots = (value: unknown): ProjectVersionSnapshot[] => {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+      const record = item as Record<string, unknown>;
+      const version =
+        typeof record.version === "number" && Number.isFinite(record.version)
+          ? Math.max(1, Math.round(record.version))
+          : 0;
+      const result =
+        record.result && typeof record.result === "object"
+          ? (record.result as AIResult)
+          : null;
+      if (!result || version <= 0) return null;
+
+      return {
+        version,
+        generatedAt:
+          typeof record.generatedAt === "string" ? record.generatedAt : null,
+        prompt: typeof record.prompt === "string" ? record.prompt : "",
+        params:
+          record.params && typeof record.params === "object"
+            ? hydrateGenerationParams(
+                record.params as Partial<GenerationParams>
+              )
+            : hydrateGenerationParams(),
+        result,
+        refinementInstruction:
+          typeof record.refinementInstruction === "string"
+            ? record.refinementInstruction
+            : "",
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (a as ProjectVersionSnapshot).version - (b as ProjectVersionSnapshot).version) as ProjectVersionSnapshot[];
+};
+
 const parseStoredProjectContent = (value: unknown): StoredProjectContent => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
@@ -128,6 +177,7 @@ const parseStoredProjectContent = (value: unknown): StoredProjectContent => {
         : 0,
     lastPrompt:
       typeof record.lastPrompt === "string" ? record.lastPrompt : "",
+    versions: parseVersionSnapshots(record.versions),
   };
 };
 
@@ -504,6 +554,23 @@ export default function ProjectPageClient({
       ? hydratedContent.version
       : 0;
   const hydratedLastPrompt = hydratedContent.lastPrompt ?? "";
+  const hydratedVersions = hydratedContent.versions ?? [];
+  const fallbackHydratedVersion =
+    hydratedResult && !hydratedVersions.length
+      ? {
+          version: hydratedVersion || 1,
+          generatedAt: hydratedGeneratedAt?.toISOString() ?? null,
+          prompt: hydratedLastPrompt || hydratedContent.prompt || "",
+          params: hydratedParams,
+          result: hydratedResult,
+          refinementInstruction: "",
+        }
+      : null;
+  const hydratedVersionHistory = fallbackHydratedVersion
+    ? [fallbackHydratedVersion]
+    : hydratedVersions;
+  const hydratedCurrentSnapshot =
+    hydratedVersionHistory[hydratedVersionHistory.length - 1] ?? null;
   const [prompt, setPrompt] = useState(hydratedContent.prompt ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -511,13 +578,39 @@ export default function ProjectPageClient({
   const [copied, setCopied] = useState(false);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState("");
-  const [result, setResult] = useState<AIResult | null>(hydratedResult);
-  const [generatedAt, setGeneratedAt] = useState<Date | null>(hydratedGeneratedAt);
-  const [version, setVersion] = useState(hydratedVersion);
-  const [lastPrompt, setLastPrompt] = useState(hydratedLastPrompt);
-  const [lastParams, setLastParams] = useState<GenerationParams | null>(null);
+  const [result, setResult] = useState<AIResult | null>(
+    hydratedCurrentSnapshot?.result ?? hydratedResult
+  );
+  const [generatedAt, setGeneratedAt] = useState<Date | null>(() => {
+    const rawDate = hydratedCurrentSnapshot?.generatedAt;
+    if (!rawDate) return hydratedGeneratedAt;
+    const parsed = new Date(rawDate);
+    return Number.isNaN(parsed.getTime()) ? hydratedGeneratedAt : parsed;
+  });
+  const [version, setVersion] = useState(
+    hydratedCurrentSnapshot?.version ?? hydratedVersion
+  );
+  const [lastPrompt, setLastPrompt] = useState(
+    hydratedCurrentSnapshot?.prompt || hydratedLastPrompt
+  );
+  const [lastParams, setLastParams] = useState<GenerationParams | null>(
+    hydratedCurrentSnapshot?.params ?? null
+  );
+  const [versionHistory, setVersionHistory] =
+    useState<ProjectVersionSnapshot[]>(hydratedVersionHistory);
+  const [isRefineModalOpen, setIsRefineModalOpen] = useState(false);
+  const [refinementInstruction, setRefinementInstruction] = useState("");
+  const [refineError, setRefineError] = useState("");
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [compareBaseVersion, setCompareBaseVersion] = useState<number | null>(
+    null
+  );
   const [selectedSection, setSelectedSection] =
-    useState<SectionKey>(hydratedResult?.sections?.[0]?.id ?? "executiveSummary");
+    useState<SectionKey>(
+      hydratedCurrentSnapshot?.result?.sections?.[0]?.id ??
+        hydratedResult?.sections?.[0]?.id ??
+        "executiveSummary"
+    );
   const [params, setParams] = useState<GenerationParams>(hydratedParams);
 
   const navSections: Array<{ key: SectionKey; label: string }> = useMemo(() => {
@@ -799,13 +892,166 @@ export default function ProjectPageClient({
     });
     return map;
   }, [result]);
+  type ComparableSection = {
+    key: SectionKey;
+    label: string;
+    content: string[];
+  };
+
+  const buildComparableSections = useCallback((data: AIResult): ComparableSection[] => {
+    if (data.sections?.length) {
+      return data.sections.map((section) => ({
+        key: section.id,
+        label: section.title,
+        content: section.bullets,
+      }));
+    }
+
+    const sceneOverview = splitToBullets(data.sceneOverview);
+    const sceneOverviewContent =
+      sceneOverview.length > 0
+        ? sceneOverview
+        : data.sceneOverview.trim()
+        ? [data.sceneOverview.trim()]
+        : [];
+
+    return [
+      {
+        key: "executiveSummary",
+        label: SECTION_LABELS.executiveSummary,
+        content: data.executiveSummary,
+      },
+      {
+        key: "sceneOverview",
+        label: SECTION_LABELS.sceneOverview,
+        content: sceneOverviewContent,
+      },
+      {
+        key: "keyActions",
+        label: SECTION_LABELS.keyActions,
+        content: data.keyActions,
+      },
+      {
+        key: "charactersRoles",
+        label: SECTION_LABELS.charactersRoles,
+        content: data.charactersRoles.map((character) =>
+          [character.name, character.role, character.notes]
+            .filter(Boolean)
+            .join(" - ")
+        ),
+      },
+      {
+        key: "visualStyle",
+        label: SECTION_LABELS.visualStyle,
+        content: data.visualStyle,
+      },
+      {
+        key: "soundDesign",
+        label: SECTION_LABELS.soundDesign,
+        content: data.soundDesign,
+      },
+      {
+        key: "budgetConsiderations",
+        label: SECTION_LABELS.budgetConsiderations,
+        content: data.budgetConsiderations,
+      },
+      {
+        key: "directorNotes",
+        label: SECTION_LABELS.directorNotes,
+        content: data.directorNotes,
+      },
+      {
+        key: "assumptionsMade",
+        label: SECTION_LABELS.assumptionsMade,
+        content: data.assumptionsMade,
+      },
+    ];
+  }, []);
+
+  const currentVersionSnapshot = useMemo<ProjectVersionSnapshot | null>(() => {
+    if (!result || !(version > 0)) return null;
+    return {
+      version,
+      generatedAt: generatedAt?.toISOString() ?? null,
+      prompt: (lastPrompt || prompt).trim(),
+      params: lastParams ?? params,
+      result,
+      refinementInstruction: "",
+    };
+  }, [generatedAt, lastParams, lastPrompt, params, prompt, result, version]);
+
+  const olderVersionOptions = useMemo(
+    () =>
+      versionHistory
+        .filter((item) => item.version < (version || 0))
+        .sort((a, b) => b.version - a.version),
+    [version, versionHistory]
+  );
+
+  const selectedCompareVersion =
+    compareBaseVersion ?? olderVersionOptions[0]?.version ?? null;
+
+  const compareBaseSnapshot = useMemo(() => {
+    if (!selectedCompareVersion) return null;
+    return (
+      versionHistory.find((item) => item.version === selectedCompareVersion) ??
+      null
+    );
+  }, [selectedCompareVersion, versionHistory]);
+
+  const compareCurrentSnapshot = useMemo(() => {
+    if (!currentVersionSnapshot) return null;
+    return (
+      versionHistory.find((item) => item.version === currentVersionSnapshot.version) ??
+      currentVersionSnapshot
+    );
+  }, [currentVersionSnapshot, versionHistory]);
+
+  const comparisonRows = useMemo(() => {
+    if (!compareBaseSnapshot || !compareCurrentSnapshot) return [];
+    const normalize = (items: string[]) =>
+      items
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .join("\n")
+        .toLowerCase();
+
+    const olderSections = buildComparableSections(compareBaseSnapshot.result);
+    const currentSections = buildComparableSections(compareCurrentSnapshot.result);
+    const order = currentSections.map((section) => section.key);
+    olderSections.forEach((section) => {
+      if (!order.includes(section.key)) {
+        order.push(section.key);
+      }
+    });
+
+    const olderMap = new Map(olderSections.map((section) => [section.key, section]));
+    const currentMap = new Map(
+      currentSections.map((section) => [section.key, section])
+    );
+
+    return order.map((key) => {
+      const older = olderMap.get(key);
+      const current = currentMap.get(key);
+      const label = current?.label || older?.label || key;
+      const olderContent = older?.content ?? [];
+      const currentContent = current?.content ?? [];
+      return {
+        key,
+        label,
+        olderContent,
+        currentContent,
+        hasChanged: normalize(olderContent) !== normalize(currentContent),
+      };
+    });
+  }, [buildComparableSections, compareBaseSnapshot, compareCurrentSnapshot]);
 
   const renderBullets = (items: string[], emptyText: string) => {
     if (!items.length) {
       return <p className="text-sm text-white/50">{emptyText}</p>;
     }
     return (
-      <ul className="space-y-2 text-sm text-white/75 list-disc list-inside">
+      <ul className="max-w-4xl space-y-2 text-sm text-white/75 list-disc list-inside">
         {items.map((item, index) => (
           <li key={`${item.slice(0, 12)}-${index}`}>{item}</li>
         ))}
@@ -921,7 +1167,7 @@ export default function ProjectPageClient({
     const { kvPairs, blocks, paragraphs } = parseSceneOverview(text);
 
     return (
-      <div className="space-y-4">
+      <div className="max-w-4xl space-y-4">
         {kvPairs.length > 0 && (
           <div className="grid gap-3 md:grid-cols-2">
             {kvPairs.map((pair) => (
@@ -1105,6 +1351,28 @@ export default function ProjectPageClient({
     [scrollToSection]
   );
 
+  const openRefineModal = useCallback(() => {
+    setRefinementInstruction("");
+    setRefineError("");
+    setIsRefineModalOpen(true);
+  }, []);
+
+  const closeRefineModal = useCallback(() => {
+    if (loading) return;
+    setIsRefineModalOpen(false);
+    setRefineError("");
+  }, [loading]);
+
+  const openCompareView = useCallback(() => {
+    if (!olderVersionOptions.length) return;
+    setCompareBaseVersion((current) => current ?? olderVersionOptions[0].version);
+    setIsCompareOpen(true);
+  }, [olderVersionOptions]);
+
+  const closeCompareView = useCallback(() => {
+    setIsCompareOpen(false);
+  }, []);
+
   const persistProjectContent = useCallback(
     async (content: StoredProjectContent) => {
       // Persist generated content to DB so projects rehydrate across sessions.
@@ -1124,7 +1392,11 @@ export default function ProjectPageClient({
   );
 
   const runGeneration = useCallback(
-    async (requestPrompt: string, sourcePrompt?: string) => {
+    async (
+      requestPrompt: string,
+      sourcePrompt?: string,
+      refinementNote?: string
+    ) => {
       const trimmedRequest = requestPrompt.trim();
       if (!trimmedRequest) return;
       setLoading(true);
@@ -1138,17 +1410,31 @@ export default function ProjectPageClient({
         const data = await generateScript(trimmedRequest, params);
         const parsed = parseAIResult(data.output || "");
         const generatedAtDate = new Date();
-        const nextVersion = (version || 0) + 1;
+        const latestVersion =
+          versionHistory[versionHistory.length - 1]?.version || version || 0;
+        const nextVersion = latestVersion + 1;
         const persistedLastPrompt = (sourcePrompt ?? trimmedRequest).trim();
         const persistedPrompt = prompt.trim() || persistedLastPrompt;
+        const paramsSnapshot = { ...params };
+        const nextSnapshot: ProjectVersionSnapshot = {
+          version: nextVersion,
+          generatedAt: generatedAtDate.toISOString(),
+          prompt: persistedLastPrompt,
+          params: paramsSnapshot,
+          result: parsed,
+          refinementInstruction: refinementNote || "",
+        };
+        const nextHistory = [...versionHistory, nextSnapshot].sort(
+          (a, b) => a.version - b.version
+        );
 
         setResult(parsed);
         setCopied(false);
         setGeneratedAt(generatedAtDate);
         setVersion(nextVersion);
         setLastPrompt(persistedLastPrompt);
-        const paramsSnapshot = { ...params };
         setLastParams(paramsSnapshot);
+        setVersionHistory(nextHistory);
         setSelectedSection(parsed.sections?.[0]?.id ?? "executiveSummary");
 
         try {
@@ -1159,6 +1445,7 @@ export default function ProjectPageClient({
             generatedAt: generatedAtDate.toISOString(),
             version: nextVersion,
             lastPrompt: persistedLastPrompt,
+            versions: nextHistory,
           });
         } catch {
           setSaveNotice("Generated, but auto-save failed.");
@@ -1173,13 +1460,55 @@ export default function ProjectPageClient({
         setLoading(false);
       }
     },
-    [params, persistProjectContent, prompt, version]
+    [params, persistProjectContent, prompt, version, versionHistory]
   );
 
   const generate = useCallback(async () => {
     if (!prompt.trim()) return;
     await runGeneration(prompt);
   }, [prompt, runGeneration]);
+
+  const refinePlan = useCallback(async () => {
+    if (!result || loading) return;
+    const instruction = refinementInstruction.trim();
+    if (!instruction) {
+      setRefineError("Add a refinement instruction first.");
+      return;
+    }
+    const basePrompt = (lastPrompt || prompt).trim();
+    if (!basePrompt) {
+      setRefineError("Original prompt is missing.");
+      return;
+    }
+    const previousOutput = formattedOutput.trim();
+    if (!previousOutput) {
+      setRefineError("No previous output available for refinement.");
+      return;
+    }
+
+    setRefineError("");
+    const refinementPrompt = `${basePrompt}
+
+Previous output:
+${previousOutput}
+
+Refinement instruction:
+${instruction}
+
+Revise the plan while preserving coherence and production-ready structure.`;
+
+    await runGeneration(refinementPrompt, basePrompt, instruction);
+    setIsRefineModalOpen(false);
+    setRefinementInstruction("");
+  }, [
+    formattedOutput,
+    lastPrompt,
+    loading,
+    prompt,
+    refinementInstruction,
+    result,
+    runGeneration,
+  ]);
 
   const regenerateSelectedSection = useCallback(async () => {
     if (!prompt.trim() || !result) return;
@@ -1189,9 +1518,19 @@ export default function ProjectPageClient({
   }, [prompt, result, runGeneration, sectionLabelMap, selectedSection]);
 
   const saveCurrentVersion = useCallback(() => {
-    if (!result) return;
+    if (!result || !currentVersionSnapshot) return;
     const persist = async () => {
+      const existingSnapshot = versionHistory.find(
+        (item) => item.version === currentVersionSnapshot.version
+      );
+      const snapshotToPersist = existingSnapshot ?? currentVersionSnapshot;
+      const mergedHistory = existingSnapshot
+        ? versionHistory
+        : [...versionHistory, snapshotToPersist].sort(
+            (a, b) => a.version - b.version
+          );
       try {
+        setVersionHistory(mergedHistory);
         await persistProjectContent({
           prompt: prompt.trim(),
           params: lastParams ?? params,
@@ -1199,6 +1538,7 @@ export default function ProjectPageClient({
           generatedAt: generatedAt?.toISOString() ?? null,
           version: version || 1,
           lastPrompt: (lastPrompt || prompt).trim(),
+          versions: mergedHistory,
         });
         setSaveNotice("Version saved.");
         setTimeout(() => setSaveNotice(""), 1800);
@@ -1209,6 +1549,7 @@ export default function ProjectPageClient({
 
     void persist();
   }, [
+    currentVersionSnapshot,
     generatedAt,
     lastParams,
     lastPrompt,
@@ -1216,12 +1557,13 @@ export default function ProjectPageClient({
     persistProjectContent,
     prompt,
     result,
+    versionHistory,
     version,
   ]);
 
   return (
     <main className="relative min-h-screen text-white px-6 md:px-10 py-10 overflow-hidden">
-      <div className="relative z-10 max-w-6xl mx-auto">
+      <div className="relative z-10 mx-auto max-w-6xl xl:max-w-[1280px]">
           <Reveal>
             <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
             <aside className="glass-panel rounded-2xl p-5 h-fit lg:sticky lg:top-8">
@@ -1275,7 +1617,7 @@ export default function ProjectPageClient({
                 <h1 className="text-3xl font-light text-white">
                   Project <span className="text-primary">{title}</span>
                 </h1>
-                <p className="text-white/60 mt-2">
+                <p className="mt-2 max-w-3xl text-white/60">
                   Describe your scene, script, or idea and generate with AI.
                 </p>
               </header>
@@ -1461,6 +1803,13 @@ export default function ProjectPageClient({
                       </h2>
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-white/60">
+                      <button
+                        onClick={openCompareView}
+                        disabled={!olderVersionOptions.length}
+                        className="rounded-full px-2.5 py-1 text-[11px] text-white/70 hover:text-white glass-outline btn-animated btn-sky disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Compare Versions
+                      </button>
                       <span className="glass-pill px-2.5 py-1 rounded-full">
                         v{version || 1}
                       </span>
@@ -1469,6 +1818,15 @@ export default function ProjectPageClient({
                         {formatTimestamp(generatedAt)}
                       </span>
                     </div>
+                  </div>
+                  <div className="mt-4">
+                    <button
+                      onClick={openRefineModal}
+                      disabled={loading}
+                      className="rounded-lg px-3 py-1.5 text-xs text-white/75 hover:text-white glass-outline btn-animated btn-emerald disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Refine Plan
+                    </button>
                   </div>
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -1743,6 +2101,189 @@ export default function ProjectPageClient({
             </div>
             </div>
           </Reveal>
+
+          {isRefineModalOpen && (
+            <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
+              <div
+                className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                onClick={closeRefineModal}
+              />
+              <div className="relative z-10 w-full max-w-lg rounded-2xl p-5 glass-panel">
+                <p className="text-xs uppercase tracking-[0.28em] text-white/50">
+                  Refine This Plan
+                </p>
+                <h3 className="mt-2 text-lg font-medium text-white">
+                  Add refinement instruction
+                </h3>
+                <textarea
+                  value={refinementInstruction}
+                  onChange={(event) => setRefinementInstruction(event.target.value)}
+                  placeholder='Make it darker tone, reduce budget, add suspense...'
+                  className="mt-4 w-full min-h-[120px] rounded-xl glass-input px-3 py-2.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 resize-y disabled:opacity-60"
+                  disabled={loading}
+                />
+                {refineError && (
+                  <p className="mt-2 text-xs text-red-300/90">{refineError}</p>
+                )}
+                <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    onClick={closeRefineModal}
+                    disabled={loading}
+                    className="rounded-lg px-3 py-2 text-xs text-white/70 hover:text-white glass-outline btn-animated btn-sky disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => void refinePlan()}
+                    disabled={loading || !refinementInstruction.trim()}
+                    className="rounded-lg px-3 py-2 text-xs text-white glass-interactive btn-animated btn-amber disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin spin-optimized" />
+                        Refining...
+                      </>
+                    ) : (
+                      `Generate v${(version || 0) + 1}`
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isCompareOpen && compareBaseSnapshot && compareCurrentSnapshot && (
+            <div className="fixed inset-0 z-40 flex items-center justify-center p-3 md:p-6">
+              <div
+                className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+                onClick={closeCompareView}
+              />
+              <div className="relative z-10 w-full max-w-[1200px] rounded-2xl p-5 glass-panel">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-white/50">
+                      Compare Versions
+                    </p>
+                    <h3 className="mt-1 text-lg font-medium text-white">
+                      Side-by-side plan diff
+                    </h3>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <select
+                      value={selectedCompareVersion ?? ""}
+                      onChange={(event) =>
+                        setCompareBaseVersion(
+                          Number.parseInt(event.target.value, 10) || null
+                        )
+                      }
+                      className="rounded-lg glass-input px-2.5 py-2 text-xs text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary/30"
+                    >
+                      {olderVersionOptions.map((item) => (
+                        <option
+                          key={item.version}
+                          value={item.version}
+                          style={optionStyle}
+                        >
+                          v{item.version} - {formatTimestamp(new Date(item.generatedAt || ""))}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={closeCompareView}
+                      className="rounded-lg px-3 py-2 text-xs text-white/70 hover:text-white glass-outline btn-animated btn-sky"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-4 max-h-[70vh] overflow-y-auto pr-1">
+                  <div className="grid gap-3 lg:grid-cols-2">
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Older version
+                      </p>
+                      <p className="mt-1 text-sm text-white/80">
+                        v{compareBaseSnapshot.version} •{" "}
+                        {formatTimestamp(
+                          compareBaseSnapshot.generatedAt
+                            ? new Date(compareBaseSnapshot.generatedAt)
+                            : null
+                        )}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
+                        Current version
+                      </p>
+                      <p className="mt-1 text-sm text-white/80">
+                        v{compareCurrentSnapshot.version} •{" "}
+                        {formatTimestamp(
+                          compareCurrentSnapshot.generatedAt
+                            ? new Date(compareCurrentSnapshot.generatedAt)
+                            : null
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {comparisonRows.map((row) => (
+                      <div
+                        key={row.key}
+                        className={`rounded-xl border p-3 ${
+                          row.hasChanged
+                            ? "border-primary/35 bg-primary/5"
+                            : "border-white/10 bg-white/5"
+                        }`}
+                      >
+                        <div className="mb-2 flex items-center justify-between gap-2">
+                          <p className="text-xs uppercase tracking-[0.2em] text-white/60">
+                            {row.label}
+                          </p>
+                          {row.hasChanged && (
+                            <span className="text-[10px] text-primary uppercase tracking-[0.18em]">
+                              Changed
+                            </span>
+                          )}
+                        </div>
+                        <div className="grid gap-3 lg:grid-cols-2">
+                          <div className="rounded-lg border border-white/10 bg-black/10 p-3">
+                            {row.olderContent.length ? (
+                              <ul className="space-y-1.5 text-sm text-white/70 list-disc list-inside">
+                                {row.olderContent.map((item, itemIndex) => (
+                                  <li key={`${row.key}-older-${itemIndex}`}>{item}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-sm text-white/40">
+                                No details in this version.
+                              </p>
+                            )}
+                          </div>
+                          <div className="rounded-lg border border-primary/25 bg-primary/5 p-3">
+                            {row.currentContent.length ? (
+                              <ul className="space-y-1.5 text-sm text-white/80 list-disc list-inside">
+                                {row.currentContent.map((item, itemIndex) => (
+                                  <li key={`${row.key}-current-${itemIndex}`}>
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-sm text-white/40">
+                                No details in this version.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
       </div>
     </main>
   );
