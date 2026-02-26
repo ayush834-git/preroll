@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   description: "Where films begin before the camera rolls. Plan, write, and generate with AI.",
 };
 
-const LANDING_AUTH_IMAGE = "/cinematic-camera.png";
+const LANDING_AUTH_IMAGE = "/landing-bg.png";
 const APP_IMAGE = "/cinematic-theater.png";
 const DASHBOARD_RESULTS_IMAGE =
   "/Gemini_Generated_Image_61ccor61ccor61cc.png";
