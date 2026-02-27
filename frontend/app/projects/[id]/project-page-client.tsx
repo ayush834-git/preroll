@@ -1807,7 +1807,7 @@ Revise the plan while preserving coherence and production-ready structure.`;
                           disabled={loading}
                         />
                         <svg
-                          className="absolute w-2.5 h-2.5 text-black pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
+                          className="absolute w-2.5 h-2.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
