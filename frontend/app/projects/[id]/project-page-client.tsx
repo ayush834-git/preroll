@@ -1597,10 +1597,9 @@ Revise the plan while preserving coherence and production-ready structure.`;
                   </p>
                   <button
                     onClick={() => handleCopy(window.location.href)}
-                    className="text-white/45 hover:text-white/80 transition-colors"
-                    title="Share project URL"
+                    className="rounded-lg px-3 py-1 text-xs text-white/75 hover:text-white glass-outline transition-colors btn-animated btn-sky"
                   >
-                    <Copy className="h-3 w-3" />
+                    Copy Project Link
                   </button>
                 </div>
               </div>
