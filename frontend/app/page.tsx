@@ -7,7 +7,6 @@ import {
   DollarSign,
   ListChecks,
   Mic,
-  Shield,
 } from "lucide-react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import { Reveal } from "@/components/ui/reveal";
@@ -98,9 +97,6 @@ export default function LandingPage() {
             </a>
             <a href="#workflow" className="link-cool">
               Workflow
-            </a>
-            <a href="#pricing" className="link-cool">
-              Pricing
             </a>
           </div>
 
@@ -277,12 +273,6 @@ export default function LandingPage() {
                       <h3 className="text-xl font-medium">{item.title}</h3>
                       <p className="text-soft mt-2">{item.body}</p>
                     </div>
-                  </div>
-                  <div className="md:ml-auto hidden md:flex items-center gap-3 text-muted-strong">
-                    <Shield className="h-4 w-4" />
-                    <span className="text-xs uppercase tracking-[0.2em]">
-                      Secure
-                    </span>
                   </div>
                 </div>
               </GlowCard>
