@@ -541,6 +541,7 @@ export default function ProjectPageClient({
   title: string;
   initialContent: unknown;
 }) {
+  const displayId = `PRJ-${id.toUpperCase()}`;
   const hydratedContent = parseStoredProjectContent(initialContent);
   const hydratedParams = hydrateGenerationParams(hydratedContent.params);
   const hydratedResult = hydratedContent.result ?? null;
@@ -1590,7 +1591,18 @@ Revise the plan while preserving coherence and production-ready structure.`;
                   Project
                 </p>
                 <p className="text-lg font-light text-white">{title}</p>
-                <p className="text-xs text-white/45 mt-1">ID: {id}</p>
+                <div className="flex items-center gap-3 mt-1">
+                  <p className="text-xs text-white/45 font-mono bg-white/5 px-2 py-1 rounded">
+                    ID: {displayId}
+                  </p>
+                  <button
+                    onClick={() => handleCopy(window.location.href)}
+                    className="text-white/45 hover:text-white/80 transition-colors"
+                    title="Share project URL"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                </div>
               </div>
 
               {result && (
