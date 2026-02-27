@@ -97,9 +97,7 @@ const GlowCard = memo(function GlowCard({
           ${sizeClasses}
           ${!customSize ? "aspect-[3/4]" : ""}
           rounded-2xl 
-          relative
-          group
-          overflow-hidden
+          relative 
           grid 
           grid-rows-[1fr_auto] 
           ${isCinematic ? "shadow-[0_1rem_2rem_-1rem_black]" : isReduced ? "shadow-[0_0.6rem_1.2rem_-0.8rem_black]" : "shadow-[0_0.3rem_0.6rem_-0.6rem_black]"} 
@@ -118,7 +116,6 @@ const GlowCard = memo(function GlowCard({
       className={cardClassName}
     >
       <div data-glow className="glow-card-inner" />
-      <div className="absolute inset-0 pointer-events-none opacity-0 motion-safe:group-hover:opacity-100 transition-opacity" />
       {children}
     </div>
   );
